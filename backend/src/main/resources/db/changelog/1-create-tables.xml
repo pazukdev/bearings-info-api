@@ -128,7 +128,7 @@
             <column name="status" type="varchar(255)"/>
             <column name="rating" type="int"/>
             <column name="password" type="varchar(255)"/>
-            <column name="role" type="enum('ADMIN', 'USER')"/>
+            <column name="role" type="varchar(255)"/>
             <column name="wishlist_id" type="bigint"/>
             <column name="likelist_id" type="bigint"/>
         </createTable>
