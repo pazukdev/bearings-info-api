@@ -37,7 +37,7 @@
     </changeSet>
 
     <changeSet id="insert_admin" author="sviarkaltsau">
-        <insert tableName="user">
+        <insert tableName="user_table">
             <column name="id" value="1"/>
             <column name="name" value="admin"/>
             <column name="rating" value="0"/>
@@ -50,7 +50,7 @@
     </changeSet>
 
     <changeSet id="insert_default_user" author="sviarkaltsau">
-        <insert tableName="user">
+        <insert tableName="user_table">
             <column name="id" value="2"/>
             <column name="name" value="user"/>
             <column name="rating" value="0"/>

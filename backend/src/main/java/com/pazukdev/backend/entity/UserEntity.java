@@ -14,7 +14,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-@Table(name = "user")
+@Table(name = "user_table")
 public class UserEntity extends AbstractEntity {
 
     private Integer rating = 0;

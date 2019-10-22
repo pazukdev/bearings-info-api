@@ -120,7 +120,7 @@
     </changeSet>
 
     <changeSet id="create_user_table" author="sviarkaltsau">
-        <createTable tableName="user">
+        <createTable tableName="user_table">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
