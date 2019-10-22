@@ -32,8 +32,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/test/public").permitAll()
                 .antMatchers("/user/create").permitAll()
                 .antMatchers("/item/**").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // comment to disable admin-only zone
-                //.antMatchers("/**").permitAll() // uncomment to disable security
+                //.antMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // comment to disable admin-only zone
+                .antMatchers("/**").permitAll() // uncomment to disable security
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
