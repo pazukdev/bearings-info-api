@@ -15,7 +15,6 @@ import com.pazukdev.backend.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,20 +40,22 @@ public class TableUtil {
         return PartsTable.create(dtos, tableName, header, categories);
     }
 
-    public static  PartsTable motorcyclesTable(final List<Item> motorcycles,
-                                               final String tableName,
-                                               final UserService userService) {
+    public static PartsTable motorcyclesTable(final List<Item> motorcycles,
+                                              final String tableName,
+                                              final UserService userService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
+        final Set<String> categories = new HashSet<>();
         for (final Item motorcycle : motorcycles) {
             final NestedItemDto motorcycleDto = createMotorcycle(motorcycle, userService);
             dtos.add(motorcycleDto);
+            categories.add(motorcycleDto.getItemCategory());
         }
-        final String[] header = {"Production", "Model", "-"};
-        final Set<String> categories = new HashSet<>(Collections.singletonList("Motorcycle"));
+
+        final String[] header = {"Production", "Model", "Manufacturer"};
         return PartsTable.create(dtos, tableName, header, categories);
     }
 
-    public static  PartsTable usersTable(final List<UserEntity> users, final String tableName) {
+    public static PartsTable usersTable(final List<UserEntity> users, final String tableName) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         for (final UserEntity user : users) {
             dtos.add(createUser(user));

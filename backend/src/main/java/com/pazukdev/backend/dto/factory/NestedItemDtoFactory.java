@@ -10,6 +10,8 @@ import com.pazukdev.backend.util.ItemUtil;
 import com.pazukdev.backend.util.SpecificStringUtil;
 import com.pazukdev.backend.util.UserUtil;
 
+import static com.pazukdev.backend.util.ItemUtil.getValueFromDescription;
+
 /**
  * @author Siarhei Sviarkaltsau
  */
@@ -31,10 +33,14 @@ public class NestedItemDtoFactory {
     }
 
     public static NestedItemDto createMotorcycle(final Item motorcycle, final UserService userService) {
-        final String production = ItemUtil.getValueFromDescription(motorcycle.getDescription(), "Production");
+        final String description = motorcycle.getDescription();
+        final String production = getValueFromDescription(description, "Production");
+        final String manufacturer = getValueFromDescription(description, "Manufacturer").toUpperCase();
 
         final NestedItemDto motorcycleDto = createBasicNestedItemDto(motorcycle, userService);
         motorcycleDto.setLocation(production);
+        motorcycleDto.setComment(manufacturer);
+        motorcycleDto.setItemCategory(manufacturer);
         return motorcycleDto;
     }
 
