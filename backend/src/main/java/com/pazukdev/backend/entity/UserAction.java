@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -17,12 +18,19 @@ import javax.persistence.Table;
 @Table(name = "user_action")
 public class UserAction extends AbstractEntity {
 
+    @Column(name = "user_id")
     private String userId = "-";
+    @Column(name = "action_date")
     private String actionDate = "-";
+    @Column(name = "action_type")
     private String actionType = "-";
+    @Column(name = "parent_item_id")
     private String parentItemId = "-";
+    @Column(name = "item_id")
     private String itemId = "-";
+    @Column(name = "item_type")
     private String itemType = "-";
+    @Column(name = "item_category")
     private String itemCategory = "-";
 
 }

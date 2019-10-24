@@ -41,13 +41,13 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
-            <column name="userId" type="varchar(255)"/>
-            <column name="actionDate" type="varchar(255)"/>
-            <column name="actionType" type="varchar(255)"/>
-            <column name="parentItemId" type="varchar(255)"/>
-            <column name="itemId" type="varchar(255)"/>
-            <column name="itemType" type="varchar(255)"/>
-            <column name="itemCategory" type="varchar(255)"/>
+            <column name="user_id" type="varchar(255)"/>
+            <column name="action_date" type="varchar(255)"/>
+            <column name="action_type" type="varchar(255)"/>
+            <column name="parent_item_id" type="varchar(255)"/>
+            <column name="item_id" type="varchar(255)"/>
+            <column name="item_type" type="varchar(255)"/>
+            <column name="item_category" type="varchar(255)"/>
             <column name="status" type="varchar(255)"/>
         </createTable>
     </changeSet>
