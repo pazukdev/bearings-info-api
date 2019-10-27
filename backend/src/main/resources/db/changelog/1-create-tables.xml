@@ -54,7 +54,7 @@
 
     <changeSet id="create_child_item_table" author="sviarkaltsau">
         <createTable tableName="child_item">
-            <column autoIncrement="true" name="id" type="bigint">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -67,7 +67,7 @@
 
     <changeSet id="create_replacer_table" author="sviarkaltsau">
         <createTable tableName="replacer">
-            <column autoIncrement="true" name="id" type="bigint">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -101,7 +101,7 @@
 
     <changeSet id="create_wishlist_table" author="sviarkaltsau">
         <createTable tableName="wishlist">
-            <column autoIncrement="true" name="id" type="bigint">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -111,7 +111,7 @@
 
     <changeSet id="create_likelist_table" author="sviarkaltsau">
         <createTable tableName="likelist">
-            <column autoIncrement="true" name="id" type="bigint">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
