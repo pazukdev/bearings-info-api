@@ -7,7 +7,7 @@
 
     <changeSet id="create_transitive_item_table" author="sviarkaltsau">
         <createTable tableName="transitive_item">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -21,7 +21,7 @@
 
     <changeSet id="create_item_table" author="sviarkaltsau">
         <createTable tableName="item">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -29,7 +29,7 @@
             <column name="image" type="varchar(255)"/>
             <column name="rating" type="int"/>
             <column name="status" type="varchar(255)"/>
-            <column name="creator_id" type="bigint"/>
+            <column name="creator_id" type="BIGSERIAL"/>
             <column name="user_action_date" type="varchar(255)"/>
             <column name="description" type="varchar(1000)"/>
         </createTable>
@@ -37,7 +37,7 @@
 
     <changeSet id="create_user_action_table" author="sviarkaltsau">
         <createTable tableName="user_action">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -59,7 +59,7 @@
             </column>
             <column name="name" type="varchar(255)"/>
             <column name="status" type="varchar(255)"/>
-            <column name="item_id" type="bigint"/>
+            <column name="item_id" type="BIGSERIAL"/>
             <column name="location" type="varchar(255)"/>
             <column name="quantity" type="varchar(255)"/>
         </createTable>
@@ -72,17 +72,17 @@
             </column>
             <column name="name" type="varchar(255)"/>
             <column name="status" type="varchar(255)"/>
-            <column name="item_id" type="bigint"/>
+            <column name="item_id" type="BIGSERIAL"/>
             <column name="comment" type="varchar(255)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="create_item_child_item_table" author="sviarkaltsau">
         <createTable tableName="item_child_item">
-            <column name="parent_item_id" type="bigint">
+            <column name="parent_item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_item_child_item_parent_item_id" references="item (id)"/>
             </column>
-            <column name="child_item_id" type="bigint">
+            <column name="child_item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_item_child_item_child_item_id" references="child_item (id)"/>
             </column>
         </createTable>
@@ -90,10 +90,10 @@
 
     <changeSet id="create_item_replacer_table" author="sviarkaltsau">
         <createTable tableName="item_replacer">
-            <column name="original_item_id" type="bigint">
+            <column name="original_item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_item_replacer_original_item_id" references="item (id)"/>
             </column>
-            <column name="replacer_item_id" type="bigint">
+            <column name="replacer_item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_item_replacer_replacer_item_id" references="replacer (id)"/>
             </column>
         </createTable>
@@ -121,7 +121,7 @@
 
     <changeSet id="create_user_table" author="sviarkaltsau">
         <createTable tableName="user_table">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -129,17 +129,17 @@
             <column name="rating" type="int"/>
             <column name="password" type="varchar(255)"/>
             <column name="role" type="varchar(255)"/>
-            <column name="wishlist_id" type="bigint"/>
-            <column name="likelist_id" type="bigint"/>
+            <column name="wishlist_id" type="BIGSERIAL"/>
+            <column name="likelist_id" type="BIGSERIAL"/>
         </createTable>
     </changeSet>
 
     <changeSet id="create_wishlist_item_table" author="sviarkaltsau">
         <createTable tableName="wishlist_item">
-            <column name="wishlist_id" type="bigint">
+            <column name="wishlist_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_wishlist_item_wishlist_id" references="wishlist (id)"/>
             </column>
-            <column name="item_id" type="bigint">
+            <column name="item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_wishlist_item_item_id" references="item (id)"/>
             </column>
         </createTable>
@@ -147,10 +147,10 @@
 
     <changeSet id="create_likelist_item_table" author="sviarkaltsau">
         <createTable tableName="likelist_item">
-            <column name="likelist_id" type="bigint">
+            <column name="likelist_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_likelist_item_likelist_id" references="likelist (id)"/>
             </column>
-            <column name="item_id" type="bigint">
+            <column name="item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_likelist_item_item_id" references="item (id)"/>
             </column>
         </createTable>
@@ -158,10 +158,10 @@
 
     <changeSet id="create_dislikelist_item_table" author="sviarkaltsau">
         <createTable tableName="dislikelist_item">
-            <column name="likelist_id" type="bigint">
+            <column name="likelist_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_dislikelist_item_likelist_id" references="likelist (id)"/>
             </column>
-            <column name="item_id" type="bigint">
+            <column name="item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_dislikelist_item_item_id" references="item (id)"/>
             </column>
         </createTable>
