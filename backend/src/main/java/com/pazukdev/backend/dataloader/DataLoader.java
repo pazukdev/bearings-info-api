@@ -1,7 +1,9 @@
 package com.pazukdev.backend.dataloader;
 
+import com.pazukdev.backend.constant.security.Role;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.entity.TransitiveItem;
+import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.entity.factory.TransitiveItemFactory;
 import com.pazukdev.backend.repository.TransitiveItemRepository;
 import com.pazukdev.backend.service.ItemService;
@@ -33,14 +35,31 @@ public class DataLoader implements ApplicationRunner {
     }
 
     private void populateEmptyTables() {
-        if (repositoryIsEmpty(transitiveItemService.getTransitiveItemRepository())) {
-            createTransitiveItems();
-            createItems();
+        if (!repositoryIsEmpty(transitiveItemService.getTransitiveItemRepository())) {
+            return;
         }
+        createDefaultUsers();
+        createTransitiveItems();
+        createItems();
     }
 
     private boolean repositoryIsEmpty(final TransitiveItemRepository repository) {
         return repository.findAll().isEmpty();
+    }
+
+    private void createDefaultUsers() {
+        createUser(Role.ADMIN, "admin", "$2a$10$LJDm6BOaekdsan3q3j15Q.ceRCSHHb1J8kAPqQasWZSdKoJtDAnyO");
+        createUser(Role.USER, "user", "$2a$10$50E.w9jZJAIjGlsb4OU0N.wSvxrfWe.VEmiAV7.filaKuuKN.f992");
+    }
+
+    private void createUser(final Role role,
+                            final String name,
+                            final String password) {
+        final UserEntity user = new UserEntity();
+        user.setName(name);
+        user.setRole(role);
+        user.setPassword(password);
+        itemService.getUserService().getRepository().save(user);
     }
 
     private void createTransitiveItems() {
