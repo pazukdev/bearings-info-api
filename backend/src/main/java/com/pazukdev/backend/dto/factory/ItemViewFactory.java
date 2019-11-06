@@ -4,28 +4,15 @@ import com.pazukdev.backend.dto.ItemView;
 import com.pazukdev.backend.dto.table.PartsTable;
 import com.pazukdev.backend.dto.table.TableDto;
 import com.pazukdev.backend.dto.table.TableViewDto;
-import com.pazukdev.backend.entity.ChildItem;
-import com.pazukdev.backend.entity.Item;
-import com.pazukdev.backend.entity.Replacer;
-import com.pazukdev.backend.entity.UserEntity;
-import com.pazukdev.backend.entity.WishList;
+import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
-import com.pazukdev.backend.util.DateUtil;
-import com.pazukdev.backend.util.ImageUtil;
-import com.pazukdev.backend.util.ItemUtil;
-import com.pazukdev.backend.util.NestedItemUtil;
-import com.pazukdev.backend.util.RateUtil;
-import com.pazukdev.backend.util.UserActionUtil;
-import com.pazukdev.backend.util.UserUtil;
+import com.pazukdev.backend.util.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 import static com.pazukdev.backend.util.TableUtil.*;
 
@@ -100,7 +87,7 @@ public class ItemViewFactory {
 
     public ItemView updateItemView(final Long itemId,
                                    final String userName,
-                                   final ItemView itemView) {
+                                   final ItemView itemView) throws IOException {
         final UserEntity user = itemService.getUserService().findByName(userName);
         final boolean removeItem = itemId == SpecialItemId.ITEMS_MANAGEMENT_VIEW.getItemId();
         final boolean removeItemFromWishList = itemId == SpecialItemId.WISH_LIST_VIEW.getItemId();
@@ -126,7 +113,7 @@ public class ItemViewFactory {
 
         itemView.setSearchEnabled(true);
         itemView.setCategory(item.getCategory());
-        itemView.setImage(ImageUtil.getImage(item));
+        itemView.setImgData(ImgUtil.getItemImgData(item));
         itemView.setHeader(createHeader(item, itemService));
         itemView.setItems(createTableView(new ArrayList<>(item.getChildItems())));
         itemView.setPartsTable(createPartsTable(item, tableName, itemService));
@@ -144,7 +131,7 @@ public class ItemViewFactory {
         final String tableName = "Motorcycle catalogue";
         final String countParameterName = "Model";
 
-        itemView.setImage("common/ic_launcher.png");
+        itemView.setImgData(ImgUtil.getAppImgData());
 
         return createItemsView(
                 itemView,
@@ -212,7 +199,7 @@ public class ItemViewFactory {
         return itemView;
     }
 
-    private ItemView updateItem(final Long itemId, final ItemView itemView, final UserEntity currentUser) {
+    private ItemView updateItem(final Long itemId, final ItemView itemView, final UserEntity currentUser) throws IOException {
         final Item item = itemService.getOne(itemId);
 
         if (itemView.getRate() != null) {
@@ -224,6 +211,7 @@ public class ItemViewFactory {
         final Map<String, String> headerMatrixMap = createHeaderMatrixMap(itemView);
         ItemUtil.updateName(item, headerMatrixMap, itemService);
         ItemUtil.updateDescription(item, headerMatrixMap, itemService);
+        ItemUtil.updateImg(itemView.getImgData(), item);
         ItemUtil.updateChildItems(item, itemView, itemService, currentUser);
         ItemUtil.updateReplacers(item, itemView, itemService, currentUser);
         ItemUtil.updateWishList(item, itemView, currentUser, itemService);

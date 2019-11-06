@@ -14,20 +14,13 @@ import com.pazukdev.backend.repository.ChildItemRepository;
 import com.pazukdev.backend.repository.ItemRepository;
 import com.pazukdev.backend.repository.ReplacerRepository;
 import com.pazukdev.backend.repository.UserActionRepository;
-import com.pazukdev.backend.util.CategoryUtil;
-import com.pazukdev.backend.util.ChildItemUtil;
-import com.pazukdev.backend.util.DateUtil;
-import com.pazukdev.backend.util.ItemUtil;
-import com.pazukdev.backend.util.ReplacerUtil;
+import com.pazukdev.backend.util.*;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 import static com.pazukdev.backend.util.ItemUtil.createDescriptionMap;
 import static com.pazukdev.backend.util.SpecificStringUtil.replaceBlankWithDash;
@@ -117,7 +110,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public ItemView updateItemView(final Long itemId, final String userName, final ItemView itemView) {
+    public ItemView updateItemView(final Long itemId, final String userName, final ItemView itemView) throws IOException {
         final ItemViewFactory itemViewFactory = new ItemViewFactory(this);
         return itemViewFactory.updateItemView(itemId, userName, itemView);
     }
@@ -145,9 +138,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         item.getReplacers().addAll(replacers);
         item.setCreatorId(userService.getAdmin().getId());
         item.setUserActionDate(DateUtil.now());
-        if (transitiveItem.getImage() != null) {
-            item.setImage(transitiveItem.getImage());
-        }
+        item.setImage(transitiveItem.getImage());
         return item;
     }
 

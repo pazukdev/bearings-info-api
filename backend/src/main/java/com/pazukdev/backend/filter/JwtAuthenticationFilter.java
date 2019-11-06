@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         final String userName = authentication.getPrincipal().toString();
-        final byte[] secretBytes = SecurityConstants.JWT_SECRET.getBytes();
+        final byte[] secretBytes = SecurityConstants.JWT_SECRET.getBytes(); // TODO replace with smth like secretService.getHS256SecretBytes()
 
         final String token = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, secretBytes)

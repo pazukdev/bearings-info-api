@@ -13,14 +13,7 @@ import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.*;
 
@@ -40,9 +33,9 @@ public class TableUtil {
         return PartsTable.create(dtos, tableName, header, categories);
     }
 
-    public static PartsTable motorcyclesTable(final List<Item> motorcycles,
-                                              final String tableName,
-                                              final UserService userService) {
+    public static  PartsTable motorcyclesTable(final List<Item> motorcycles,
+                                               final String tableName,
+                                               final UserService userService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         final Set<String> categories = new HashSet<>();
         for (final Item motorcycle : motorcycles) {
@@ -55,7 +48,7 @@ public class TableUtil {
         return PartsTable.create(dtos, tableName, header, categories);
     }
 
-    public static PartsTable usersTable(final List<UserEntity> users, final String tableName) {
+    public static  PartsTable usersTable(final List<UserEntity> users, final String tableName) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         for (final UserEntity user : users) {
             dtos.add(createUser(user));

@@ -5,7 +5,6 @@ import com.pazukdev.backend.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,14 +28,13 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/css/**", "/index", "/js/**").permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
                 .antMatchers("/test/public").permitAll()
                 .antMatchers("/user/create").permitAll()
                 .antMatchers("/item/**").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // comment to disable admin-only zone
-                //.antMatchers("/**").permitAll() // uncomment to disable security
+                //.antMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // comment to disable admin-only zone
+                .antMatchers("/**").permitAll() // uncomment to disable security
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))

@@ -26,7 +26,7 @@ public class ItemView extends AbstractDto {
     private boolean newItem;
     private boolean addToWishList;
     private NestedItemDto userData;
-    private String image;
+    private String imgData = "-";
     private InputStream file;
     private RateReplacer rate;
     private String category;
