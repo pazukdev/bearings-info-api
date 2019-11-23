@@ -241,14 +241,14 @@ MT804,KMZ,205 (clutch shaft - 1); 303 (clutch shaft - 1); 304 (main shaft - 2); 
 ,,,,,,,,,,,,
 ,,,,,,,,,,,,
 Category:,Engine,,,,,,,,,,,
-Name,Manufacturer,"Power, hp","Torque, nm","Max speed, rpm",Spark plug,Bearing,Seal,Oil,,,,
-Engine M-72 type,IMZ / KMZ,22,30,5900,NA11; 11A,"207 (crankshaft - 2); 7201404 (camshaft, front journal - 1); 7201107 (camshaft, rear journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-Engine K-750 type,KMZ,26,30,5900,A8U,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-Engine K-750M type,KMZ,26,30,5900,A8U,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-MT-8,KMZ,32,30,5900,A8U,"42209 (crankshaft, rear journal - 1); 209 (crankshaft, front journal - 1); 205 (camshaft, front journal - 1)",59.7x85x12 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-Engine MT-9 type,KMZ,32,30,5900,A8U,"42209 (crankshaft, rear journal - 1); 209 (crankshaft, front journal - 1); 205 (camshaft, front journal - 1)",59.7x85x12 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-Engine M67 type,IMZ,32,30,5900,A11N; A14V,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x70x9 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
-Engine M67-36 type,IMZ,36,30,5900,A11N; A14V,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x70x9 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),,,,
+Name,Manufacturer,"Power, hp","Torque, nm","Max speed, rpm",Spark plug,Bearing,Seal,Oil,Image,,,
+Engine M-72 type,IMZ / KMZ,22,30,5900,NA11; 11A,"207 (crankshaft - 2); 7201404 (camshaft, front journal - 1); 7201107 (camshaft, rear journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
+Engine K-750 type,KMZ,26,30,5900,A8U,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
+Engine K-750M type,KMZ,26,30,5900,A8U,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x65x5.5 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),engine_engine_k-750m_type.png,,,
+MT-8,KMZ,32,30,5900,A8U,"42209 (crankshaft, rear journal - 1); 209 (crankshaft, front journal - 1); 205 (camshaft, front journal - 1)",59.7x85x12 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
+Engine MT-9 type,KMZ,32,30,5900,A8U,"42209 (crankshaft, rear journal - 1); 209 (crankshaft, front journal - 1); 205 (camshaft, front journal - 1)",59.7x85x12 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
+Engine M67 type,IMZ,32,30,5900,A11N; A14V,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x70x9 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
+Engine M67-36 type,IMZ,36,30,5900,A11N; A14V,"207 (crankshaft - 2); 205 (camshaft, front journal - 1)",50x70x9 (crankshaft - 1); 15x30x7 (camshaft - 1),M8 (2.1 L),-,,,
 ,,,,,,,,,,,,
 ,,,,,,,,,,,,
 ,,,,,,,,,,,,
@@ -291,3 +291,10 @@ K-650 Dnepr,KMZ,1968-1971,105,350,19,MT-8,6204,G-414,M-72 type,Frame K-750M type
 Dnepr MT-9,KMZ,1971-1976,105,350,19,Engine MT-9 type,MT804,G-414,M-72 type,Frame K-750M type,-,motorcycle_mt9.png
 Ural M67,IMZ,1973-1976,105,350,20,Engine M67 type,8.101-04001,G-424,M-72 type,Frame M-67 type,-,motorcycle_m67.png
 Ural M67-36,IMZ,1976-1974,105,350,20,Engine M67-36 type,8.101-04001,G-424,M-72 type,Frame M-67 type,-,motorcycle_m67-36.png
+R-75,BMW,1941-1946,95,420,-,-,-,-,-,-,-,-
+KS750,Zundapp,1939-1948,95,420,23,-,-,-,-,-,-,motorcycle_ks750.png
+Jupiter-4,IZHMASH,1980-1985,120,-,18,-,-,-,-,-,-,-
+RT125,DKW,1939-1965,90,-,-,-,-,-,-,-,-,-
+M1A,MMVZ,1951-?,-,-,9,-,-,-,-,-,-,-
+M1M Monkey,MMVZ,1956-1961,75,-,9,-,-,-,-,-,-,-
+M103,MMVZ,1962-1964,75,-,9,-,-,-,-,-,-,-

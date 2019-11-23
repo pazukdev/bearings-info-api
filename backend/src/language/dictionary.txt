@@ -23,7 +23,6 @@ ru=KMZ M-72N=КМЗ М-72Н
 ru=KMZ=КМЗ
 ru=Location=Расположение
 ru=M-72N=М-72Н
-ru=M1=М1
 ru=M61 Irbit=М61 Ирбит
 ru=M63 Ural-2=М63 Урал-2
 ru=M66 Ural-3=М66 Урал-3
@@ -38,6 +37,7 @@ ru=Max speed, km/h=Макс. скорость, км/ч
 ru=Model=Модель
 ru=Motorcycle Jupiter 5=Мотоцикл Юпитер 5
 ru=Motorcycle M1=Мотоцикл М1
+ru=Motorcycle R-75=Мотоцикл R-75
 ru=Motorcycle catalogue=Модельный ряд
 ru=Motorcycle=Мотоцикл
 ru=Name=Название
