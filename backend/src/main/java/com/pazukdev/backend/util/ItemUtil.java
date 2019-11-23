@@ -7,6 +7,7 @@ import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -17,6 +18,21 @@ import java.util.stream.Collectors;
  * @author Siarhei Sviarkaltsau
  */
 public class ItemUtil {
+
+    @Getter
+    public enum SpecialItemId {
+
+        ITEMS_MANAGEMENT_VIEW(-1),
+        MOTORCYCLE_CATALOGUE_VIEW(-2),
+        WISH_LIST_VIEW(-3),
+        USER_LIST_VIEW(-4);
+
+        private final int itemId;
+
+        SpecialItemId(final int itemId) {
+            this.itemId = itemId;
+        }
+    }
 
     public static void sort(final List<TransitiveItem> items) {
         items.sort(Comparator.comparing(TransitiveItem::getCategory));
@@ -148,12 +164,7 @@ public class ItemUtil {
     }
 
     public static boolean isInfoItem(final String parameter, final TransitiveItemService service) {
-        //return findCategories(service.findAll()).contains(parameter + " (i)");
         return service.find(parameter + " (i)").size() > 0;
-    }
-
-    public static String getInfoCategory(final String parameter) {
-        return parameter + " (i)";
     }
 
     public static ReplacerData parseReplacerData(final String replacerDataSourceString) {
@@ -228,19 +239,28 @@ public class ItemUtil {
     }
 
     public static void updateName(final Item item,
-                                  final Map<String, String> headerMatrixMap,
+                                  final Map<String, String> description,
                                   final ItemService itemService) {
         final String oldName = item.getName();
-        final String newName = headerMatrixMap.get("Name");
+        final String newName = description.get("Name");
         if (newName != null && !newName.equals(oldName)) {
             item.setName(newName);
             applyToAllItemDescriptions(item.getCategory(), oldName, newName, itemService);
         }
-        headerMatrixMap.remove("Name");
+        description.remove("Name");
     }
 
-    public static void updateImg(final String base64Data, final Item item) {
+    public static void updateImg(final ItemView itemView, final Item item) {
+        if (itemView.getMessages().contains("img removed")) {
+            item.setImage(null);
+            return;
+        } else if (!itemView.getMessages().contains("img uploaded")) {
+            return;
+        }
+
+        String base64Data = null;
         try {
+            base64Data = itemView.getImgData();
             ImgUtil.createImgFileInFileSystem(base64Data, item);
         } catch (IOException e) {
             e.printStackTrace();
@@ -252,10 +272,10 @@ public class ItemUtil {
     }
 
     public static void updateDescription(final Item item,
-                                         final Map<String, String> headerMatrixMap,
+                                         final Map<String, String> description,
                                          final ItemService itemService) {
-        final String newDescription = ItemUtil.toDescription(headerMatrixMap);
-        applyNewDescriptionToCategory(item.getCategory(), headerMatrixMap, itemService);
+        final String newDescription = ItemUtil.toDescription(description);
+        applyNewDescriptionToCategory(item.getCategory(), description, itemService);
         item.setDescription(newDescription);
     }
 
@@ -395,25 +415,16 @@ public class ItemUtil {
         }
     }
 
-    public static Item copy(final Item original) {
-        final Item copy = new Item();
-        copy.setName(original.getName());
-        copy.setCategory(original.getCategory());
-        copy.setCreatorId(original.getCreatorId());
-        copy.setUserActionDate(original.getUserActionDate());
-        copy.setDescription(original.getDescription());
-        copy.setReplacers(original.getReplacers());
-        copy.setChildItems(original.getChildItems());
-        return copy;
-    }
-
     public static Set<Long> collectIds(final Set<Item> items) {
         final Set<Long> ids = new HashSet<>();
         for (final Item item : items) {
             ids.add(item.getId());
         }
         return ids;
+    }
 
+    public static boolean isSpecialItem(final Long itemId) {
+        return itemId != null && itemId < 0;
     }
 
 }

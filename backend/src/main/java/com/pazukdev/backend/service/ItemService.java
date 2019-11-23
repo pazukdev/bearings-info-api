@@ -19,7 +19,6 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.*;
 
 import static com.pazukdev.backend.util.ItemUtil.createDescriptionMap;
@@ -96,23 +95,32 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public ItemView createItemView(final Long itemId, final String userName) {
+    public ItemView createItemView(final Long itemId, final String userName, final String language) {
         final ItemViewFactory itemViewFactory = new ItemViewFactory(this);
-        return itemViewFactory.createItemView(itemId, userName);
+        return itemViewFactory.createItemView(itemId, userName, language);
     }
 
     @Transactional
     public ItemView createNewItemView(final String category,
                                       final String name,
-                                      final String userName) {
+                                      final String userName,
+                                      final String userLanguage) {
         final ItemViewFactory itemViewFactory = new ItemViewFactory(this);
-        return itemViewFactory.createNewItemView(category, name, userName);
+        try {
+            return itemViewFactory.createNewItemView(category, name, userName, userLanguage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Transactional
-    public ItemView updateItemView(final Long itemId, final String userName, final ItemView itemView) throws IOException {
+    public ItemView updateItemView(final Long itemId,
+                                   final String userName,
+                                   final String language,
+                                   final ItemView itemView) {
         final ItemViewFactory itemViewFactory = new ItemViewFactory(this);
-        return itemViewFactory.updateItemView(itemId, userName, itemView);
+        return itemViewFactory.updateItemView(itemId, userName, language, itemView);
     }
 
     public Item getOrCreate(final TransitiveItem transitiveItem) {

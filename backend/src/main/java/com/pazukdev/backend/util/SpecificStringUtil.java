@@ -41,6 +41,7 @@ public class SpecificStringUtil {
     }
 
     private static final List<String> nullKeys = Arrays.asList("?", "-", "null");
+    private static final List<String> abbreviation = Arrays.asList("имз", "кмз", "гост");
 
     public static List<String> getList(String source) {
         return Arrays.asList(removeSpaces(source).split(Separator.SEMICOLON.getSeparator()));
@@ -110,6 +111,9 @@ public class SpecificStringUtil {
     }
 
     public static String capitalize(final String s) {
+        if (isAbbreviation(s)) {
+            return s.toUpperCase();
+        }
         return StringUtils.capitalize(s.toLowerCase());
     }
 
@@ -185,6 +189,10 @@ public class SpecificStringUtil {
 
     private static boolean isNullKey(final String source) {
         return nullKeys.contains(source);
+    }
+
+    private static boolean isAbbreviation(final String s) {
+        return abbreviation.contains(s);
     }
 
     public static Integer extractIntegerAutomatically(final String source) {

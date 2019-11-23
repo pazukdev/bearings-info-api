@@ -144,7 +144,9 @@ public class NestedItemUtil {
             if (!CategoryUtil.isPartCategory(category)) {
                 continue;
             }
-            childItemDtos.add(NestedItemDtoFactory.createBasicNestedItemDto(item, userService));
+            final NestedItemDto dto = NestedItemDtoFactory.createBasicNestedItemDto(item, userService);
+            dto.setSelectText(item.getCategory() + " " + dto.getButtonText());
+            childItemDtos.add(dto);
         }
         return childItemDtos;
     }

@@ -24,9 +24,9 @@ public class SpeedUtil {
     }
 
     private static Integer calculateSpeed(final int engineRpm,
-                                          final double gearboxRatio,
-                                          final double finalDriveRatio,
-                                          final double tireRadiusM) {
+                                     final double gearboxRatio,
+                                     final double finalDriveRatio,
+                                     final double tireRadiusM) {
         final double speedMs = (2 * Math.PI * tireRadiusM * engineRpm) / (60 * gearboxRatio * finalDriveRatio);
         final double msKmHRatio = 1000D / 3600D;
         final double speedKmH = speedMs / msKmHRatio;

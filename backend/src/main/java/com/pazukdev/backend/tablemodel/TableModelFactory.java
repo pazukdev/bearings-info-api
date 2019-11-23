@@ -27,8 +27,8 @@ public class TableModelFactory {
 
     public TableModel createTableModel(final String filePath) {
         List<TableRow> tableRows = null;
-        try (final InputStream in= getClass().getResourceAsStream(filePath)) {
-            tableRows = getTableRows(CSVFileUtil.readInputStreamFromCSVFile(in));
+        try (final InputStream inputStream = getClass().getResourceAsStream(filePath)) {
+            tableRows = getTableRows(CSVFileUtil.readInputStreamFromCSVFile(inputStream));
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }

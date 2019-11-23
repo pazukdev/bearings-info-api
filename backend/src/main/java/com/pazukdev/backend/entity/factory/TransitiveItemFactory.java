@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +24,8 @@ import java.util.Map;
 public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem> {
 
     private final TransitiveItemService service;
+    private final List<String> descriptionIgnore = new ArrayList<>(
+            Arrays.asList("name", "category", "replacer", "image"));
 
     @Override
     protected String getCSVFilePath() {
@@ -55,7 +60,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         String description = "";
         for (final Map.Entry<String, String> entry : tableRow.getData().entrySet()) {
             final String key = entry.getKey();
-            if (key.equals("Name") || key.equals("Category") || key.equals("Replacer")) {
+            if (descriptionIgnore.contains(key.toLowerCase())) {
                 continue;
             }
             description = description + entry.getKey() + ":" + entry.getValue() + ";;";

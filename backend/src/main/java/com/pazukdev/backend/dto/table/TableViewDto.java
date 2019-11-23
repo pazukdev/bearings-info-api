@@ -12,6 +12,6 @@ public class TableViewDto {
 
     private String name;
     private final Integer count;
-    private final List<TableDto> tables;
+    private final List<HeaderTable> tables;
 
 }

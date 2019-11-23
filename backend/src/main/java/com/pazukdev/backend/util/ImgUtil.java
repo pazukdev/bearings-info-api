@@ -1,5 +1,6 @@
 package com.pazukdev.backend.util;
 
+import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.entity.Item;
 
 import javax.imageio.ImageIO;
@@ -17,8 +18,9 @@ public class ImgUtil {
     private static final String PNG_EXTENSION = "png";
     private static final String IMG_DATA_METADATA = "data:image/png;base64,";
 
-    public static String getItemImgData(final Item item) {
+    public static ImgViewData getImgViewData(final Item item) {
         final String itemCategory = item.getCategory();
+        boolean defaultImg = false;
         String imgName;
         String imgPath;
         BufferedImage img;
@@ -27,13 +29,14 @@ public class ImgUtil {
             imgPath = getImgFullPath(imgName, itemCategory);
             try {
                 img = getImg(imgPath);
+                defaultImg = img != null;
             } catch (IOException e1) {
                 img = getImgIfItemHasNoSpecificImg(itemCategory);
             }
         } else {
             img = getImgIfItemHasNoSpecificImg(itemCategory);
         }
-        return createBase64ImgData(img);
+        return new ImgViewData(defaultImg, createBase64ImgData(img));
     }
 
     private static BufferedImage getImgIfItemHasNoSpecificImg(final String itemCategory) {
@@ -103,6 +106,16 @@ public class ImgUtil {
     public static String getImgName(final String itemCategory, final String itemName) {
         return toPath(itemCategory) + "_" + toPath(itemName) + "." + PNG_EXTENSION;
     }
+
+//    public static String getImgName(final String transitiveItemImg, final Long transitiveItemId) {
+//        if (transitiveItemImg == null) {
+//            return null;
+//        }
+//        final String name = transitiveItemImg.split(".")[0];
+//        final String extension = transitiveItemImg.split(".")[1];
+//
+//        return name + "_" + transitiveItemId + "." + extension;
+//    }
 
     public static boolean isPngFile(final String base64Data) {
         return getBase64DataFileExtension(base64Data).equals(PNG_EXTENSION);

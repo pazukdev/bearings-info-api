@@ -18,7 +18,7 @@ import javax.persistence.*;
 public class UserEntity extends AbstractEntity {
 
     private Integer rating = 0;
-    @Column(name = "password")
+    private String email;
     private String password;
     @Column(name = "role")
     @Enumerated(EnumType.STRING)

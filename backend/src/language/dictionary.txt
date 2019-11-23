@@ -1,0 +1,60 @@
+ru=- Gear oil for gearbox=- Трансмиссионное масло для КПП
+ru=Bearing=Подшипник
+ru=Created by=Добавлено пользователем
+ru=Dnepr MT-9=Днепр МТ-9
+ru=Edit=Редактировать
+ru=Engine M-72 type=Двигатель M-72 type
+ru=Engine M67-36 type=Двигатель M67-36 type
+ru=Engine=Двигатель
+ru=Final drive=Редуктор
+ru=Front fork=Передняя вилка
+ru=Fuel capacity, l=Объем бензобака, л
+ru=Gearbox=Коробка передач
+ru=Generator G-11A=Генератор Г-11А
+ru=Generator=Генератор
+ru=IMZ / KMZ=ИМЗ / КМЗ
+ru=IMZ 8103=ИМЗ 8103
+ru=IMZ=ИМЗ
+ru=IZHMASH=ИЖМАШ
+ru=Jupiter 5=Юпитер 5
+ru=K-750 type engine=Двигатель K-750 type
+ru=K-750M type engine=Двигатель K-750M type
+ru=KMZ M-72N=КМЗ М-72Н
+ru=KMZ=КМЗ
+ru=Location=Расположение
+ru=M-72N=М-72Н
+ru=M1=М1
+ru=M61 Irbit=М61 Ирбит
+ru=M63 Ural-2=М63 Урал-2
+ru=M66 Ural-3=М66 Урал-3
+ru=M66 engine=Двигатель M66
+ru=M66=М66
+ru=M67 type engine=Двигатель M67 type
+ru=MG-10=МГ-10
+ru=MMVZ=ММВЗ
+ru=MT-9 type engine=Двигатель MT-9 type
+ru=Manufacturer=Производитель
+ru=Max speed, km/h=Макс. скорость, км/ч
+ru=Model=Модель
+ru=Motorcycle Jupiter 5=Мотоцикл Юпитер 5
+ru=Motorcycle M1=Мотоцикл М1
+ru=Motorcycle catalogue=Модельный ряд
+ru=Motorcycle=Мотоцикл
+ru=Name=Название
+ru=Oil - 20W-50 Synthetic=Масло - 20W-50 Синтетика
+ru=Partnumber=Наименование
+ru=Parts=Агрегаты и детали
+ru=Pcs/Vol=Кол-во/объем
+ru=Pendulum type=Маятникового типа
+ru=Production=Годы пр-ва
+ru=Rating=Рейтинг
+ru=Rear suspension=Задняя подвеска
+ru=Replacers=Заменители
+ru=Role=Роль
+ru=Telescopic=Телескопическая
+ru=Ural M-63=Урал М-63
+ru=Ural M63=Урал М63
+ru=Username=Имя пользователя
+ru=Weight, kg=Вес, кг
+ru=Wheel=Колесо
+ru=Width=Ширина

@@ -63,7 +63,7 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
     }
 
     public UserEntity getAdmin() {
-        return getOne(1L);
+        return getOne(2L);
     }
 
     private List<String> createOrUpdateWithCredentialsValidation(final Long id,
@@ -73,9 +73,12 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
         if (validationMessages.isEmpty()) {
             dto.setPassword(passwordEncoder.encode(dto.getPassword()));
             if (create) {
+                final String validEmail = dto.getName();
+
                 final UserEntity user = new UserEntity();
                 user.setPassword(dto.getPassword());
-                user.setName(dto.getName());
+                user.setEmail(validEmail);
+                user.setName(validEmail);
                 repository.save(user);
             } else {
                 update(id, dto);

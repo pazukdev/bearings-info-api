@@ -6,11 +6,10 @@ import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.Replacer;
 import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.service.UserService;
-import com.pazukdev.backend.util.ItemUtil;
 import com.pazukdev.backend.util.SpecificStringUtil;
 import com.pazukdev.backend.util.UserUtil;
 
-import static com.pazukdev.backend.util.ItemUtil.getValueFromDescription;
+import static com.pazukdev.backend.util.ItemUtil.*;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -35,7 +34,7 @@ public class NestedItemDtoFactory {
     public static NestedItemDto createMotorcycle(final Item motorcycle, final UserService userService) {
         final String description = motorcycle.getDescription();
         final String production = getValueFromDescription(description, "Production");
-        final String manufacturer = getValueFromDescription(description, "Manufacturer").toUpperCase();
+        final String manufacturer = getValueFromDescription(description, "Manufacturer");
 
         final NestedItemDto motorcycleDto = createBasicNestedItemDto(motorcycle, userService);
         motorcycleDto.setLocation(production);
@@ -68,6 +67,39 @@ public class NestedItemDtoFactory {
         return replacerDto;
     }
 
+    public static NestedItemDto createItemForItemsManagement(final Item item, final UserService userService) {
+        final NestedItemDto basicSpecialNestedItemDto = createBasicNestedItemDto(item, userService);
+        final String category = item.getCategory();
+        final String description = item.getDescription();
+
+        String leftColumnData = null;
+        String rightColumnData = null;
+
+        if (category.toLowerCase().equals("bearing")) {
+            leftColumnData = getValueFromDescription(description, "Type");
+            rightColumnData = getValueFromDescription(description, "Size, mm");
+        } else if (category.toLowerCase().equals("seal")) {
+            leftColumnData = getValueFromDescription(description, "Size, mm");
+            rightColumnData = getValueFromDescription(description, "Rotation");
+        } else if (category.toLowerCase().equals("oil")) {
+            leftColumnData = getValueFromDescription(description, "Base");
+            rightColumnData = getValueFromDescription(description, "Seasonality");
+        } else if (category.toLowerCase().equals("motorcycle")) {
+            leftColumnData = getValueFromDescription(description, "Production");
+            rightColumnData = getValueFromDescription(description, "Manufacturer");
+        } else if (category.toLowerCase().equals("spark plug")) {
+            leftColumnData = getValueFromDescription(description, "Manufacturer");
+            rightColumnData = getValueFromDescription(description, "Heat range");
+        } else if (category.toLowerCase().equals("generator")) {
+            leftColumnData = getValueFromDescription(description, "Tension, V");
+        }
+
+        basicSpecialNestedItemDto.setLocation(leftColumnData != null ? leftColumnData : "-");
+        basicSpecialNestedItemDto.setComment(rightColumnData != null ? rightColumnData : "-");
+
+        return basicSpecialNestedItemDto;
+    }
+
     public static NestedItemDto createBasicSpecialNestedItemDto(final Item item, final UserService userService) {
         final NestedItemDto basicSpecialNestedItemDto = createBasicNestedItemDto(item, userService);
         basicSpecialNestedItemDto.setLocation(item.getCategory());
@@ -78,8 +110,8 @@ public class NestedItemDtoFactory {
         final String name = " - " + item.getName();
         final Long itemId = item.getId();
         final String itemName = item.getName();
-        final String buttonText = ItemUtil.createButtonText(item);
-        final String selectText = ItemUtil.createSelectText(item);
+        final String buttonText = createButtonText(item);
+        final String selectText = createSelectText(item);
 
         final NestedItemDto nestedItemDto = new NestedItemDto();
         nestedItemDto.setName(name);
@@ -92,8 +124,6 @@ public class NestedItemDtoFactory {
         nestedItemDto.setStatus(item.getStatus());
         nestedItemDto.setCreatorName(UserUtil.getCreatorName(item, userService));
         return nestedItemDto;
-
-
     }
 
 }

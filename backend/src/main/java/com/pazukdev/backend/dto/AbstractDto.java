@@ -15,6 +15,11 @@ public class AbstractDto implements Serializable {
     //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private String name = "-";
+    private String localizedName = "-";
     private String status = "created";
 
+    public void setName(final String name) {
+        this.name = name;
+        this.localizedName = name;
+    }
 }

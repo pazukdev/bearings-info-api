@@ -13,8 +13,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class UserDto extends AbstractDto {
 
-    private final static long serialVersionUID = 12343L;
-
     private Integer rating = 0;
     private String password;
     private String repeatedPassword;
