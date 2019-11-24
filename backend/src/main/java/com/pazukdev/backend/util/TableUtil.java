@@ -38,9 +38,9 @@ public class TableUtil {
         return partsTable;
     }
 
-    public static  PartsTable motorcyclesTable(final List<Item> motorcycles,
-                                               final String tableName,
-                                               final UserService userService) {
+    public static PartsTable motorcyclesTable(final List<Item> motorcycles,
+                                              final String tableName,
+                                              final UserService userService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         final Set<String> categories = new HashSet<>();
         for (final Item motorcycle : motorcycles) {
@@ -59,7 +59,7 @@ public class TableUtil {
         return partsTable;
     }
 
-    public static  PartsTable usersTable(final List<UserEntity> users, final String tableName) {
+    public static PartsTable usersTable(final List<UserEntity> users, final String tableName) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         for (final UserEntity user : users) {
             dtos.add(createUser(user));
@@ -126,7 +126,7 @@ public class TableUtil {
         for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
             String parameter = entry.getKey();
             String value = entry.getValue();
-            String itemId = "no id";
+            String itemId = "-";
 
             final Item foundItem = itemService.find(parameter, value);
             if (foundItem != null) {

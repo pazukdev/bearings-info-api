@@ -262,7 +262,9 @@ public class ItemViewFactory {
             UserActionUtil.processItemAction("remove from wishlist", item, user, itemService);
         }
         itemService.getUserService().update(user);
+        itemView.getWishListIds().removeAll(itemView.getIdsToRemove());
         itemView.getIdsToRemove().clear();
+        itemView.getHeader().getRows().get(0).setValue(String.valueOf(itemView.getWishListIds().size()));
         return itemView;
     }
 
