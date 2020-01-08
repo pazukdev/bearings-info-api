@@ -18,9 +18,19 @@ import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.*;
 
 public class TableUtil {
 
-    public static PartsTable specialItemsTable(final List<Item> items,
-                                               final String tableName,
-                                               final ItemService itemService) {
+    public static PartsTable wishListTable(final Set<ChildItem> items, final ItemService itemService) {
+        final List<NestedItemDto> dtos = new ArrayList<>();
+        for (final ChildItem item : items) {
+            final NestedItemDto itemDto = createWishListItem(item, itemService.getUserService());
+            dtos.add(itemDto);
+        }
+        final String[] header = {"Comment", "Name", "Quantity, pcs"};
+//        final String[] header = null;
+        final Set<String> categories = itemService.findAllCategories();
+        return PartsTable.create(header, dtos, categories);
+    }
+
+    public static PartsTable specialItemsTable(final List<Item> items, final ItemService itemService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         for (final Item item : items) {
             final NestedItemDto itemDto = createItemForItemsManagement(item, itemService.getUserService());
@@ -29,18 +39,10 @@ public class TableUtil {
 //        final String[] header = {"Category", "Name", "-"};
         final String[] header = null;
         final Set<String> categories = itemService.findAllCategories();
-        final PartsTable partsTable =  PartsTable.create(dtos, tableName, header, categories);
-
-        for (final PartsTable childTable : partsTable.getTables()) {
-            childTable.setOpened(false);
-        }
-
-        return partsTable;
+        return PartsTable.create(header, dtos, categories);
     }
 
-    public static PartsTable motorcyclesTable(final List<Item> motorcycles,
-                                              final String tableName,
-                                              final UserService userService) {
+    public static  PartsTable motorcyclesTable(final List<Item> motorcycles, final UserService userService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         final Set<String> categories = new HashSet<>();
         for (final Item motorcycle : motorcycles) {
@@ -50,32 +52,20 @@ public class TableUtil {
         }
 
         final String[] header = {"Production", "Model", "Manufacturer"};
-        final PartsTable partsTable =  PartsTable.create(dtos, tableName, header, categories);
-
-        for (final PartsTable child : partsTable.getTables()) {
-            child.setOpened(child.getWeight() > 7);
-        }
-
-        return partsTable;
+        return PartsTable.create(header, dtos, categories);
     }
 
-    public static PartsTable usersTable(final List<UserEntity> users, final String tableName) {
+    public static  PartsTable usersTable(final List<UserEntity> users) {
         final List<NestedItemDto> dtos = new ArrayList<>();
         for (final UserEntity user : users) {
             dtos.add(createUser(user));
         }
         final String[] header = {"Role", "Username", "Rating"};
         final Set<String> partCategories = new HashSet<>(Arrays.asList("Admin", "User"));
-        final PartsTable partsTable =  PartsTable.create(dtos, tableName, header, partCategories);
-        for (final PartsTable child : partsTable.getTables()) {
-            child.getParts().sort(Comparator.comparing(NestedItemDto::getQuantity));
-        }
-        return partsTable;
+        return PartsTable.create(header, dtos, partCategories);
     }
 
-    public static PartsTable createPartsTable(final Item item,
-                                              final String tableName,
-                                              final ItemService itemService) {
+    public static PartsTable createPartsTable(final Item item, final ItemService itemService) {
         if (!CategoryUtil.itemIsAbleToContainParts(item)) {
             return PartsTable.createStub();
         }
@@ -88,7 +78,7 @@ public class TableUtil {
         final String[] header = {"Location", "Partnumber", "Pcs/Vol"};
         //final String[] header = null;
         final Set<String> categories = itemService.findAllPartCategories();
-        return PartsTable.create(dtos, tableName, header, categories);
+        return PartsTable.create(header, dtos, categories);
     }
 
     public static ReplacersTable createReplacersTable(final Item item, final UserService userService) {
@@ -99,7 +89,6 @@ public class TableUtil {
             final NestedItemDto replacerDto = createReplacer(replacer, userService);
             replacersTable.getReplacers().add(replacerDto);
         }
-        replacersTable.getReplacers().sort(Comparator.comparing(NestedItemDto::getRating).reversed());
         return replacersTable;
     }
 
@@ -110,8 +99,8 @@ public class TableUtil {
         final Map<String, String> description = ItemUtil.toMap(item.getDescription());
 
         final List<HeaderTableRow> headerTableRows = new ArrayList<>();
-        headerTableRows.add(HeaderTableRow.create("Name", itemName, itemCategory));
-        return createTable(tableName, description, headerTableRows, itemCategory, itemService);
+        headerTableRows.add(HeaderTableRow.create("Name", itemName));
+        return createTable(tableName, description, headerTableRows, itemService);
     }
 
     public static String getHeaderTableName(final String itemCategory, final String itemName) {
@@ -121,19 +110,20 @@ public class TableUtil {
     private static HeaderTable createTable(final String tableName,
                                            final Map<String, String> descriptionMap,
                                            final List<HeaderTableRow> headerTableRows,
-                                           final String itemCategory,
                                            final ItemService itemService) {
         for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
             String parameter = entry.getKey();
             String value = entry.getValue();
             String itemId = "-";
 
-            final Item foundItem = itemService.find(parameter, value);
+            // str.matches(".*\\d
+            String category = parameter.replaceAll("[0-9]","").trim();
+            final Item foundItem = itemService.find(category, value);
             if (foundItem != null) {
                 itemId = foundItem.getId().toString();
             }
 
-            final HeaderTableRow row = HeaderTableRow.create(parameter, value, itemCategory);
+            final HeaderTableRow row = HeaderTableRow.create(parameter, value);
             row.setItemId(itemId);
             headerTableRows.add(row);
         }

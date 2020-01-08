@@ -5,7 +5,6 @@ import com.pazukdev.backend.dto.factory.NestedItemDtoFactory;
 import com.pazukdev.backend.dto.table.PartsTable;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.service.UserService;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 public class NestedItemUtil {
 
     public static List<NestedItemDto> prepareNestedItemDtosToConverting(final List<NestedItemDto> dtos) {
-        correctFieldsValues(dtos);
+//        correctFieldsValues(dtos);
 
         final List<NestedItemDto> hasId = new ArrayList<>();
         final List<NestedItemDto> noId = new ArrayList<>();
@@ -92,18 +91,11 @@ public class NestedItemUtil {
 
     public static void correctFieldsValues(final List<NestedItemDto> dtos) {
         for (final NestedItemDto dto : dtos) {
-            final String comment = dto.getComment();
-            final String location = dto.getLocation();
-            final String quantity = dto.getQuantity();
-            if (StringUtils.isBlank(comment)) {
-                dto.setComment("-");
-            }
-            if (StringUtils.isBlank(location)) {
-                dto.setLocation("-");
-            }
-            if (StringUtils.isBlank(quantity)) {
-                dto.setQuantity("0");
-            }
+//            dto.setLocalizedComment(SpecificStringUtil.replaceBlankWithDash(dto.getLocalizedComment()));
+//            dto.setLocalizedSecondComment(SpecificStringUtil.replaceBlankWithDash(dto.getLocalizedSecondComment()));
+
+            dto.setComment(SpecificStringUtil.replaceBlankWithDash(dto.getComment()));
+            dto.setSecondComment(SpecificStringUtil.replaceBlankWithDash(dto.getSecondComment()));
         }
     }
 
@@ -130,30 +122,33 @@ public class NestedItemUtil {
     }
 
     public static List<NestedItemDto> collectAllItems(final PartsTable partsTable) {
-        final Set<NestedItemDto> allItems = new HashSet<>(partsTable.getParts());
-        for (final PartsTable childTable : partsTable.getTables()) {
-            allItems.addAll(childTable.getParts());
-        }
-        return new ArrayList<>(allItems);
+        return partsTable.getParts();
     }
 
-    public static List<NestedItemDto> createPossibleParts(final List<Item> items, final UserService userService) {
+    public static List<NestedItemDto> createPossibleParts(final List<Item> items,
+                                                          final String parentItemCategory,
+                                                          final UserService userService) {
         final List<NestedItemDto> childItemDtos = new ArrayList<>();
         for (final Item item : items) {
             final String category = item.getCategory();
-            if (!CategoryUtil.isPartCategory(category)) {
+            if (!CategoryUtil.isPartCategory(category) || category.equalsIgnoreCase(parentItemCategory)) {
                 continue;
             }
             final NestedItemDto dto = NestedItemDtoFactory.createBasicNestedItemDto(item, userService);
-            dto.setSelectText(item.getCategory() + " " + dto.getButtonText());
+            dto.setSelectText(category + " " + dto.getSelectText());
             childItemDtos.add(dto);
         }
         return childItemDtos;
     }
 
-    public static List<NestedItemDto> createReplacerDtos(final List<Item> items, final UserService userService) {
+    public static List<NestedItemDto> createReplacerDtos(final List<Item> items,
+                                                         final Long parentItemId,
+                                                         final UserService userService) {
         final List<NestedItemDto> replacerDtos = new ArrayList<>();
         for (final Item item : items) {
+            if (item.getId().equals(parentItemId)) {
+                continue;
+            }
             replacerDtos.add(NestedItemDtoFactory.createBasicNestedItemDto(item, userService));
         }
         replacerDtos.sort(Comparator.comparing(NestedItemDto::getRating).reversed());

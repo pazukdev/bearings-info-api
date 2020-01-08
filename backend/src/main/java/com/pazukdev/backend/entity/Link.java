@@ -14,15 +14,10 @@ import javax.persistence.Table;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-@Table(name = "transitive_item")
-public class TransitiveItem extends AbstractEntity {
+@Table(name = "link")
+public class Link extends AbstractEntity {
 
-    private String category;
-    private String image;
-    private String description = "-";
-    private String replacer = "-";
-    private String wiki;
-    private String website;
-    private String websiteLang;
+    private String type;
+    private String lang;
 
 }

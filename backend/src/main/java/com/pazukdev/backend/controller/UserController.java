@@ -1,9 +1,11 @@
 package com.pazukdev.backend.controller;
 
 import com.pazukdev.backend.converter.UserConverter;
-import com.pazukdev.backend.dto.UserDto;
+import com.pazukdev.backend.dto.factory.ItemViewFactory;
+import com.pazukdev.backend.dto.user.UserDto;
+import com.pazukdev.backend.dto.view.ItemView;
+import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.Item;
-import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.entity.WishList;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
@@ -41,8 +43,29 @@ public class UserController {
     @GetMapping("/admin/user/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get User. Admins-only permitted")
-    public UserDto get(@PathVariable("id") Long id) {
+    public UserDto get(@PathVariable("id") final Long id) {
         return userConverter.convertToDto(userService.getOne(id));
+    }
+
+    @GetMapping("/view/user/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get public user data")
+    public UserView getUserView(@PathVariable("id") final Long id) {
+        return userConverter.convertToUserView(userService.getOne(id));
+    }
+
+    @GetMapping("/view/user/list/{userName}/{language}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get user list view")
+    public ItemView getUserListView(@PathVariable final String userName, @PathVariable final String language) {
+        return new ItemViewFactory(itemService).createUserListView(userName, language);
+    }
+
+    @GetMapping("/view/wishlist/{userName}/{language}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get user wishlist view")
+    public ItemView getWishlistView(@PathVariable final String userName, @PathVariable final String language) {
+        return itemService.createWishlistView(userName, language);
     }
 
     @GetMapping(value = "user/find-by-name/{username}")
@@ -59,18 +82,18 @@ public class UserController {
         return userService.createUser(dto);
     }
 
-    @PutMapping("/admin/user/{id}")
+    @PutMapping("/user/{id}/update")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Update user")
-    public List<String> update(@PathVariable("id") final Long id, @RequestBody final UserDto dto) {
-        return userService.updateUser(id, dto);
+    public List<String> update(@PathVariable final Long id, @RequestBody final UserView userView) {
+        return userService.updateUser(userView);
     }
 
-    @DeleteMapping("/admin/user/delete/{id}")
+    @DeleteMapping("/user/{id}/delete")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Delete User. Admins-only permitted")
-    public UserDto delete(@PathVariable("id") final Long id) {
-        return userConverter.convertToDto(userService.delete(id));
+    @ApiOperation(value = "Delete user")
+    public void delete(@PathVariable("id") final Long id) {
+        userService.delete(id);
     }
 
     @DeleteMapping("/admin/user/list")
@@ -87,32 +110,22 @@ public class UserController {
         return userService.getRoles();
     }
 
-    @PutMapping(value = "{userName}/add-item/{itemId}")
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Add item to wish list")
-    public boolean addItem(@PathVariable final String userName, @PathVariable final Long itemId) {
-        final UserEntity user = userService.findByName(userName);
-        final WishList wishList = user.getWishList();
-        final Item item = itemService.getOne(itemId);
-        if (!isItemInWishList(userName, item)) {
-            wishList.getItems().add(item);
-            userService.update(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @GetMapping(value = "{userName}/wishlist/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get user wishlist")
     public boolean isItemInWishList(@PathVariable final String userName, @PathVariable final Long itemId) {
-        return isItemInWishList(userName, itemService.getOne(itemId));
-    }
-
-    private boolean isItemInWishList(final String userName, final Item item) {
+        final Item item = itemService.getOne(itemId);
         final WishList wishList = userService.findByName(userName).getWishList();
         return wishList.getItems().contains(item);
+    }
+
+    @PutMapping("user/{username}/add-item-to-wishlist/{item-id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Add item to wish list")
+    public boolean addItemToWishList(@PathVariable("item-id") final Long id,
+                                     @PathVariable("username") final String userName) {
+        final Item item = itemService.getOne(id);
+        return userService.addItemToWishList(item, userName);
     }
 
 }

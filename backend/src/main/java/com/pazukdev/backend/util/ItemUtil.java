@@ -1,16 +1,15 @@
 package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.dto.ItemQuantity;
-import com.pazukdev.backend.dto.ItemView;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
+import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,14 +21,14 @@ public class ItemUtil {
     @Getter
     public enum SpecialItemId {
 
-        ITEMS_MANAGEMENT_VIEW(-1),
-        MOTORCYCLE_CATALOGUE_VIEW(-2),
-        WISH_LIST_VIEW(-3),
-        USER_LIST_VIEW(-4);
+        ITEMS_MANAGEMENT_VIEW(-1L),
+        MOTORCYCLE_CATALOGUE_VIEW(-2L),
+        WISH_LIST_VIEW(-3L),
+        USER_LIST_VIEW(-4L);
 
-        private final int itemId;
+        private final Long itemId;
 
-        SpecialItemId(final int itemId) {
+        SpecialItemId(final Long itemId) {
             this.itemId = itemId;
         }
     }
@@ -122,8 +121,8 @@ public class ItemUtil {
 
     public static String toDescription(final TransitiveItemDescriptionMap descriptionMap) {
         final String description
-                = toDescription(descriptionMap.getCharacteristics())
-                + toDescription(descriptionMap.getSelectableCharacteristics())
+                = toDescription(descriptionMap.getParameters())
+                + toDescription(descriptionMap.getSelectableParameters())
                 + toDescription(descriptionMap.getItems());
         return SpecificStringUtil.replaceBlankWithDash(description);
     }
@@ -149,22 +148,26 @@ public class ItemUtil {
             final String parameter = StringUtils.trim(entry.getKey());
             final String value = StringUtils.trim(entry.getValue());
             if (isInfoItem(parameter, service)) {
-                itemDescriptionMap.getSelectableCharacteristics().put(parameter, value);
-            } else if (isLinkToItem(parameter, service)) {
+                itemDescriptionMap.getSelectableParameters().put(parameter, value);
+            } else if (isPart(parameter, service)) {
                 itemDescriptionMap.getItems().put(parameter, value);
             } else {
-                itemDescriptionMap.getCharacteristics().put(parameter, value);
+                itemDescriptionMap.getParameters().put(parameter, value);
             }
         }
         return itemDescriptionMap;
     }
 
-    public static boolean isLinkToItem(final String parameter, final TransitiveItemService service) {
-        return !isInfoItem(parameter, service) && service.find(parameter).size() > 0;
+    public static boolean isPart(final String parameter, final TransitiveItemService service) {
+        if (isInfoItem(parameter, service)) {
+            return false;
+        }
+        return service.find(parameter).size() > 0;
     }
 
     public static boolean isInfoItem(final String parameter, final TransitiveItemService service) {
-        return service.find(parameter + " (i)").size() > 0;
+        final Set<String> infoCategories = service.findInfoCategories();
+        return infoCategories.contains(parameter);
     }
 
     public static ReplacerData parseReplacerData(final String replacerDataSourceString) {
@@ -250,27 +253,6 @@ public class ItemUtil {
         description.remove("Name");
     }
 
-    public static void updateImg(final ItemView itemView, final Item item) {
-        if (itemView.getMessages().contains("img removed")) {
-            item.setImage(null);
-            return;
-        } else if (!itemView.getMessages().contains("img uploaded")) {
-            return;
-        }
-
-        String base64Data = null;
-        try {
-            base64Data = itemView.getImgData();
-            ImgUtil.createImgFileInFileSystem(base64Data, item);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (ImgUtil.isPngFile(base64Data)) {
-            final String imgName = ImgUtil.getImgName(item.getCategory(), item.getName());
-            item.setImage(imgName);
-        }
-    }
-
     public static void updateDescription(final Item item,
                                          final Map<String, String> description,
                                          final ItemService itemService) {
@@ -350,23 +332,6 @@ public class ItemUtil {
             itemService.getReplacerRepository().deleteById(orphan.getId());
             UserActionUtil.processReplacerAction("delete", orphan, item, user, itemService);
         }
-    }
-
-    public static void updateWishList(final Item item,
-                                      final ItemView itemView,
-                                      final UserEntity currentUser,
-                                      final ItemService itemService) {
-        if (itemView.isAddToWishList()) {
-            addItemToWishList(item.getId(), currentUser, itemService);
-            itemView.setAddToWishList(false);
-        }
-    }
-
-    private static void addItemToWishList(final Long itemId,
-                                          final UserEntity currentUser,
-                                          final ItemService itemService) {
-        currentUser.getWishList().getItems().add(itemService.getOne(itemId));
-        itemService.getUserService().update(currentUser);
     }
 
     private static void applyToAllItemDescriptions(final String updatingItemCategory,

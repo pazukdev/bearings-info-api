@@ -17,6 +17,7 @@ public class AbstractDto implements Serializable {
     private String name = "-";
     private String localizedName = "-";
     private String status = "created";
+    private boolean deletable = true;
 
     public void setName(final String name) {
         this.name = name;

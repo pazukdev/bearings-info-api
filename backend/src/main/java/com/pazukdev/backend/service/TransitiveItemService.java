@@ -4,13 +4,13 @@ import com.pazukdev.backend.converter.TransitiveItemConverter;
 import com.pazukdev.backend.dto.TransitiveItemDto;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.repository.TransitiveItemRepository;
+import com.pazukdev.backend.util.CategoryUtil;
 import com.pazukdev.backend.util.ItemUtil;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -38,6 +38,20 @@ public class TransitiveItemService extends AbstractService<TransitiveItem, Trans
         return null;
     }
 
+    private boolean isSealSize(final String value) {
+        final List<String> dimensions = new ArrayList<>(Arrays.asList(value.split("x")));
+        if (value.length() < 2) {
+            return false;
+        }
+        try {
+            Integer.valueOf(dimensions.get(0));
+            Integer.valueOf(dimensions.get(1));
+        } catch (final Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     private List<TransitiveItem> filter(final List<TransitiveItem> items,
                                         final String parameter,
                                         final String searchingValue) {
@@ -59,6 +73,14 @@ public class TransitiveItemService extends AbstractService<TransitiveItem, Trans
 
     @Transactional
     public TransitiveItem find(final String category, final String name) {
+        if (category == null || name == null) {
+            return null;
+        }
+
+        if (category.equalsIgnoreCase("seal") && isSealSize(name)) {
+            return getUssrSealBySize(name);
+        }
+
         for (final TransitiveItem item : find(category)) {
             if (item.getName().equals(name)) {
                 return item;
@@ -76,6 +98,22 @@ public class TransitiveItemService extends AbstractService<TransitiveItem, Trans
             }
         }
         return categorizedItems;
+    }
+
+    public Set<String> findAllCategories() {
+        return findCategories(transitiveItemRepository.findAll());
+    }
+
+    public Set<String> findInfoCategories() {
+        return CategoryUtil.filterInfoCategories(findAllCategories());
+    }
+
+    public Set<String> findCategories(final List<TransitiveItem> items) {
+        final Set<String> categories = new HashSet<>();
+        for (final TransitiveItem item : items) {
+            categories.add(item.getCategory());
+        }
+        return categories;
     }
 
 }

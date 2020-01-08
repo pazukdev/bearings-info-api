@@ -1,8 +1,8 @@
 package com.pazukdev.backend.util;
 
-import com.pazukdev.backend.dto.ItemView;
 import com.pazukdev.backend.dto.NestedItemDto;
 import com.pazukdev.backend.dto.table.ReplacersTable;
+import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.Replacer;
 import com.pazukdev.backend.entity.TransitiveItem;
@@ -17,7 +17,7 @@ public class ReplacerUtil {
 
     public static List<Replacer> createReplacers(final TransitiveItem transitiveItem,
                                                  final ItemService itemService,
-                                                 TransitiveItemService transitiveItemService) {
+                                                 final TransitiveItemService transitiveItemService) {
         final List<Replacer> replacers = new ArrayList<>();
         final String replacersSourceString = transitiveItem.getReplacer();
         if (replacersSourceString == null || replacersSourceString.equals("-")) {
@@ -53,6 +53,7 @@ public class ReplacerUtil {
                                                             final ItemService itemService) {
         final ReplacersTable replacersTable = itemView.getReplacersTable();
         final List<NestedItemDto> dtos = prepareNestedItemDtosToConverting(replacersTable.getReplacers());
+        final String parentName = ChildItemUtil.getParentName(itemView, itemService);
 
         final Set<Replacer> replacersFromItemView = new HashSet<>();
         for (final NestedItemDto dto : dtos) {
@@ -60,7 +61,7 @@ public class ReplacerUtil {
 
             final Replacer replacer = new Replacer();
             replacer.setId(dto.getId());
-            replacer.setName(dto.getName());
+            replacer.setName(ChildItemUtil.getName(parentName, replacerItem.getName()));
             replacer.setItem(replacerItem);
             replacer.setComment(dto.getComment());
             replacer.setStatus(dto.getStatus());

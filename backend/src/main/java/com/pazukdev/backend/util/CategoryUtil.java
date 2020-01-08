@@ -28,7 +28,7 @@ public class CategoryUtil {
         return !(category.equals("Motorcycle")
                 || category.equals("Manufacturer")
                 || category.equals("Material")
-                || category.equals("GOST"));
+                || category.equals("Standard"));
     }
 
     public static Set<String> filterPartCategories(final Set<String> categories) {
@@ -39,6 +39,20 @@ public class CategoryUtil {
             }
         }
         return partCategories;
+    }
+
+    public static Set<String> filterInfoCategories(final Set<String> categories) {
+        final Set<String> infoCategories = new HashSet<>();
+        for (final String category : categories) {
+            if (isInfoCategory(category)) {
+                infoCategories.add(category);
+            }
+        }
+        return infoCategories;
+    }
+
+    public static boolean isInfoCategory(final String category) {
+        return category.contains("(i)");
     }
 
 }

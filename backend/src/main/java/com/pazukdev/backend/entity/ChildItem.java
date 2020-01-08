@@ -22,7 +22,7 @@ public class ChildItem extends AbstractEntity {
 //    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id")
     private Item item;
-    private String location;
-    private String quantity;
+    private String location = "-";
+    private String quantity = "1";
 
 }

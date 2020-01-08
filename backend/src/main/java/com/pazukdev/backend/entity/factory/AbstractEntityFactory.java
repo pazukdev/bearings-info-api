@@ -23,7 +23,7 @@ public abstract class AbstractEntityFactory<Entity extends AbstractEntity> {
 
     public abstract Entity createEntity();
 
-    protected abstract String getCSVFilePath();
+    protected abstract String[] getCSVFilesPaths();
 
     public Entity findByName(final String name) {
         return createEntitiesFromCSVFile()
@@ -39,7 +39,7 @@ public abstract class AbstractEntityFactory<Entity extends AbstractEntity> {
 
     private TableModel getTableModelFromCSVFile() {
         final TableModelFactory factory = TableModelFactory.create();
-        return factory.createTableModel(getCSVFilePath());
+        return factory.createTableModel(getCSVFilesPaths());
     }
 
     private List<Entity> createEntitiesFromTableModel(final TableModel tableModel) {

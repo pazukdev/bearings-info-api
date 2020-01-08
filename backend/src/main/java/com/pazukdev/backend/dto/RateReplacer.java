@@ -3,6 +3,7 @@ package com.pazukdev.backend.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -14,5 +15,7 @@ public class RateReplacer implements Serializable {
 
     private String action;
     private Long itemId;
+    private LikeListDto likeList;
+    private List<NestedItemDto> replacers;
 
 }

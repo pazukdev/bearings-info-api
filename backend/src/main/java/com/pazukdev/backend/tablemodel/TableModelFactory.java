@@ -25,12 +25,14 @@ public class TableModelFactory {
         return new TableModelFactory();
     }
 
-    public TableModel createTableModel(final String filePath) {
-        List<TableRow> tableRows = null;
-        try (final InputStream inputStream = getClass().getResourceAsStream(filePath)) {
-            tableRows = getTableRows(CSVFileUtil.readInputStreamFromCSVFile(inputStream));
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+    public TableModel createTableModel(final String... filePaths) {
+        final List<TableRow> tableRows = new ArrayList<>();
+        for (final String filePath : filePaths) {
+            try (final InputStream inputStream = getClass().getResourceAsStream(filePath)) {
+                tableRows.addAll(getTableRows(CSVFileUtil.readInputStreamFromCSVFile(inputStream)));
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
         return new TableModelImpl(tableRows);
     }

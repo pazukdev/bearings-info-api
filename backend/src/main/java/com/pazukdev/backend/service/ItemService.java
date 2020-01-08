@@ -2,14 +2,12 @@ package com.pazukdev.backend.service;
 
 import com.pazukdev.backend.converter.ItemConverter;
 import com.pazukdev.backend.converter.ReplacerConverter;
-import com.pazukdev.backend.dto.ItemView;
+import com.pazukdev.backend.dto.RateReplacer;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.TransitiveItemDto;
 import com.pazukdev.backend.dto.factory.ItemViewFactory;
-import com.pazukdev.backend.entity.ChildItem;
-import com.pazukdev.backend.entity.Item;
-import com.pazukdev.backend.entity.Replacer;
-import com.pazukdev.backend.entity.TransitiveItem;
+import com.pazukdev.backend.dto.view.ItemView;
+import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.repository.ChildItemRepository;
 import com.pazukdev.backend.repository.ItemRepository;
 import com.pazukdev.backend.repository.ReplacerRepository;
@@ -21,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.pazukdev.backend.util.ChildItemUtil.createParts;
 import static com.pazukdev.backend.util.ItemUtil.createDescriptionMap;
+import static com.pazukdev.backend.util.ReplacerUtil.createReplacers;
 import static com.pazukdev.backend.util.SpecificStringUtil.replaceBlankWithDash;
 
 /**
@@ -91,13 +91,30 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     public Item saveAsItem(final TransitiveItem transitiveItem) {
         final Item item = getOrCreate(transitiveItem);
         item.setName(replaceBlankWithDash(item.getName()));
+        if (item.getImage() == null) {
+            item.setImage("-");
+        }
         return repository.save(item);
     }
 
     @Transactional
+    public ItemView createHomeView(final String userName, final String language) {
+        return createNewItemViewFactory().createHomeView(userName, language);
+    }
+
+    @Transactional
+    public ItemView createItemsManagementView(final String userName, final String language) {
+        return createNewItemViewFactory().createItemsManagementView(userName, language);
+    }
+
+    @Transactional
+    public ItemView createWishlistView(final String userName, final String language) {
+        return createNewItemViewFactory().createWishlistView(userName, language);
+    }
+
+    @Transactional
     public ItemView createItemView(final Long itemId, final String userName, final String language) {
-        final ItemViewFactory itemViewFactory = new ItemViewFactory(this);
-        return itemViewFactory.createItemView(itemId, userName, language);
+        return createNewItemViewFactory().createItemView(itemId, userName, language);
     }
 
     @Transactional
@@ -123,30 +140,39 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         return itemViewFactory.updateItemView(itemId, userName, language, itemView);
     }
 
+    @Transactional
+    public RateReplacer rateReplacer(final String userName, final RateReplacer rate) {
+        final UserEntity user = userService.findByName(userName);
+        return RateUtil.rateReplacer(rate, user, this);
+    }
+
     public Item getOrCreate(final TransitiveItem transitiveItem) {
         final Item item = find(transitiveItem.getCategory(), transitiveItem.getName());
         return item != null ? item : create(transitiveItem);
     }
 
     public Item create(final TransitiveItem transitiveItem) {
-        final TransitiveItemDescriptionMap descriptionMap
-                = createDescriptionMap(transitiveItem, transitiveItemService);
+        final TransitiveItemDescriptionMap descriptionMap = createDescriptionMap(transitiveItem, transitiveItemService);
         final Map<String, String> items = descriptionMap.getItems();
-        final List<ChildItem> childItems
-                = ChildItemUtil.createParts(transitiveItem, items, this, transitiveItemService);
-        final List<Replacer> replacers
-                = ReplacerUtil.createReplacers(transitiveItem, this, transitiveItemService);
+        final List<ChildItem> childItems = createParts(transitiveItem, items, this, transitiveItemService);
+        final List<Replacer> replacers = createReplacers(transitiveItem, this, transitiveItemService);
+
+        final String name = transitiveItem.getName();
+        final Long soyuzRetromechanicId = 5L;
+        final Long adminId = userService.getAdmin().getId();
+        final Long creatorId = name.toLowerCase().contains("soyuz retromechanic") ? soyuzRetromechanicId : adminId;
 
         final Item item = new Item();
         item.setName(transitiveItem.getName());
         item.setCategory(transitiveItem.getCategory().replace(" (i)", ""));
         item.setStatus("active");
-        item.setDescription(createItemDescription(transitiveItem));
+        item.setDescription(createItemDescription(descriptionMap));
         item.getChildItems().addAll(childItems);
         item.getReplacers().addAll(replacers);
-        item.setCreatorId(userService.getAdmin().getId());
+        item.setCreatorId(creatorId);
         item.setUserActionDate(DateUtil.now());
         item.setImage(transitiveItem.getImage());
+        LinkUtil.addLinksToItem(item, transitiveItem);
         return item;
     }
 
@@ -162,14 +188,21 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         return findCategories(findAll());
     }
 
+    final Set<String> findInfoCategories() {
+        return transitiveItemService.findInfoCategories();
+    }
+
     public Set<String> findAllPartCategories() {
         return CategoryUtil.filterPartCategories(findAllCategories());
     }
 
-    private String createItemDescription(final TransitiveItem transitiveItem) {
-        final TransitiveItemDescriptionMap descriptionMap = createDescriptionMap(transitiveItem, transitiveItemService);
+    private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {
         descriptionMap.getItems().clear();
         return ItemUtil.toDescription(descriptionMap);
+    }
+
+    private ItemViewFactory createNewItemViewFactory() {
+        return new ItemViewFactory(this);
     }
 
 }

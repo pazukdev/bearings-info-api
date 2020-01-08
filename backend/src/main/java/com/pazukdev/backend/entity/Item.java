@@ -16,6 +16,7 @@ import java.util.Set;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "item")
+@SecondaryTable(name = "item_description")
 public class Item extends AbstractEntity {
 
     private String category;
@@ -24,6 +25,7 @@ public class Item extends AbstractEntity {
     private Long creatorId;
     @Column(name = "user_action_date")
     private String userActionDate;
+    @Column(name = "description", table = "item_description")
     private String description;
     private String image;
     @ToString.Exclude
@@ -37,7 +39,6 @@ public class Item extends AbstractEntity {
     private Set<ChildItem> childItems = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    //@Getter(AccessLevel.NONE)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "item_replacer",
@@ -45,5 +46,14 @@ public class Item extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "replacer_item_id")
     )
     private Set<Replacer> replacers = new HashSet<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinTable(
+            name = "item_link",
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "link_id")
+    )
+    private Set<Link> links = new HashSet<>();
 
 }

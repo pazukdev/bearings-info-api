@@ -1,17 +1,16 @@
 package com.pazukdev.backend.entity.factory;
 
+import com.pazukdev.backend.config.ContextData;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.service.TransitiveItemService;
 import com.pazukdev.backend.tablemodel.TableRow;
-import com.pazukdev.backend.util.CSVFileUtil;
+import com.pazukdev.backend.util.FileUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,12 +23,10 @@ import java.util.Map;
 public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem> {
 
     private final TransitiveItemService service;
-    private final List<String> descriptionIgnore = new ArrayList<>(
-            Arrays.asList("name", "category", "replacer", "image"));
 
     @Override
-    protected String getCSVFilePath() {
-        return CSVFileUtil.filePath("item");
+    protected String[] getCSVFilesPaths() {
+        return FileUtil.getCSVFilesPaths();
     }
 
     @Override
@@ -45,6 +42,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         applyImage(item, tableRow);
         applyDescription(item, tableRow);
         applyReplacers(item, tableRow);
+        applyLinks(item, tableRow);
     }
 
     private void applyCategory(final TransitiveItem item, final TableRow tableRow) {
@@ -60,10 +58,20 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         String description = "";
         for (final Map.Entry<String, String> entry : tableRow.getData().entrySet()) {
             final String key = entry.getKey();
-            if (descriptionIgnore.contains(key.toLowerCase())) {
+            if (ContextData.isDescriptionIgnored(key)) {
                 continue;
             }
-            description = description + entry.getKey() + ":" + entry.getValue() + ";;";
+
+            final String value = entry.getValue();
+
+            if (value.contains("; ")) {
+                int count = 1;
+                for (final String subValue : Arrays.asList(value.split("; "))) {
+                    description = description + key + " " + count++ + ":" + subValue + ";;";
+                }
+            } else {
+                description = description + key + ":" + value + ";;";
+            }
         }
         item.setDescription(description);
     }
@@ -71,6 +79,12 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
     private void applyReplacers(final TransitiveItem item, final TableRow tableRow) {
         final String replacer = tableRow.getData().get("Replacer");
         item.setReplacer(replacer != null ? replacer : "-");
+    }
+
+    private void applyLinks(final TransitiveItem item, final TableRow tableRow) {
+        item.setWiki(tableRow.getData().get("Wiki"));
+        item.setWebsite(tableRow.getData().get("Website"));
+        item.setWebsiteLang(tableRow.getData().get("Website lang"));
     }
 
 }

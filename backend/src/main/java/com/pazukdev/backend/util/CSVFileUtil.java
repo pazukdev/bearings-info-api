@@ -20,12 +20,9 @@ public class CSVFileUtil {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CSVFileUtil.class);
 
-    public static final String PACKAGE = "/static/";
-    public static final String FILE_FORMAT = "csv";
 
-    public static String filePath(final String fileName) {
-        return dataFilePathInResources(fileName);
-    }
+
+
 
     public static List<List<String>> readInputStreamFromCSVFile(final InputStream in) {
         List<String[]> lines = null;
@@ -50,9 +47,7 @@ public class CSVFileUtil {
         return AppCollectionUtil.toLowerCase(list);
     }
 
-    private static String dataFilePathInResources(final String fileName) {
-        return PACKAGE + fileName + "." + FILE_FORMAT;
-    }
+
 
     private static List<List<String>> listOfArraysToListOfLists(final List<String[]> arrays) {
         final List<List<String>> lists = new ArrayList<>();
