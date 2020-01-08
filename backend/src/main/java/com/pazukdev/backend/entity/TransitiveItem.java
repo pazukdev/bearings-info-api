@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -23,6 +24,7 @@ public class TransitiveItem extends AbstractEntity {
     private String replacer = "-";
     private String wiki;
     private String website;
+    @Column(name = "website_lang")
     private String websiteLang;
 
 }

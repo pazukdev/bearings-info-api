@@ -18,7 +18,7 @@
             <column name="replacer" type="varchar(1000)"/>
             <column name="wiki" type="varchar(1000)"/>
             <column name="website" type="varchar(1000)"/>
-            <column name="websiteLang" type="varchar(2)"/>
+            <column name="website_lang" type="varchar(2)"/>
         </createTable>
     </changeSet>
 
