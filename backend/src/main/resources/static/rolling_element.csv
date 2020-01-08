@@ -1,0 +1,16 @@
+Category:,Rolling element,,,,,,
+Name,Type,"Size, mm",Standard,Manufacturer,Material,Replacer,Image
+6601209,Cylindrical roller,5x12,-,USSR,SHH-15,610A0512,-
+7201209,Cylindrical roller,7x10,-,USSR,SHH-15,ZRB7X10,-
+610A0512,Cylindrical roller,5x12,-,Kawasaki,-,-,rolling_element_610A0512.png
+Ball,Ball,-,-,-,-,-,-
+Needle,Needle,-,-,-,-,-,-
+Needle 2.5x10,Needle,2.5x10,GOST 6870-54,USSR,-,NRB 2.5x9.8-G2,rolling_element_needle_2.5x10.png
+Needle 3x15.8,Needle,3x15.8,-,USSR,-,NRB 3x15.8-G2,rolling_element_needle_3x15.8.png
+NRB 2.5x9.8-G2,Needle,2.5x9.8,-,INA,-,-,-
+NRB 3x15.8-G2,Needle,3x15.8,-,INA,-,-,rolling_element_nrb_3x15.8-g2.png
+Roller,Roller,-,-,-,-,-,-
+Roller 6.5x6.5,Cylindrical roller,6.5x6.5,-,USSR,SHH-15,ZRB 6.5x6.5,rolling_element_roller_6.5x6.5.png
+Tapered roller,Tapered roller,-,-,-,-,-,-
+ZRB 6.5x6.5,Cylindrical roller,6.5x6.5,-,INA,-,-,-
+ZRB7X10,Cylindrical roller,7x10,DIN 1/1/5402,INA,-,-,-

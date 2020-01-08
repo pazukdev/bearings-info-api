@@ -1,0 +1,10 @@
+Category:,Lock ring,,,,
+Name,"Dimensions, mm",Standard,Material,Replacer,Image
+7205317,19x1,GOST 13943-86,40X13,DIN 472,-
+DIN 472,19x1,-,Spring steel,-,-
+75005305,20x2,OST 1.10241-71,B-2A,"DIN 7993 A; DIN 983 (TODO: cardan shaft groove diameter 15.2 mm, fork inner diameter 23.4mm); GOST-13940-86 (TODO: cardan shaft groove diameter 16.8 mm)",lock_ring_75005305.png
+6305310,20x2,OST 1.10241-71,B-2A,"DIN 7993 A; DIN 983 (TODO: cardan shaft groove diameter 15.2 mm, fork inner diameter 23.4mm); GOST-13940-86 (TODO: cardan shaft groove diameter 16.8 mm)",lock_ring_75005305.png
+IMZ-8.101-05310,20x2,OST 1.10241-71,B-2A,"DIN 7993 A; DIN 983 (TODO: cardan shaft groove diameter 15.2 mm, fork inner diameter 23.4mm); GOST-13940-86 (TODO: cardan shaft groove diameter 16.8 mm)",lock_ring_75005305.png
+DIN 7993 A,20x2,DIN 7993 A,Spring steel; Stainless steel A2,-,lock_ring_din_7993_a.png
+DIN 983,16x2,DIN 983,Spring steel; Stainless steel A2,-,lock_ring_din_983.png
+GOST-13940-86,18x1.2,GOST-13940-86,Spring steel; Stainless steel A2,-,gost_13940-86.png

@@ -16,6 +16,9 @@
             <column name="status" type="varchar(255)"/>
             <column name="description" type="varchar(1000)"/>
             <column name="replacer" type="varchar(1000)"/>
+            <column name="wiki" type="varchar(1000)"/>
+            <column name="website" type="varchar(1000)"/>
+            <column name="websiteLang" type="varchar(2)"/>
         </createTable>
     </changeSet>
 
@@ -31,7 +34,6 @@
             <column name="status" type="varchar(255)"/>
             <column name="creator_id" type="BIGSERIAL"/>
             <column name="user_action_date" type="varchar(255)"/>
-            <column name="description" type="varchar(1000)"/>
         </createTable>
     </changeSet>
 
@@ -74,6 +76,27 @@
             <column name="status" type="varchar(255)"/>
             <column name="item_id" type="BIGSERIAL"/>
             <column name="comment" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_link_table" author="sviarkaltsau">
+        <createTable tableName="link">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="status" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>
+            <column name="lang" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_item_description_table" author="sviarkaltsau">
+        <createTable tableName="item_description">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="description" type="varchar(1000)"/>
         </createTable>
     </changeSet>
 
@@ -132,6 +155,8 @@
             <column name="role" type="varchar(255)"/>
             <column name="wishlist_id" type="BIGSERIAL"/>
             <column name="likelist_id" type="BIGSERIAL"/>
+            <column name="img" type="varchar(255)"/>
+            <column name="country" type="varchar(2)"/>
         </createTable>
     </changeSet>
 
@@ -164,6 +189,17 @@
             </column>
             <column name="item_id" type="BIGSERIAL">
                 <constraints foreignKeyName="fk_dislikelist_item_item_id" references="item (id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_item_link_table" author="sviarkaltsau">
+        <createTable tableName="item_link">
+            <column name="item_id" type="BIGSERIAL">
+                <constraints foreignKeyName="fk_item_link_item_id" references="item (id)"/>
+            </column>
+            <column name="link_id" type="BIGSERIAL">
+                <constraints foreignKeyName="fk_item_link_link_id" references="link (id)"/>
             </column>
         </createTable>
     </changeSet>

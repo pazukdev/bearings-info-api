@@ -1,0 +1,25 @@
+Category:,Motorcycle,,,,,,,,,,,
+Name,Manufacturer,Production,"Max speed, km/h","Weight, kg","Fuel capacity, l",Engine,Gearbox,Generator,Final drive,Sidecar reduction drive,Frame and wheels,Image
+M-72,IMZ,1941-1957,95,350,22,Engine M-72 type,7204,G-11A,M-72 type,-,Frame M-72 type,motorcycle_m-72.png
+M-72M,IMZ / KMZ,1955-1960,95,350,22,Engine M-72 type,7204,G-11A,M-72 type,-,Frame M-72M type,motorcycle_m-72m.png
+M-72N,KMZ,1957-1958,95,350,22,Engine M-72 type,7204,G-11A,M-72 type,-,Frame M-72N type,motorcycle_m-72n.png
+K-750,KMZ,1958-1964,95,342,20,Engine K-750 type,7204,G-11A,K-750 type,-,Frame K-750 type,motorcycle_k-750.png
+K-750V,KMZ,1958-1964,95,342,20,Engine K-750 type,7204,G-11A,K-750 type,-,Frame K-750 type,motorcycle_k-750v.png
+K-750M,KMZ,1963-1970,95,350,20,Engine K-750M type,6204,G-414,K-750M type,-,Frame K-750M type,motorcycle_k-750m.png
+K-650 Dnepr,KMZ,1968-1971,105,350,20,MT-8,6204,G-414,K-750M type,-,Frame K-750M type,motorcycle_k-650.png
+Dnepr MT-9,KMZ,1971-1976,105,350,20,Engine MT-9 type,MT804,G-414,K-750M type,-,Frame K-750M type,motorcycle_mt-9.png
+Dnepr-11,KMZ,1985-2008,100,325,19,Engine MT-10-32,KMZ-8.155 type,G-424,K-750M type,-,-,-
+Dnepr-16,KMZ,1986-2008,95,355,19,Engine MT-10-32,KMZ-8.155 type,G-424,2WD MB-750M type,USSR KMZ type,-,-
+M-61 Irbit ,IMZ,1959-1963,95,360,22,Engine M-61 type,7204,G-11A,-,-,Frame M-72M type,-
+M-62 Ural,IMZ,1961-1965,95,340,22,Engine M-62 type,6204,G-414,-,-,-,-
+M-63 Ural-2,IMZ,1963-1980,95,320,19,Engine M-62 type,6204,G-414,-,-,-,-
+M-66 Ural-3 ,IMZ,1973-1976,105,315,19,Engine M-67 type,6204,G-414,-,-,-,-
+Ural M-67,IMZ,1973-1976,105,330,19,Engine M-67 type,8.101-04001,G-424,-,-,Frame M-67 type,motorcycle_m-67.png
+Ural M-67-36,IMZ,1976-1974,105,330,19,Engine M-67-36 type,8.101-04001,G-424,-,-,Frame M-67 type,motorcycle_m-67-36.png
+R-75,BMW,1941-1946,95,420,-,-,-,-,-,-,-,-
+KS750,Zundapp,1939-1948,95,420,23,-,-,-,-,-,-,motorcycle_ks750.png
+Jupiter-4,IZHMASH,1980-1985,120,-,18,-,-,-,-,-,-,-
+RT125,DKW,1939-1965,90,-,-,-,-,-,-,-,-,-
+M1A,MMVZ,1951-?,-,-,9,-,-,-,-,-,-,-
+M1M Monkey,MMVZ,1956-1961,75,-,9,-,-,-,-,-,-,-
+M103,MMVZ,1962-1964,75,-,9,-,-,-,-,-,-,-

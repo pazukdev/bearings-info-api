@@ -1,0 +1,40 @@
+Category:,Bearing,,,,,,,,,,,,,
+Name,Type,Rolling element,Enclosure,Rolling row,Cage,"Size, mm",Static load rating,Dynamic load rating,Standard,Manufacturer,Material,Note,Replacer,Image
+18,Deepgroove,Ball (7),Open,Single row,Sheet metal cage,8x22x7,-,-,-,USSR,-,-,608; 608-2RS; 608-ZZ,bearing_18.png
+110,Deepgroove,Ball (no data),Open,Single row,-,50x80x16,-,-,-,USSR,-,-,6010,bearing_110.png
+200,Deepgroove,Ball (6),Open,Single row,Sheet metal cage,10x30x9,-,-,-,USSR,-,-,6200; 6200 - 2RS; 6200-ZZ,bearing_200.png
+201,Deepgroove,Ball (7),Open,Single row,Sheet metal cage,12x32x10,-,-,-,USSR,-,-,6201; 6201-2RS; 6201-ZZ,bearing_201.png
+203,Deepgroove,Ball (no data),Sealed,Single row,-,17x40x12,-,-,-,USSR,-,-,6203-2RS; 6203-ZZ,-
+204,Deepgroove,Ball (8),Open,Single row,Sheet metal cage,20x47x14,-,-,-,USSR,-,-,6204,bearing_204.png
+205,Deepgroove,Ball (9),Open,Single row,Sheet metal cage,25x52x15,-,-,-,USSR,-,-,6205,bearing_205.png
+206,Deepgroove,Ball (no data),Open,Single row,Cage,30x62x16,-,-,-,USSR,-,-,6206,bearing_206.png
+207,Deepgroove,Ball (9),Open,Single row,Sheet metal cage,35x72x17,-,-,-,USSR,-,-,6207; 6207M; 32207 (For rear journal only),bearing_207.png
+209,Deepgroove,Ball (9),Open,Single row,Sheet metal cage,45x85x19,-,-,-,USSR,-,-,6209,bearing_209.png
+303,Deepgroove,Ball (no data),Open,Single row,Sheet metal cage,17x47x14,-,-,-,USSR,-,-,6303,bearing_303.png
+304,Deepgroove,Ball (no data),Open,Single row,Sheet metal cage,20x52x15,-,-,-,USSR,-,-,6304,bearing_304.png
+7204,Tapered roller,Tapered roller (12),Open,Single row,Sheet metal cage,20x47x15.3,-,-,-,USSR,-,-,30204,bearing_7204.png
+12204,Cylindrical roller,Roller (11),Open,Single row,Solid brass cage,20x47x14,-,-,-,USSR,-,-,NF204; NJ204,bearing_12204.png
+32207,Roller,Roller (no data),Open,Single row,-,35x72x17,-,-,-,-,-,-,NU207,bearing_32207.png
+180503,Deepgroove,Ball (no data),Sealed,Single row,-,17x40x16,-,-,-,USSR,-,-,62203-ZZ; 62203-2RS; 6203-2RS (+ 4mm spacer); 6203-ZZ (+ 4mm spacer),bearing_180503.png
+822907,Cylindrical roller,7201209 (12),Open,Single row,7201208 (1),36x50x15,-,-,-,USSR,-,-,-,bearing_822907.png
+874901,Needle,Needle (no data),Open,Single row,-,13x32x20,-,-,-,USSR,-,-,-,bearing_874901.png
+948066,Thrust,Ball (no data),Open,Single row,-,6x22.7x5.5,-,-,-,USSR,-,-,AXK0619NF (+ 2 washers: AS 0619 h1 and AS 0619 h2.75),bearing_948066.png
+7000105,Deepgroove,Ball (no data),Open,Single row,-,25x47x8,-,-,-,USSR,-,-,16005,bearing_7000105.png
+7201107,Plain,-,-,-,-,20x26x19.5,-,-,-,USSR,BrAZHMC 10-3-1.5,-,-,bearing_7201107.png
+7201404,Plain,-,-,-,-,-,-,-,-,USSR,BrAZHMC 10-3-1.5; AL-5,-,-,bearing_7201404.png
+7787007,Thrust,Ball (no data),-,Single row,-,34x51x12.1,-,-,-,USSR,-,-,SSW055,bearing_778707.png
+3086304 L,Deepgroove,Ball (no data),Open,2 row,Solid brass cage,20x52x22.22,-,-,-,USSR,-,-,5304; 3304; 3304B TVH; BMW 07119982468,bearing_3086304_l.png
+3304B TVH,Deepgroove,Ball (no data),Open,2 row,"Solid polyamide Snap cage, ball guided",20x52x22.22,-,-,-,FAG,-,-,-,bearing_3304b_tvh.png
+407-1004058-A,Half-bearing,-,-,-,-,47.975-48.000 (diameter of con rod big end journal),-,-,-,USSR,-,Common use: Car Moskvitch-408,-,bearing_407-1004058_a.png
+42209l,Cylindrical roller,Roller (16),Open,Single row,Solid brass cage,45x85x19,-,-,-,USSR,-,-,NJ209,bearing_42209l.png
+6207M,Deepgroove,Ball (9),Open,Single row,Solid brass cage,35x72x17,-,-,-,SLF,-,-,-,bearing_6207m.png
+7201234-A,Plain,-,-,-,-,21x23.5x25,-,-,-,USSR,BrOF10,-,-,bearing_7201234-a.png
+864708 DM,Cylindrical roller,6601209 (18),Open,Single row,6601208 (1),40x50x17,-,-,-,USSR,-,-,K40x50x17,bearing_864708_dm.png
+904700US17,Needle,Needle (no data),-,-,-,10x19x9,-,-,-,USSR,-,-,-,bearing_904700US17.png
+AXK0619NF,Thrust,Roller (no data),Open,Single row,-,-,-,-,-,-,-,-,-,-
+Half-bearing 7205238/39,Half-bearing,-,-,-,-,-,-,-,-,USSR,Bronze,-,Needle 3x15.8 45 pcs kit,-
+K40x50x17,Cylindrical roller,Roller (18),Open,Single row,Cage,40x50x17,Cor 30200,Cr 39200,DIN 5405-1,INA,-,-,-,bearing_k40x50x17.png
+Needle 2.5x10 120 pcs kit,"Kit, Needle",Needle 2.5x10 (120),-,-,-,-,-,-,-,-,-,-,-,-
+Needle 3x15.8 45 pcs kit,"Kit, Needle",Needle 3x15.8 (45),-,-,-,-,-,-,-,-,-,-,-,-
+Needle 3x15.8 90 pcs kit,"Kit, Needle",Needle 3x15.8 (90),-,-,-,-,-,-,-,-,-,-,-,-
+SSW055,Tapered roller,Tapered roller (no data),-,Single row,Sheet metal cage,34x51x12.1,-,-,-,-,-,-,-,-
