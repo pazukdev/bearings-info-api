@@ -93,7 +93,7 @@
 
     <changeSet id="create_item_description_table" author="sviarkaltsau">
         <createTable tableName="item_description">
-            <column autoIncrement="true" name="id" type="bigint">
+            <column autoIncrement="true" name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
             <column name="description" type="varchar(1000)"/>
