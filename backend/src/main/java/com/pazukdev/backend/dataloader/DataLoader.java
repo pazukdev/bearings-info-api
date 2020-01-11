@@ -53,10 +53,10 @@ public class DataLoader implements ApplicationRunner {
         createItems();
 
         final long stop = System.nanoTime();
-        LOG.error("Start time: " + startTime);
-        LOG.error("Stop time: " + LocalTime.now());
+        LOG.warn("Start time: " + startTime);
+        LOG.info("Stop time: " + LocalTime.now());
         final double time = (stop - start) * 0.000000001;
-        LOG.error("DB created in, seconds: " + time);
+        LOG.error("DB created in " + time + " seconds");
     }
 
     private boolean repositoryIsEmpty(final TransitiveItemRepository repository) {

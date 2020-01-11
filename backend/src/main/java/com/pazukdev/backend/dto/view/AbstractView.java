@@ -16,7 +16,8 @@ import java.util.List;
 @ToString(callSuper = true)
 public abstract class AbstractView extends AbstractDto {
 
-    protected String imgData = "-";
+    protected String img;
+    protected String defaultImg;
     protected List<String> messages = new ArrayList<>();
 
 }

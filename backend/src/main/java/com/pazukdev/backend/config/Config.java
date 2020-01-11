@@ -57,6 +57,10 @@ public class Config {
                 registry
                         .addResourceHandler("/webjars/**")
                         .addResourceLocations("classpath:/META-INF/resources/webjars/");
+
+                registry
+                        .addResourceHandler("/**")
+                        .addResourceLocations("file:backend/src/img/");
             }
         };
 

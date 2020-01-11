@@ -1,6 +1,5 @@
 package com.pazukdev.backend.util;
 
-import com.pazukdev.backend.constant.security.Role;
 import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.dto.view.AbstractView;
 import com.pazukdev.backend.dto.view.ItemView;
@@ -24,73 +23,32 @@ public class ImgUtil {
     private static final String PNG_EXTENSION = "png";
     private static final String IMG_DATA_METADATA = "data:image/png;base64,";
 
-    public static String getUserImgData(final UserEntity user) {
-        final Role userRole = user.getRole();
-        if (userRole == Role.USER || userRole == Role.GUEST) {
-            return "-";
-        }
-
-        BufferedImage img = null;
-        String imgName = user.getImg();
-        String imgPath = getUserIconDirectoryPath() + imgName;
-        try {
-            img = getImg(imgPath);
-        } catch (IOException e1) {
-            try {
-                imgName = "default.png";
-                imgPath = getUserIconDirectoryPath() + imgName;
-                img = getImg(imgPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return createBase64ImgData(img);
+    public static String getImg(final UserEntity user) {
+        return getImgPath(user.getImg(), "user", false);
     }
 
-    public static ImgViewData getImgViewData(final Item item) {
+    public static ImgViewData getImg(final Item item) {
+        final String itemImg = item.getImage();
         final String itemCategory = item.getCategory();
-        boolean defaultImg = false;
-        String imgName;
-        String imgPath;
-        BufferedImage img;
-        if (item.getImage() != null) {
-            imgName = item.getImage();
-            imgPath = getImgFullPath(imgName, itemCategory);
-            try {
-                img = getImg(imgPath);
-                defaultImg = img != null;
-            } catch (IOException e1) {
-                img = getImgIfItemHasNoSpecificImg(itemCategory);
-            }
-        } else {
-            img = getImgIfItemHasNoSpecificImg(itemCategory);
+        final String imgPath = getImgPath(itemImg, itemCategory, false);
+        final String defaultImgPath = getImgIfItemHasNoSpecificImg(itemCategory);
+
+        final ImgViewData imgViewData = new ImgViewData();
+        imgViewData.setImgData(imgPath);
+        imgViewData.setDefaultImgData(defaultImgPath);
+
+        try {
+            getImg(IMG_DIRECTORY_PATH + defaultImgPath);
+        } catch (IOException e) {
+            imgViewData.setDefaultImgData(getItemDefaultImgPath());
         }
-        return new ImgViewData(defaultImg, createBase64ImgData(img));
+
+        return imgViewData;
     }
 
-    private static BufferedImage getImgIfItemHasNoSpecificImg(final String itemCategory) {
+    private static String getImgIfItemHasNoSpecificImg(final String itemCategory) {
         String imgName = getCategoryDefaultImgName(itemCategory);
-        String imgPath = getImgFullPath(imgName, itemCategory);
-
-        BufferedImage img = null;
-        try {
-            img = getImg(imgPath);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            try {
-                img = getImg(imgPath);
-            } catch (IOException e2) {
-                e2.printStackTrace();
-                imgName = getItemDefaultImgName();
-                imgPath = IMG_DIRECTORY_PATH + "common/" + imgName;
-                try {
-                    img = getImg(imgPath);
-                } catch (IOException e3) {
-                    e3.printStackTrace();
-                }
-            }
-        }
-        return img;
+        return getImgPath(imgName, itemCategory, false);
     }
 
     public static BufferedImage getImg(String imgPath) throws IOException {
@@ -103,20 +61,21 @@ public class ImgUtil {
         byte[] decodedBytes = Base64.getDecoder().decode(base64Data.split(",")[1]);
         final ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
         BufferedImage img = ImageIO.read(bis);
-        String imgPath = null;
 
+        String itemCategory = "";
+        String imgName = "";
         if (entity instanceof Item) {
             final Item item = (Item) entity;
-            final String itemCategory = item.getCategory();
-            final String imgName = getItemImgName(itemCategory, item.getName());
+            itemCategory = item.getCategory();
+            imgName = getItemImgName(itemCategory, item.getName());
             createCategoryDirectoryIfNotExists(itemCategory);
-            imgPath = getImgFullPath(imgName, itemCategory);
         } else if (entity instanceof UserEntity) {
             final UserEntity user = (UserEntity) entity;
-            final String imgName = getUserImgName(user.getName());
-            imgPath = getUserIconDirectoryPath() + imgName;
+            itemCategory = "user";
+            imgName = getUserImgName(user.getName());
         }
 
+        final String imgPath = getImgPath(imgName, itemCategory, true);
         if (imgPath == null) {
             return;
         }
@@ -139,20 +98,21 @@ public class ImgUtil {
         }
     }
 
-    private static String getNewImg(final AbstractView abstractView, final AbstractEntity entity) {
-        if (abstractView.getMessages().contains("img removed")) {
-            return "-";
-        } else if (!abstractView.getMessages().contains("img uploaded")) {
-            return null;
-        }
+    private static boolean isBase64Data(final String data) {
+        return data != null && data.contains(";base64,");
+    }
 
-        final String base64Data = abstractView.getImgData();
-        if (!ImgUtil.isPngFile(base64Data)) {
+    private static String getNewImg(final AbstractView abstractView, final AbstractEntity entity) {
+        final String imgData = abstractView.getImg();
+        if (imgData == null) {
+            return "-";
+        }
+        if (!isBase64Data(abstractView.getImg()) || !ImgUtil.isPngFile(imgData)) {
             return null;
         }
 
         try {
-            ImgUtil.createImgFileInFileSystem(base64Data, entity);
+            ImgUtil.createImgFileInFileSystem(imgData, entity);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -179,13 +139,7 @@ public class ImgUtil {
     }
 
     public static String getAppImgData() {
-        final String imgPath = IMG_DIRECTORY_PATH + "common/ic_launcher.png";
-        try {
-            final BufferedImage img = getImg(imgPath);
-            return createBase64ImgData(img);
-        } catch (IOException e) {
-            return "-";
-        }
+        return "common/ic_launcher.png";
     }
 
     public static String getItemImgName(final String itemCategory, final String itemName) {
@@ -201,22 +155,23 @@ public class ImgUtil {
     }
 
     private static void createCategoryDirectoryIfNotExists(final String itemCategory) {
-        final File directory = new File(getCategoryDirectoryPath(itemCategory));
+        final File directory = new File(getDirectoryPath(itemCategory, true));
         if (!directory.exists()) {
             directory.mkdir();
         }
     }
 
-    private static String getImgFullPath(final String imgName, final String itemCategory) {
-        return getCategoryDirectoryPath(itemCategory) + "/" + imgName;
+    private static String getImgPath(final String itemImg, final String itemCategory, final boolean save) {
+        if (itemImg == null || itemCategory == null) {
+            return null;
+        }
+        return getDirectoryPath(itemCategory, save) + "/" + itemImg;
     }
 
-    private static String getCategoryDirectoryPath(final String itemCategory) {
-        return IMG_DIRECTORY_PATH + toPath(itemCategory);
-    }
-
-    private static String getUserIconDirectoryPath() {
-        return IMG_DIRECTORY_PATH + "user/";
+    private static String getDirectoryPath(final String itemCategory, final boolean save) {
+        final String firstPart = save ? IMG_DIRECTORY_PATH : "";
+        final String secondPart = itemCategory.equals("user") ? "user/" : toPath(itemCategory);
+        return firstPart + secondPart;
     }
 
     private static String getCategoryDefaultImgName(final String itemCategory) {
@@ -227,8 +182,8 @@ public class ImgUtil {
         return name.replaceAll(" ", "_").toLowerCase();
     }
 
-    private static String getItemDefaultImgName() {
-        return "default_image_small.png";
+    private static String getItemDefaultImgPath() {
+        return "common/default_image_small.png";
     }
 
     private static String getBase64DataFileExtension(final String base64Data) {

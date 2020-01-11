@@ -151,15 +151,16 @@ public class ItemViewFactory {
         final List<Item> sameCategoryItems = itemService.find(item.getCategory(), allItems);
         final String category = item.getCategory();
         final String name = item.getName();
-        final ImgViewData imgViewData = ImgUtil.getImgViewData(item);
+        final ImgViewData imgViewData = ImgUtil.getImg(item);
 
         itemView.setSearchEnabled(true);
+        itemView.setOrdinaryItem(true);
         itemView.setCategory(category);
         itemView.setLocalizedCategory(category);
         itemView.setName(name);
         itemView.setLocalizedName(name);
-        itemView.setDefaultImg(imgViewData.isDefaultImg());
-        itemView.setImgData(imgViewData.getImgData());
+        itemView.setDefaultImg(imgViewData.getDefaultImgData());
+        itemView.setImg(imgViewData.getImgData());
         itemView.setHeader(createHeader(item, itemService));
         itemView.setPartsTable(createPartsTable(item, itemService));
         itemView.setReplacersTable(createReplacersTable(item, itemService.getUserService()));
@@ -179,7 +180,7 @@ public class ItemViewFactory {
         final String countParameterName = "Model";
 
         itemView.setLocalizedName("Motorcycle catalogue");
-        itemView.setImgData(ImgUtil.getAppImgData());
+//        itemView.setImg(ImgUtil.getAppImgData());
 
         return createItemsView(
                 itemView,
@@ -270,7 +271,7 @@ public class ItemViewFactory {
         final ItemView newItemView = createItemView(itemId, currentUser.getName(), userLanguage);
 
         final double totalTranslationTime = view.getTranslationTime() * 1000000000 + translationFromUserLangDuration;
-        setTime(newItemView, (double) (System.nanoTime() - businessLogicStartTime), null);
+        setTime(newItemView, (double) (System.nanoTime() - businessLogicStartTime), totalTranslationTime);
         return newItemView;
     }
 
