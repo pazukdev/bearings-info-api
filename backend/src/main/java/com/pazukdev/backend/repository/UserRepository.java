@@ -10,8 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    UserEntity findByName(final String name);
+    UserEntity findFirstByName(final String name);
 
-    UserEntity findByEmail(final String email);
+    UserEntity findFirstByEmail(final String email);
+
+    UserEntity findFirstByNameAndStatus(final String name, final String status);
 
 }

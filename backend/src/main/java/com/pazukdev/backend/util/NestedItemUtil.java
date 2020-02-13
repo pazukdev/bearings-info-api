@@ -1,19 +1,23 @@
 package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.dto.NestedItemDto;
-import com.pazukdev.backend.dto.factory.NestedItemDtoFactory;
-import com.pazukdev.backend.dto.table.PartsTable;
+import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.Item;
+import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.createBasicNestedItemDto;
+import static com.pazukdev.backend.util.CategoryUtil.Category;
+import static com.pazukdev.backend.util.CategoryUtil.isPart;
 
 public class NestedItemUtil {
 
     public static List<NestedItemDto> prepareNestedItemDtosToConverting(final List<NestedItemDto> dtos) {
-//        correctFieldsValues(dtos);
-
         final List<NestedItemDto> hasId = new ArrayList<>();
         final List<NestedItemDto> noId = new ArrayList<>();
         for (final NestedItemDto dto : dtos) {
@@ -89,70 +93,36 @@ public class NestedItemUtil {
         return false;
     }
 
-    public static void correctFieldsValues(final List<NestedItemDto> dtos) {
-        for (final NestedItemDto dto : dtos) {
-//            dto.setLocalizedComment(SpecificStringUtil.replaceBlankWithDash(dto.getLocalizedComment()));
-//            dto.setLocalizedSecondComment(SpecificStringUtil.replaceBlankWithDash(dto.getLocalizedSecondComment()));
-
-            dto.setComment(SpecificStringUtil.replaceBlankWithDash(dto.getComment()));
-            dto.setSecondComment(SpecificStringUtil.replaceBlankWithDash(dto.getSecondComment()));
-        }
-    }
-
-    public static List<List<NestedItemDto>> categorize(final List<NestedItemDto> nestedItems) {
-        final List<List<NestedItemDto>> categorizedItems = new ArrayList<>();
-        for (final String category : getCategories(nestedItems)) {
-            categorizedItems.add(nestedItems.stream().filter(
-                    nestedItem -> nestedItem.getItemCategory().equals(category)).collect(Collectors.toList()));
-
-        }
-        return categorizedItems;
-    }
-
-    public static Set<String> getCategories(final List<NestedItemDto> nestedItems) {
-        final Set<String> categories = new HashSet<>();
-        for (final NestedItemDto nestedItem : nestedItems) {
-            categories.add(nestedItem.getItemCategory());
-        }
-        return categories;
-    }
-
     public static String createName(final String parentItemName, final String nestedItemName) {
         return parentItemName + " - " + nestedItemName;
     }
 
-    public static List<NestedItemDto> collectAllItems(final PartsTable partsTable) {
-        return partsTable.getParts();
-    }
+    public static void addPossiblePartsAndReplacers(final ItemView view,
+                                                    final List<Item> allItems,
+                                                    final Item parent,
+                                                    final List<String> infoCategories,
+                                                    final ItemService itemService) {
+        final UserService userService = itemService.getUserService();
 
-    public static List<NestedItemDto> createPossibleParts(final List<Item> items,
-                                                          final String parentItemCategory,
-                                                          final UserService userService) {
-        final List<NestedItemDto> childItemDtos = new ArrayList<>();
-        for (final Item item : items) {
+        for (final Item item : allItems) {
             final String category = item.getCategory();
-            if (!CategoryUtil.isPartCategory(category) || category.equalsIgnoreCase(parentItemCategory)) {
-                continue;
-            }
-            final NestedItemDto dto = NestedItemDtoFactory.createBasicNestedItemDto(item, userService);
-            dto.setSelectText(category + " " + dto.getSelectText());
-            childItemDtos.add(dto);
-        }
-        return childItemDtos;
-    }
 
-    public static List<NestedItemDto> createReplacerDtos(final List<Item> items,
-                                                         final Long parentItemId,
-                                                         final UserService userService) {
-        final List<NestedItemDto> replacerDtos = new ArrayList<>();
-        for (final Item item : items) {
-            if (item.getId().equals(parentItemId)) {
-                continue;
+            boolean addPart = isPart(category, infoCategories) && !category.equals(parent.getCategory());
+            boolean addReplacer = category.equals(parent.getCategory()) && !category.equals(Category.VEHICLE);
+
+            NestedItemDto dto = null;
+            if (addPart) {
+                dto = createBasicNestedItemDto(item, userService);
+                dto.setSelectText(category + " " + dto.getSelectText());
+                view.getPossibleParts().add(dto);
             }
-            replacerDtos.add(NestedItemDtoFactory.createBasicNestedItemDto(item, userService));
+            if (addReplacer) {
+                if (dto == null) {
+                    dto = createBasicNestedItemDto(item, userService);
+                }
+                view.getPossibleReplacers().add(dto);
+            }
         }
-        replacerDtos.sort(Comparator.comparing(NestedItemDto::getRating).reversed());
-        return replacerDtos;
     }
 
 }

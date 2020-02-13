@@ -1,5 +1,7 @@
 package com.pazukdev.backend.entity;
 
+import com.pazukdev.backend.util.LinkUtil;
+import com.pazukdev.backend.util.SpecificStringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,10 +29,9 @@ public class Item extends AbstractEntity {
     private String userActionDate;
     @Column(name = "description", table = "item_description")
     private String description;
-    private String image;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_child_item",
             joinColumns = @JoinColumn(name = "parent_item_id"),
@@ -39,7 +40,7 @@ public class Item extends AbstractEntity {
     private Set<ChildItem> childItems = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_replacer",
             joinColumns = @JoinColumn(name = "original_item_id"),
@@ -48,12 +49,40 @@ public class Item extends AbstractEntity {
     private Set<Replacer> replacers = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_link",
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "link_id")
     )
     private Set<Link> links = new HashSet<>();
+
+    public String getImg() {
+        final Link link = LinkUtil.getLink("img", this);
+        return link != null ? link.getName() : null;
+    }
+
+    public String getWiki() {
+        final Link link = LinkUtil.getLink("wiki", this);
+        return link != null ? link.getName() : null;
+    }
+
+    public void setImg(final String img) {
+        Link imgLink = getImgLink();
+        if (SpecificStringUtil.isEmpty(img)) {
+            links.remove(imgLink);
+            return;
+        }
+        if (imgLink == null) {
+            imgLink = new Link();
+            imgLink.setType("img");
+        }
+        imgLink.setName(img);
+        links.add(imgLink);
+    }
+
+    private Link getImgLink() {
+        return LinkUtil.getLink("img", this);
+    }
 
 }

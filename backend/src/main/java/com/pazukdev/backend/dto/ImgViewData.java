@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ImgViewData extends AbstractDto {
 
-    private String imgData;
-    private String defaultImgData;
+    private String img;
+    private String defaultImg;
 
 }

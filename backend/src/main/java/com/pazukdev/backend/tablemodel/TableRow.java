@@ -24,7 +24,13 @@ public class TableRow {
         return new TableRow(new HashMap<>());
     }
 
-    public void put(final String key, final String value) {
+    public void put(String key, String value) {
+        if (key != null) {
+            key = key.trim();
+        }
+        if (value != null) {
+            value = value.trim();
+        }
         data.put(key, value);
     }
 

@@ -74,7 +74,7 @@ public abstract class AbstractEntityFactory<Entity extends AbstractEntity> {
                                                      final AbstractEntityFactory<T> dtoFactory) {
         final T entity;
         if (service != null) {
-            entity = (T) service.findByName(name);
+            entity = (T) service.findFirstByName(name);
         } else {
             entity = CSVFileUtil.findByName(name, dtoFactory);
         }

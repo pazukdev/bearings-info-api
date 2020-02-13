@@ -10,6 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransitiveItemRepository extends JpaRepository<TransitiveItem, Long> {
 
-    TransitiveItem findByName(final String name);
+    TransitiveItem findFirstByName(final String name);
+
+    TransitiveItem findFirstByCategory(final String category);
+
+    TransitiveItem findFirstByCategoryAndName(final String category, final String name);
 
 }

@@ -3,8 +3,11 @@ package com.pazukdev.backend.util;
 import com.pazukdev.backend.dto.ItemQuantity;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
+import com.pazukdev.backend.dto.table.HeaderTable;
+import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
+import com.pazukdev.backend.repository.ItemRepository;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 import lombok.Getter;
@@ -13,10 +16,23 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.pazukdev.backend.util.CategoryUtil.Category.MANUFACTURER;
+import static com.pazukdev.backend.util.CategoryUtil.Category.SEAL;
+import static com.pazukdev.backend.util.CategoryUtil.Parameter.SIZE;
+import static com.pazukdev.backend.util.CategoryUtil.isAddManufacturer;
+import static com.pazukdev.backend.util.CategoryUtil.isInfo;
+import static com.pazukdev.backend.util.FileUtil.*;
+import static com.pazukdev.backend.util.SpecificStringUtil.*;
+import static com.pazukdev.backend.util.UserActionUtil.ActionType.*;
+import static com.pazukdev.backend.util.UserActionUtil.processPartAction;
+import static com.pazukdev.backend.util.UserActionUtil.processReplacerAction;
+
 /**
  * @author Siarhei Sviarkaltsau
  */
 public class ItemUtil {
+
+    public static final String MULTI_PARAM_SEPARATOR = " #";
 
     @Getter
     public enum SpecialItemId {
@@ -31,10 +47,6 @@ public class ItemUtil {
         SpecialItemId(final Long itemId) {
             this.itemId = itemId;
         }
-    }
-
-    public static void sort(final List<TransitiveItem> items) {
-        items.sort(Comparator.comparing(TransitiveItem::getCategory));
     }
 
     public static Set<String> findCategories(final List<TransitiveItem> items) {
@@ -80,26 +92,6 @@ public class ItemUtil {
         return categorizedItems;
     }
 
-    public static List<List<ItemQuantity>> categorizeItemQuantities(final List<ItemQuantity> items) {
-        final List<List<ItemQuantity>> categorizedItems = new ArrayList<>();
-        for (final String category : getItemQuantityCategories(items)) {
-            categorizedItems.add(items.stream()
-                    .filter(item -> item.getItem().getCategory().equals(category)).collect(Collectors.toList()));
-
-        }
-        return categorizedItems;
-    }
-
-    public static List<List<ChildItem>> categorizeChildItems(final List<ChildItem> childItems) {
-        final List<List<ChildItem>> categorizedItems = new ArrayList<>();
-        for (final String category : getChildItemsCategories(childItems)) {
-            categorizedItems.add(childItems.stream()
-                    .filter(item -> item.getItem().getCategory().equals(category)).collect(Collectors.toList()));
-
-        }
-        return categorizedItems;
-    }
-
     public static String getValueFromDescription(final TransitiveItem item, final String key) {
         return getValueFromDescription(item.getDescription(), key);
     }
@@ -124,7 +116,7 @@ public class ItemUtil {
                 = toDescription(descriptionMap.getParameters())
                 + toDescription(descriptionMap.getSelectableParameters())
                 + toDescription(descriptionMap.getItems());
-        return SpecificStringUtil.replaceBlankWithDash(description);
+        return replaceEmptyWithDash(description);
     }
 
     public static Map<String, String> toMap(final String description) {
@@ -132,7 +124,7 @@ public class ItemUtil {
         if (description == null || !description.contains(":")) {
             return map;
         }
-        final List<String> descriptionList = Arrays.asList(description.split(";;"));
+        final String[] descriptionList = description.split(";;");
         for (final String element : descriptionList) {
             map.put(element.split(":")[0], element.split(":")[1]);
         }
@@ -140,16 +132,17 @@ public class ItemUtil {
     }
 
     public static TransitiveItemDescriptionMap createDescriptionMap(final TransitiveItem item,
-                                                                    final TransitiveItemService service) {
+                                                                    final TransitiveItemService service,
+                                                                    final List<String> infoCategories) {
         final Map<String, String> unsortedMap = toMap(item.getDescription());
         final TransitiveItemDescriptionMap itemDescriptionMap = new TransitiveItemDescriptionMap();
         itemDescriptionMap.setParent(item);
         for (final Map.Entry<String, String> entry : unsortedMap.entrySet()) {
-            final String parameter = StringUtils.trim(entry.getKey());
+            String parameter = StringUtils.trim(entry.getKey());
             final String value = StringUtils.trim(entry.getValue());
-            if (isInfoItem(parameter, service)) {
-                itemDescriptionMap.getSelectableParameters().put(parameter, value);
-            } else if (isPart(parameter, service)) {
+            if (isInfo(parameter, infoCategories)) {
+                itemDescriptionMap.getParameters().put(parameter, value);
+            } else if (service.isPart(parameter, infoCategories)) {
                 itemDescriptionMap.getItems().put(parameter, value);
             } else {
                 itemDescriptionMap.getParameters().put(parameter, value);
@@ -158,25 +151,13 @@ public class ItemUtil {
         return itemDescriptionMap;
     }
 
-    public static boolean isPart(final String parameter, final TransitiveItemService service) {
-        if (isInfoItem(parameter, service)) {
-            return false;
-        }
-        return service.find(parameter).size() > 0;
-    }
-
-    public static boolean isInfoItem(final String parameter, final TransitiveItemService service) {
-        final Set<String> infoCategories = service.findInfoCategories();
-        return infoCategories.contains(parameter);
-    }
-
     public static ReplacerData parseReplacerData(final String replacerDataSourceString) {
         final ReplacerData replacerData = new ReplacerData();
         String replacerName;
         String comment = "-";
-        if (SpecificStringUtil.containsParentheses(replacerDataSourceString)) {
-            replacerName = SpecificStringUtil.getStringBeforeParentheses(replacerDataSourceString);
-            comment = SpecificStringUtil.getStringBetweenParentheses(replacerDataSourceString);
+        if (containsParentheses(replacerDataSourceString)) {
+            replacerName = getStringBeforeParentheses(replacerDataSourceString);
+            comment = getStringBetweenParentheses(replacerDataSourceString);
         } else {
             replacerName = replacerDataSourceString;
         }
@@ -188,39 +169,40 @@ public class ItemUtil {
     public static List<ReplacerData> parseReplacersSourceString(final String replacersSourceString) {
         final List<ReplacerData> data = new ArrayList<>();
         if (!replacersSourceString.equals("-")) {
-            for (final String replacerData : Arrays.asList(replacersSourceString.split("; "))) {
+            for (final String replacerData : replacersSourceString.split("; ")) {
                 data.add(parseReplacerData(replacerData));
             }
         }
         return data;
     }
 
-    public static String createButtonText(final Item nestedItem) {
-        if (CategoryUtil.isAddManufacturerName(nestedItem)) {
-            return getValueFromDescription(nestedItem.getDescription(), "Manufacturer")
-                    + " " + nestedItem.getName();
+    public static String createButtonText(final Item item, final String manufacturer) {
+        if (isAddManufacturer(item, manufacturer, false)) {
+            return manufacturer + " " + item.getName();
         } else {
-            return nestedItem.getName();
+            return item.getName();
         }
     }
 
-    public static String createSelectText(final Item nestedItem) {
-        final String manufacturer = getValueFromDescription(nestedItem.getDescription(), "Manufacturer");
-        String selectText = nestedItem.getName();
-        if (manufacturer != null) {
-            selectText = manufacturer + " " + nestedItem.getName();
+    public static String createSelectText(final Item item,
+                                          final String manufacturer,
+                                          final Map<String, String> descriptionMap) {
+        final String itemCategory = item.getCategory();
+        final String itemName = item.getName();
+        final boolean addManufacturer = isAddManufacturer(item, manufacturer, true);
+        if (itemCategory.equals(SEAL)) {
+            return descriptionMap.get(SIZE) + " " + (addManufacturer ? manufacturer + " " : "") + itemName;
         }
-        if (nestedItem.getCategory().equals("Seal")) {
-            final String size = ItemUtil.getValueFromDescription(nestedItem.getDescription(), "Size, mm");
-            selectText = size + " " + manufacturer + " " + nestedItem.getName();
+        if (addManufacturer) {
+            return manufacturer + " " + itemName;
         }
-        return selectText;
+        return itemName;
     }
 
     public static Item getUssrSealBySize(final String searchingSize, final ItemService itemService) {
-        final List<Item> ussrSeals = filter(itemService.find("Seal"), "Manufacturer", "USSR");
+        final List<Item> ussrSeals = filter(itemService.find(SEAL), MANUFACTURER, "USSR");
         for (Item seal : ussrSeals) {
-            final String actualSize = ItemUtil.getValueFromDescription(seal.getDescription(), "Size, mm");
+            final String actualSize = getValueFromDescription(seal.getDescription(), SIZE);
             if (actualSize.equals(searchingSize)) {
                 return seal;
             }
@@ -233,7 +215,7 @@ public class ItemUtil {
                                     final String searchingValue) {
         final List<Item> filteredItems = new ArrayList<>();
         for (Item item : items) {
-            final String value = ItemUtil.getValueFromDescription(item.getDescription(), parameter);
+            final String value = getValueFromDescription(item.getDescription(), parameter);
             if (value != null && value.equals(searchingValue)) {
                 filteredItems.add(item);
             }
@@ -241,24 +223,104 @@ public class ItemUtil {
         return filteredItems;
     }
 
-    public static void updateName(final Item item,
-                                  final Map<String, String> description,
-                                  final ItemService itemService) {
+    public static boolean updateNameAndCategory(final Item item,
+                                                final String newCategory,
+                                                final String newName,
+                                                final List<Item> allItems,
+                                                final List<String> infoCategories,
+                                                final ItemService service) {
         final String oldName = item.getName();
-        final String newName = description.get("Name");
-        if (newName != null && !newName.equals(oldName)) {
-            item.setName(newName);
-            applyToAllItemDescriptions(item.getCategory(), oldName, newName, itemService);
+        final String oldCategory = item.getCategory();
+
+        boolean nameChanged = newName != null && !newName.equals(oldName);
+        boolean categoryChanged = newCategory != null && !newCategory.equals(oldCategory);
+
+        if (!nameChanged && !categoryChanged) {
+            return false;
         }
-        description.remove("Name");
+
+        boolean infoItem = isInfo(oldCategory, infoCategories);
+        boolean checkDescriptions = nameChanged && infoItem;
+        boolean renameCategory = categoryChanged && !service.collectCategories(allItems).contains(newCategory);
+        boolean moveItemToAnotherCategory = categoryChanged && !renameCategory;
+
+        if (nameChanged) {
+            item.setName(newName);
+        }
+        if (categoryChanged && !moveItemToAnotherCategory) {
+            item.setCategory(newCategory);
+        }
+
+        if (checkDescriptions || renameCategory) {
+            for (final Item i : allItems) {
+                boolean descriptionChanged = false;
+                final Map<String, String> descriptionMap = toMap(i.getDescription());
+                if (checkDescriptions) {
+                    for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
+                        if (entry.getValue().equals(oldName)) {
+                            entry.setValue(newName);
+                            descriptionChanged = true;
+                        }
+                    }
+                }
+                if (renameCategory && infoItem) {
+                    final String value = descriptionMap.get(oldCategory);
+                    if (value != null) {
+                        descriptionMap.remove(oldCategory);
+                        descriptionMap.put(newCategory, value);
+                        descriptionChanged = true;
+                    }
+                }
+
+                final boolean setNewCategory = i.getCategory().equals(oldCategory) && renameCategory;
+                if (setNewCategory) {
+                    i.setCategory(newCategory);
+                }
+                if (descriptionChanged) {
+                    i.setDescription(toDescription(descriptionMap));
+                }
+                if (descriptionChanged || setNewCategory) {
+                    service.update(i);
+                }
+
+            }
+        }
+
+        if (renameCategory) {
+            final List<String> textLines = getTxtFileTextLines(getTxtFilePath(FileName.COMMENTS));
+            for (final String line : new HashSet<>(textLines)) {
+                if (line.split("=")[0].equalsIgnoreCase(oldCategory)) {
+                    textLines.remove(line);
+                    textLines.add(newCategory + "=" + line.split("=")[1]);
+                }
+            }
+            createFile(FileName.COMMENTS, textLines);
+        }
+
+        if (renameCategory && infoItem) {
+            final List<String> textLines = getTxtFileTextLines(getTxtFilePath(FileName.INFO_CATEGORIES));
+            for (final String line : new HashSet<>(textLines)) {
+                if (line.equalsIgnoreCase(oldCategory)) {
+                    textLines.remove(line);
+                    textLines.add(newCategory);
+                }
+            }
+            createFile(FileName.INFO_CATEGORIES, textLines);
+        }
+
+        return moveItemToAnotherCategory;
     }
 
-    public static void updateDescription(final Item item,
-                                         final Map<String, String> description,
-                                         final ItemService itemService) {
-        final String newDescription = ItemUtil.toDescription(description);
-        applyNewDescriptionToCategory(item.getCategory(), description, itemService);
-        item.setDescription(newDescription);
+    public static String createEmptyDescription(final String category, final ItemRepository repository) {
+        final Item firstFound = repository.findFirstByCategory(category);
+        if (firstFound == null) {
+            return "";
+        }
+        final Map<String, String> descriptionMap = ItemUtil.toMap(firstFound.getDescription());
+        for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
+            entry.setValue("-");
+        }
+        return ItemUtil.toDescription(descriptionMap);
     }
 
     public static void updateChildItems(final Item item,
@@ -267,13 +329,13 @@ public class ItemUtil {
                                         final UserEntity user) {
         final Set<ChildItem> oldChildItems = new HashSet<>(item.getChildItems());
         final Set<ChildItem> newChildItems
-                = new HashSet<>(ChildItemUtil.createPartsFromItemView(itemView, itemService));
+                = new HashSet<>(ChildItemUtil.createChildrenFromItemView(itemView, itemService));
         item.getChildItems().clear();
         item.getChildItems().addAll(newChildItems);
 
         for (final ChildItem child : newChildItems) {
             if (child.getId() == null) {
-                UserActionUtil.processPartAction("create", child, item, user, itemService);
+                processPartAction(ADD, child, item, user, itemService);
             }
         }
 
@@ -284,7 +346,7 @@ public class ItemUtil {
                     toSave.add(oldChild);
                     if (!newChild.getLocation().equals(oldChild.getLocation())
                             || !newChild.getQuantity().equals(oldChild.getQuantity())) {
-                        UserActionUtil.processPartAction("update", oldChild, item, user, itemService);
+                        processPartAction(UPDATE, oldChild, item, user, itemService);
                     }
                 }
             }
@@ -294,7 +356,7 @@ public class ItemUtil {
 
         for (final ChildItem orphan : oldChildItems) {
             itemService.getChildItemRepository().deleteById(orphan.getId());
-            UserActionUtil.processPartAction("delete", orphan, item, user, itemService);
+            processPartAction(DELETE, orphan, item, user, itemService);
         }
     }
 
@@ -310,7 +372,7 @@ public class ItemUtil {
 
         for (final Replacer replacer : newReplacers) {
             if (replacer.getId() == null) {
-                UserActionUtil.processReplacerAction("create", replacer, item, user, itemService);
+                processReplacerAction(ADD, replacer, item, user, itemService);
             }
         }
 
@@ -320,7 +382,7 @@ public class ItemUtil {
                 if (newReplacer.getName().equals(oldReplacer.getName())) {
                     toSave.add(oldReplacer);
                     if (!newReplacer.getComment().equals(oldReplacer.getComment())) {
-                        UserActionUtil.processReplacerAction("update", oldReplacer, item, user, itemService);
+                        processReplacerAction(UPDATE, oldReplacer, item, user, itemService);
                     }
                 }
             }
@@ -330,53 +392,47 @@ public class ItemUtil {
 
         for (final Replacer orphan : oldReplacers) {
             itemService.getReplacerRepository().deleteById(orphan.getId());
-            UserActionUtil.processReplacerAction("delete", orphan, item, user, itemService);
+            processReplacerAction(DELETE, orphan, item, user, itemService);
         }
     }
 
-    private static void applyToAllItemDescriptions(final String updatingItemCategory,
-                                                   final String oldValue,
-                                                   final String newValue,
-                                                   final ItemService itemService) {
-        final List<Item> items = itemService.findAll();
-        final Set<String> categories = itemService.findCategories(items);
-        for (final Item item : items) {
-            final Map<String, String> descriptionMap = ItemUtil.toMap(item.getDescription());
-            for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
-                final String value = entry.getValue().split(" \\(")[0];
-                if (value.equals(oldValue)) {
-                    if (categories.contains(entry.getKey())) {
-                        if (entry.getKey().equals(updatingItemCategory)) {
-                            entry.setValue(entry.getValue().replace(oldValue, newValue));
-                        }
-                    } else {
-                        entry.setValue(entry.getValue().replace(oldValue, newValue));
-                    }
-                }
+    public static void moveItemToAnotherCategory(final Item item,
+                                                 final String newCategory,
+                                                 final Map<String, String> newDescriptionMap,
+                                                 final ItemService service) {
+        final Map<String, String> emptyMap = toMap(createEmptyDescription(newCategory, service.getItemRepository()));
+        for (Map.Entry<String, String> entry : emptyMap.entrySet()) {
+            final String oldValue = newDescriptionMap.get(entry.getKey());
+            if (oldValue != null) {
+                entry.setValue(oldValue);
             }
-            final String newDescription = ItemUtil.toDescription(descriptionMap);
-            item.setDescription(newDescription);
-            itemService.update(item);
         }
+        item.setDescription(toDescription(emptyMap));
+        item.setCategory(newCategory);
     }
 
-    private static void applyNewDescriptionToCategory(final String category,
-                                                      final Map<String, String> newDescriptionMap,
-                                                      final ItemService itemService) {
-        final List<Item> allItemsOfCategory = itemService.find(category);
-        for (final Item item : allItemsOfCategory) {
-            final Map<String, String> oldItemDescriptionMap = ItemUtil.toMap(item.getDescription());
-            final Map<String, String> newItemDescriptionMap = new HashMap<>(newDescriptionMap);
-            for (final Map.Entry<String, String> entry : newItemDescriptionMap.entrySet()) {
-                final String newParameter = entry.getKey();
-                final String value = oldItemDescriptionMap.get(newParameter);
-                if (value == null) {
-                    entry.setValue("-");
+    public static void applyNewDescriptionToCategory(final String category,
+                                                     final HeaderTable headerTable,
+                                                     final Map<String, String> newDescriptionMap,
+                                                     final List<Item> allItems,
+                                                     final ItemService itemService) {
+
+        for (final Item item : itemService.find(category, allItems)) {
+            final Map<String, String> oldDescriptionMap = toMap(item.getDescription());
+            for (final HeaderTableRow row : headerTable.getRows()) {
+                final String oldParam = row.getName();
+                final String newParam = row.getParameter();
+                final String oldValue = oldDescriptionMap.get(oldParam);
+                boolean paramChanged = !oldParam.equals(newParam);
+
+                if (paramChanged) {
+                    newDescriptionMap.put(newParam, oldValue == null ? "-" : oldValue);
                 } else {
-                    entry.setValue(value);
+                    newDescriptionMap.remove(newParam);
+                    newDescriptionMap.put(newParam, oldValue);
                 }
             }
-            item.setDescription(ItemUtil.toDescription(newItemDescriptionMap));
+            item.setDescription(toDescription(newDescriptionMap));
         }
     }
 
@@ -386,10 +442,6 @@ public class ItemUtil {
             ids.add(item.getId());
         }
         return ids;
-    }
-
-    public static boolean isSpecialItem(final Long itemId) {
-        return itemId != null && itemId < 0;
     }
 
 }

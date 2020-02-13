@@ -21,6 +21,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
+import static com.pazukdev.backend.util.FileUtil.FileName;
+import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
+
 /**
  * @author Siarhei Sviarkaltsau
  *
@@ -48,15 +51,17 @@ public class DataLoader implements ApplicationRunner {
         final long start = System.nanoTime();
         final String startTime = LocalTime.now().toString();
 
+        final List<String> infoCategories = getTxtFileTextLines(FileName.INFO_CATEGORIES);
+
         createDefaultUsers();
         createTransitiveItems();
-        createItems();
+        createItems(infoCategories);
 
         final long stop = System.nanoTime();
-        LOG.warn("Start time: " + startTime);
-        LOG.info("Stop time: " + LocalTime.now());
-        final double time = (stop - start) * 0.000000001;
-        LOG.error("DB created in " + time + " seconds");
+//        LOG.info("Start time: " + startTime);
+//        LOG.info("Stop time: " + LocalTime.now());
+        final Double time = (stop - start) * 0.000000001;
+        LOG.info("DB created in " + time.intValue() + " seconds");
     }
 
     private boolean repositoryIsEmpty(final TransitiveItemRepository repository) {
@@ -78,15 +83,14 @@ public class DataLoader implements ApplicationRunner {
         user.setPassword(password);
         if (name.equalsIgnoreCase("admin")) {
             user.setEmail("pazuk1985@gmail.com");
-            user.setImg(name + ".png");
-            user.setCountry("BY");
+            user.setImg("https://drive.google.com/open?id=1iuDdjYXtphxQ8UlQD-jjWYnEb_JC9OcG");
+            user.setCountry("ZW");
         } else if (name.equalsIgnoreCase("dominator")) {
-            user.setCountry("BY");
-            user.setImg(name + ".png");
+            user.setCountry("MC");
+            user.setImg("https://drive.google.com/open?id=1YUwn8rh8ZNjg4sw_MPVccY936D87fman");
         } else if (name.equalsIgnoreCase("soyuz retromechanic")) {
             user.setCountry("BY");
-            user.setImg(name + ".png");
-            user.setEmail("абцфъюэждлорпавыфчячсмитьбюъхзщшгнекуцйё");
+            user.setImg("https://drive.google.com/open?id=1rtWwJf6XvEp2EV8p79ok5_NwlsOwawVC");
         }
         itemService.getUserService().getRepository().save(user);
     }
@@ -97,10 +101,9 @@ public class DataLoader implements ApplicationRunner {
         createStubReplacers(transitiveItems);
     }
 
-    private void createItems() {
-        final List<TransitiveItem> transitiveItems = transitiveItemService.findAll();
-        for (final TransitiveItem transitiveItem : transitiveItems) {
-            itemService.saveAsItem(transitiveItem);
+    private void createItems(final List<String> infoCategories) {
+        for (final TransitiveItem transitiveItem : transitiveItemService.findAll()) {
+            itemService.create(transitiveItem, infoCategories);
         }
     }
 

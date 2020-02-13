@@ -32,4 +32,8 @@ public class AppCollectionUtil {
         return array;
     }
 
+    public static boolean contains(final List<String> list, final String element) {
+        return list.stream().anyMatch(element::equalsIgnoreCase);
+    }
+
 }

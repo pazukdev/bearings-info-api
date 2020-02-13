@@ -1,6 +1,5 @@
 package com.pazukdev.backend.entity.factory;
 
-import com.pazukdev.backend.config.ContextData;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.service.TransitiveItemService;
 import com.pazukdev.backend.tablemodel.TableRow;
@@ -10,8 +9,10 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Map;
+
+import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.*;
+import static com.pazukdev.backend.util.CategoryUtil.isDescriptionIgnored;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -46,45 +47,35 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
     }
 
     private void applyCategory(final TransitiveItem item, final TableRow tableRow) {
-        final String category = tableRow.getData().get("Category");
+        final String category = tableRow.getData().get(CATEGORY);
         item.setCategory(category);
     }
 
     private void applyImage(final TransitiveItem item, final TableRow tableRow) {
-        item.setImage(tableRow.getData().get("Image"));
+        item.setImage(tableRow.getData().get(IMAGE));
     }
 
     private void applyDescription(final TransitiveItem item, final TableRow tableRow) {
         String description = "";
         for (final Map.Entry<String, String> entry : tableRow.getData().entrySet()) {
             final String key = entry.getKey();
-            if (ContextData.isDescriptionIgnored(key)) {
+            if (isDescriptionIgnored(key)) {
                 continue;
             }
-
-            final String value = entry.getValue();
-
-            if (value.contains("; ")) {
-                int count = 1;
-                for (final String subValue : Arrays.asList(value.split("; "))) {
-                    description = description + key + " " + count++ + ":" + subValue + ";;";
-                }
-            } else {
-                description = description + key + ":" + value + ";;";
-            }
+            description = description + entry.getKey() + ":" + entry.getValue() + ";;";
         }
-        item.setDescription(description);
+        item.setDescription(description.replaceAll(";;;", ";;"));
     }
 
     private void applyReplacers(final TransitiveItem item, final TableRow tableRow) {
-        final String replacer = tableRow.getData().get("Replacer");
+        final String replacer = tableRow.getData().get(REPLACER);
         item.setReplacer(replacer != null ? replacer : "-");
     }
 
     private void applyLinks(final TransitiveItem item, final TableRow tableRow) {
-        item.setWiki(tableRow.getData().get("Wiki"));
-        item.setWebsite(tableRow.getData().get("Website"));
-        item.setWebsiteLang(tableRow.getData().get("Website lang"));
+        item.setWiki(tableRow.getData().get(WIKI));
+        item.setWebsite(tableRow.getData().get(WEBSITE));
+        item.setWebsiteLang(tableRow.getData().get(WEBSITE_LANG));
     }
 
 }

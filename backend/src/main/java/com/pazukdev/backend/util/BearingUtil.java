@@ -43,10 +43,4 @@ public class BearingUtil {
         }
     }
 
-    public static boolean isBearingRollingElementSpecifiedAsParameter(final String bearingRollingElementValue) {
-        return bearingRollingElementValue.contains("ball (")
-                || bearingRollingElementValue.contains("roller (")
-                || bearingRollingElementValue.contains("needle (");
-    }
-
 }

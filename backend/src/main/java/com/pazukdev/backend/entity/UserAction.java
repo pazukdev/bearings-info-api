@@ -19,15 +19,15 @@ import javax.persistence.Table;
 public class UserAction extends AbstractEntity {
 
     @Column(name = "user_id")
-    private String userId = "-";
+    private Long userId;
     @Column(name = "action_date")
     private String actionDate = "-";
     @Column(name = "action_type")
     private String actionType = "-";
     @Column(name = "parent_item_id")
-    private String parentItemId = "-";
+    private Long parentItemId;
     @Column(name = "item_id")
-    private String itemId = "-";
+    private Long itemId;
     @Column(name = "item_type")
     private String itemType = "-";
     @Column(name = "item_category")

@@ -20,7 +20,7 @@ public class WishList extends AbstractEntity {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "wishlist_item",
             joinColumns = @JoinColumn(name = "wishlist_id"),

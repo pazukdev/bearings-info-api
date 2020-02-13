@@ -18,21 +18,24 @@ public class ChildItemUtil {
     public static List<ChildItem> createParts(final TransitiveItem parent,
                                               final Map<String, String> childItemsDescription,
                                               final ItemService itemService,
-                                              final TransitiveItemService transitiveItemService) {
+                                              final TransitiveItemService transitiveItemService,
+                                              final List<String> infoCategories) {
         final List<ChildItem> childItems = new ArrayList<>();
         for (final Map.Entry<String, String> entry : childItemsDescription.entrySet()) {
             final String category = entry.getKey();
             if (entry.getValue().contains(";")) {
                 final String[] names = entry.getValue().split("; ");
                 for (final String name : names) {
-                    final ChildItem child = createChild(parent, name, category, itemService, transitiveItemService);
+                    final ChildItem child
+                            = createChild(parent, name, category, itemService, transitiveItemService, infoCategories);
                     if (child != null) {
                         childItems.add(child);
                     }
                 }
             } else {
                 final String name = entry.getValue();
-                final ChildItem child = createChild(parent, name, category, itemService, transitiveItemService);
+                final ChildItem child
+                        = createChild(parent, name, category, itemService, transitiveItemService, infoCategories);
                 if (child != null) {
                     childItems.add(child);
                 }
@@ -42,15 +45,13 @@ public class ChildItemUtil {
         return childItems;
     }
 
-    public static Set<ChildItem> createPartsFromItemView(final ItemView itemView,
-                                                         final ItemService itemService) {
-        final List<NestedItemDto> allItems = NestedItemUtil.collectAllItems(itemView.getPartsTable());
-        final List<NestedItemDto> preparedItems = prepareNestedItemDtosToConverting(allItems);
-        final String parentName = getParentName(itemView, itemService);
+    public static Set<ChildItem> createChildrenFromItemView(final ItemView view, final ItemService itemService) {
+        final List<NestedItemDto> preparedItems = prepareNestedItemDtosToConverting(view.getChildren());
+        final String parentName = getParentName(view, itemService);
 
         final Set<ChildItem> partsFromItemView = new HashSet<>();
         for (final NestedItemDto nestedItem : preparedItems) {
-            final Item partItem = itemService.getOne(nestedItem.getItemId());
+            final Item partItem = itemService.findOne(nestedItem.getItemId());
 
             final ChildItem part = new ChildItem();
             part.setId(nestedItem.getId());
@@ -70,7 +71,8 @@ public class ChildItemUtil {
                                          final String value,
                                          final String category,
                                          final ItemService itemService,
-                                         final TransitiveItemService transitiveItemService) {
+                                         final TransitiveItemService transitiveItemService,
+                                         final List<String> infoCategories) {
         String name;
         String location = "";
         String quantity;
@@ -82,12 +84,12 @@ public class ChildItemUtil {
         } else {
             name = value;
             location = "-";
-            quantity = category.equals("Spark plug") ? "2" : "1";
+            quantity = category.equals(CategoryUtil.Category.SPARK_PLUG) ? "2" : "1";
         }
 
         final TransitiveItem oldChild = transitiveItemService.find(category, name);
         if (oldChild != null) {
-            final Item child = itemService.getOrCreate(oldChild);
+            final Item child = itemService.create(oldChild, infoCategories);
 
             final ChildItem childItem = new ChildItem();
             childItem.setName(getName(parent.getName(), name));
@@ -116,7 +118,7 @@ public class ChildItemUtil {
     public static String getParentName(final ItemView itemView, final ItemService itemService) {
         final Long parentId = itemView.getItemId();
         if (parentId > 0) {
-            return itemService.getOne(parentId).getName();
+            return itemService.findOne(parentId).getName();
         }
         if (parentId.equals(ItemUtil.SpecialItemId.WISH_LIST_VIEW.getItemId())) {
             return "Wishlist";

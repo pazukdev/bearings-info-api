@@ -18,6 +18,8 @@ import java.util.Set;
 @Table(name = "likelist")
 public class LikeList extends AbstractEntity {
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany
     @JoinTable(
             name = "likelist_item",
@@ -25,6 +27,8 @@ public class LikeList extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "item_id")
     )
     private Set<Item> likedItems = new HashSet<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany
     @JoinTable(
             name = "dislikelist_item",
