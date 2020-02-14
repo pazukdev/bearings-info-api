@@ -32,7 +32,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         final String login = authentication.getName();
         final String password = authentication.getCredentials().toString();
 
-        final UserEntity user = userService.findByName(login);
+        final UserEntity user = userService.findFirstByName(login);
         validateCredentials(user, password);
 
         final List<GrantedAuthority> authorities = new ArrayList<>();

@@ -29,18 +29,18 @@ public class ItemController {
         return service.createItemView(id, userName, language);
     }
 
+    @GetMapping("/view/items-management/{userName}/{language}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get items management view")
+    public ItemView getAll(@PathVariable final String userName, @PathVariable final String language) {
+        return service.createItemsManagementView(userName, language);
+    }
+
     @GetMapping("/view/home/{userName}/{language}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get home view")
     public ItemView getHomeView(@PathVariable final String userName, @PathVariable final String language) {
         return service.createHomeView(userName, language);
-    }
-
-    @GetMapping("/view/items-management/{userName}/{language}")
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get items management view")
-    public ItemView getItemsManagementView(@PathVariable final String userName, @PathVariable final String language) {
-        return service.createItemsManagementView(userName, language);
     }
 
     @PostMapping("/create/{category}/{name}/{userName}/{language}")

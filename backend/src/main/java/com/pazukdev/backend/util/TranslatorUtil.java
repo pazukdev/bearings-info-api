@@ -1,200 +1,155 @@
 package com.pazukdev.backend.util;
 
-import com.pazukdev.backend.dto.ItemData;
+import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.NestedItemDto;
+import com.pazukdev.backend.dto.UserActionDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.HeaderTableRow;
-import com.pazukdev.backend.dto.table.PartsTable;
 import com.pazukdev.backend.dto.table.ReplacersTable;
 import com.pazukdev.backend.dto.view.ItemView;
-import com.pazukdev.backend.service.ItemService;
 import org.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.pazukdev.backend.util.SpecificStringUtil.splitIntoWords;
-import static com.pazukdev.backend.util.SpecificStringUtil.wordsIntoText;
+import static com.pazukdev.backend.dto.DictionaryData.getDictionaryFromFile;
+import static com.pazukdev.backend.util.CategoryUtil.Category;
+import static com.pazukdev.backend.util.CategoryUtil.Parameter;
+import static com.pazukdev.backend.util.FileUtil.*;
+import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
 /**
  * @author Siarhei Sviarkaltsau
  */
 public class TranslatorUtil {
-    
-    private static String EN = "en";
+
     private static String WORD_SEPARATOR = " ";
-    private static String DICTIONARY_SEPARATOR = "=";
+    public static String DICTIONARY_SEPARATOR = "=";
+    public static String LANGS = "langs";
 
-    public static void translate(final String languageFrom,
-                                 final String languageTo,
-                                 final ItemView itemView,
-                                 final boolean addToDictionary,
-                                 final ItemService service) {
-        HeaderTable header = itemView.getHeader();
-        final String category = itemView.getCategory();
-        final String name = itemView.getName();
-        final PartsTable partsTable = itemView.getPartsTable();
-        final ReplacersTable replacersTable = itemView.getReplacersTable();
-        final List<NestedItemDto> possibleParts = itemView.getPossibleParts();
-        final List<NestedItemDto> replacers = itemView.getPossibleReplacers();
-        final List<String> categories = itemView.getAllCategories();
-
-        header = translate(languageFrom, languageTo, header, addToDictionary, itemView.getItemId(), service);
-        translate(languageFrom, languageTo, partsTable, addToDictionary, service);
-        translate(languageFrom, languageTo, replacersTable, addToDictionary, service);
-        translateNestedItemDtoList(languageFrom, languageTo, possibleParts, addToDictionary, service);
-        translateNestedItemDtoList(languageFrom, languageTo, replacers, addToDictionary, service);
-        translate(languageFrom, languageTo, categories, addToDictionary, service);
-
-        itemView.setLocalizedCategory(translate(languageFrom, languageTo, category, addToDictionary, false, service));
-        itemView.setLocalizedName(translate(languageFrom, languageTo, name, addToDictionary, false, service));
-        itemView.setHeader(header);
-        itemView.setPartsTable(partsTable);
-        itemView.setReplacersTable(replacersTable);
-        itemView.setPossibleParts(possibleParts);
-        itemView.setPossibleReplacers(replacers);
-        itemView.setAllCategories(categories);
+    public static void translate(final String langFrom,
+                                 final String langTo,
+                                 final ItemView view,
+                                 final boolean addToDictionary) throws Exception {
+        final String lang = !langFrom.equals("en") ? langFrom : langTo;
+        final DictionaryData dictionaryData = getDictionaryFromFile(lang);
+        translate(langFrom, langTo, view, addToDictionary, dictionaryData.getDictionary());
+        DictionaryData.saveDictionary(dictionaryData);
     }
 
-    private static HeaderTable translate(final String languageFrom,
-                                         final String languageTo,
+    public static void translate(final String langFrom,
+                                 final String langTo,
+                                 final ItemView view,
+                                 final boolean addToDictionary,
+                                 final List<String> dictionary) throws Exception {
+        HeaderTable header = view.getHeader();
+        final String category = view.getCategory();
+        final String localizedName = view.getLocalizedName();
+        final ReplacersTable replacersTable = view.getReplacersTable();
+        final List<String> categories = view.getAllCategories();
+
+        try {
+            header = translate(langFrom, langTo, header, addToDictionary, dictionary);
+            translate(langFrom, langTo, replacersTable, dictionary);
+            translate(langFrom, langTo, categories, addToDictionary, dictionary);
+
+            view.setLocalizedCategory(translate(langFrom, langTo, category, false, addToDictionary, dictionary));
+            view.setLocalizedName(translate(langFrom, langTo, localizedName, true, false, dictionary));
+            view.setChildren(translateItemDtoList(langFrom, langTo, view.getChildren(), dictionary));
+            view.setAllChildren(translateItemDtoList(langFrom, langTo, view.getAllChildren(), dictionary));
+            view.setPossibleParts(translateItemDtoList(langFrom, langTo, view.getPossibleParts(), dictionary));
+            view.setPossibleReplacers(translateItemDtoList(langFrom, langTo, view.getPossibleReplacers(), dictionary));
+            if (view.getAdminMessage() != null) {
+                view.getAdminMessage().translate(langTo, dictionary);
+            }
+            for (final UserActionDto userAction : view.getLastVehicles()) {
+                userAction.translate(langTo, dictionary);
+            }
+            for (final UserActionDto userAction : view.getLastReplacers()) {
+                userAction.translate(langTo, dictionary);
+            }
+
+            if (view.getParents() != null) {
+                translate(langFrom, langTo, view.getParents(), addToDictionary, dictionary);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw new Exception("Translation isn't finished because of the error. "
+                    + "To remove this message please select English language");
+        }
+
+        view.setHeader(header);
+        view.setReplacersTable(replacersTable);
+        view.setAllCategories(categories);
+    }
+
+    private static HeaderTable translate(final String langFrom,
+                                         final String langTo,
                                          final HeaderTable headerTable,
-                                         final boolean addToDictionary,
-                                         final Long itemId,
-                                         final ItemService itemService) {
-//        Item item = null;
-//        String itemCategory = null;
-//        String itemName = null;
-//        if (!ItemUtil.isSpecialItem(itemId)) {
-//            item = itemService.getOne(itemId);
-//            itemCategory = item.getCategory();
-//            itemName = item.getName();
-//        }
-
-//        String tableName = headerTable.getName();
-//        if (item != null && tableName.equals(TableUtil.getHeaderTableName(itemCategory, itemName))) {
-//            itemCategory = translate(languageFrom, languageTo, itemCategory, addToDictionary, true, itemService);
-//            itemName = translate(languageFrom, languageTo, itemName, addToDictionary, true, itemService);
-//            tableName = TableUtil.getHeaderTableName(itemCategory, itemName);
-//        } else {
-//            tableName = translate(languageFrom, languageTo, tableName, false, true, itemService);
-//        }
-//        headerTable.setName(tableName);
-
+                                         boolean addToDictionary,
+                                         final List<String> dictionary) {
+        if (headerTable == null) {
+            return null;
+        }
         for (final HeaderTableRow row : headerTable.getRows()) {
-            row.setParameter(translate(languageFrom, languageTo, row.getParameter(), addToDictionary, false, itemService));
-            row.setValue(translate(languageFrom, languageTo, row.getValue(), addToDictionary, false, itemService));
+            boolean name = row.getName().equalsIgnoreCase(Parameter.DescriptionIgnored.NAME)
+                    || row.getName().equalsIgnoreCase(Category.MANUFACTURER);
+            if (name) {
+                addToDictionary = false;
+            }
+
+            row.setParameter(translate(langFrom, langTo, row.getParameter(), false, true, dictionary));
+            row.setValue(translate(langFrom, langTo, row.getValue(), name, addToDictionary, dictionary));
         }
 
         return headerTable;
     }
 
-    public static void translate(final String languageFrom,
-                                 final String languageTo,
-                                 final PartsTable partsTable,
-                                 final boolean addToDictionary,
-                                 final ItemService itemService) {
-        final String name = partsTable.getName();
-        partsTable.setLocalizedName(translate(languageFrom, languageTo, name, addToDictionary, false, itemService));
-        String[] header = partsTable.getHeader();
-        translate(languageFrom, languageTo, header, addToDictionary, itemService);
-        List<NestedItemDto> dtos = partsTable.getParts();
-        translateNestedItemDtoList(languageFrom, languageTo, dtos, addToDictionary, itemService);
-    }
-
-    private static void translate(final String languageFrom,
-                                  final String languageTo,
-                                  final ReplacersTable replacersTable,
-                                  final boolean addToDictionary,
-                                  final ItemService itemService) {
-        replacersTable.setLocalizedName(translate(languageFrom, languageTo, replacersTable.getName(), addToDictionary, false, itemService));
-        final List<NestedItemDto> replacers = replacersTable.getReplacers();
-        translateNestedItemDtoList(languageFrom, languageTo, replacers, addToDictionary, itemService);
-    }
-
-    public static void translateNestedItemDtoList(final String languageFrom,
-                                                  final String languageTo,
-                                                  final List<NestedItemDto> dtos,
-                                                  final boolean addToDictionary,
-                                                  final ItemService itemService) {
-        for (final NestedItemDto dto : dtos) {
-            translate(languageFrom, languageTo, dto, itemService);
-        }
-    }
-
     private static void translate(final String langFrom,
                                   final String langTo,
-                                  final NestedItemDto dto,
-                                  final ItemService itemService) {
-//        final String buttonText = dto.getButtonText();
-//        final String selectText = dto.getSelectText();
-//        final String comment = dto.getComment();
-//        final String secondComment = dto.getSecondComment();
-//
-//        dto.setLocalizedButtonText(translate(langFrom, langTo, buttonText, addToDictionary, true, itemService));
-//        dto.setLocalizedSelectText(translate(langFrom, langTo, selectText, addToDictionary, true, itemService));
-//        dto.setLocalizedComment(translate(langFrom, langTo, comment, addToDictionary, true, itemService));
-//        dto.setLocalizedSecondComment(translate(langFrom, langTo, secondComment, addToDictionary, false, itemService));
-
-        dto.translate(langFrom, langTo, itemService);
-
+                                  final ReplacersTable replacersTable,
+                                  final List<String> dictionary) {
+        if (replacersTable == null) {
+            return;
+        }
+        translateItemDtoList(langFrom, langTo, replacersTable.getReplacers(), dictionary);
     }
 
-    private static void translate(final String languageFrom,
-                                  final String languageTo,
-                                  final Map<String, String> map,
-                                  final boolean addToDictionary,
-                                  final ItemService itemService) {
-        final Map<String, String> copy = new HashMap<>(map);
-        map.clear();
-        for (final Map.Entry<String, String> entry : copy.entrySet()) {
-            final String key = translate(languageFrom, languageTo, entry.getKey(), addToDictionary, false, itemService);
-            final String value = translate(languageFrom, languageTo, entry.getValue(), addToDictionary, false, itemService);
-            map.put(key, value);
+    public static List<NestedItemDto> translateItemDtoList(final String langFrom,
+                                                           final String langTo,
+                                                           final List<NestedItemDto> dtos,
+                                                           final List<String> dictionary) {
+        for (final NestedItemDto dto : dtos) {
+            dto.translate(langFrom, langTo, dictionary);
         }
+        return dtos;
     }
 
     private static void translate(final String languageFrom,
                                   final String languageTo,
                                   final List<String> list,
                                   final boolean addToDictionary,
-                                  final ItemService itemService) {
+                                  final List<String> dictionary) {
         final List<String> copy = new ArrayList<>(list);
         list.clear();
         for (final String s : copy) {
-            list.add(translate(languageFrom, languageTo, s, addToDictionary, false, itemService));
+            list.add(translate(languageFrom, languageTo, s, false, addToDictionary, dictionary));
         }
         list.sort(String::compareTo);
     }
 
-    private static void translate(final String languageFrom,
-                                  final String languageTo,
-                                  final String[] array,
-                                  final boolean addToDictionary,
-                                  final ItemService itemService) {
-        if (array == null) {
-            return;
-        }
-        for (int i = 0; i < array.length; i++) {
-            array[i] = translate(languageFrom, languageTo, array[i], addToDictionary, false, itemService);
-        }
-    }
-
-    public static String translate(final String languageFrom,
-                                   final String languageTo,
+    public static String translate(final String langFrom,
+                                   final String langTo,
                                    String text,
+                                   final boolean name,
                                    final boolean addToDictionary,
-                                   boolean parseBeforeTranslate,
-                                   final ItemService itemService) {
+                                   final List<String> dictionary) {
 
         if (text == null) {
             return null;
@@ -205,73 +160,122 @@ public class TranslatorUtil {
         if (text.equals("-") || text.equals("no id") || text.equals("") || text.contains(".png")) {
             return text;
         }
-        if (languageFrom.equals(languageTo)) {
+        if (langFrom.equals(langTo)) {
             return text;
         }
 
-        if (languageFrom.equals("en")) {
-            String translated = getValueFromDictionary(text, languageTo);
-            if (translated != null) {
-                return translated;
+        if (langFrom.equals("en")) {
+            String translated = getValueFromDictionary(text, langTo, dictionary);
+            if (!isTranslated(translated, text)) {
+                if (name) {
+                    return text;
+                }
+                translated = parseAndTranslate(langTo, text, dictionary);
+                if (!isTranslated(translated, text)) {
+                    return text;
+                }
             }
-            translated = parseAndTranslate(languageTo, text, itemService);
-            return translated != null ? translated : text;
+            return translated;
         } else {
-            return translateToEnglish(languageFrom, text, addToDictionary);
+            if (name) {
+                return text;
+            }
+            return translateToEnglish(langFrom, text, addToDictionary, dictionary);
         }
     }
 
-    private static String translateToEnglish(final String languageFrom,
-                                             final String text,
-                                             final boolean addToDictionary) {
-        if (languageFrom.equals("ru") && !containsCyrillic(text)) {
+    private static String translateToEnglish(final String langFrom,
+                                             String text,
+                                             final boolean addToDictionary,
+                                             final List<String> dictionary) {
+        if (text == null || langFrom == null) {
+            return null;
+        }
+        if (langFrom.equals("ru") && !containsCyrillic(text)) {
             return text;
         }
 
-        if (text.matches("[0-9]+")) {
+        text = text.trim();
+
+        if (isEmpty(text)) {
             return text;
         }
 
-        String translated = getValueFromDictionary(text, "en");
-        if (translated != null) {
+        if (isNumber(text) || containsOnlyDigitsAndDash(text)) {
+            return text;
+        }
+
+        final boolean startsWithUppercase = startsWithUppercase(text);
+
+        if (isSingleWord(text)) {
+            if (endChars.contains(getLastChar(text)) && text.length() > 1) {
+                final String beforeLastChar = removeLastChar(text);
+                final String translatedBeforeLastChar
+                        = translateToEnglish(langFrom, beforeLastChar, addToDictionary, dictionary);
+                return text.replaceFirst(beforeLastChar, translatedBeforeLastChar);
+            }
+
+            if (isName(text)) {
+                return text;
+            }
+
+            if (startsWithNumber(text)) {
+                final String afterNumber = text.replace(getSubstringWithFirstNumber(text), "");
+                final String translatedAfterNumber
+                        = translateToEnglish(langFrom, afterNumber, addToDictionary, dictionary);
+                return text.replaceFirst(afterNumber, translatedAfterNumber);
+            }
+
+            if (isBetweenParenthesises(text)) {
+                final String stringBetweenParentheses = getStringBetweenParentheses(text);
+                return "(" + translateToEnglish(langFrom, stringBetweenParentheses, addToDictionary, dictionary) + ")";
+            }
+        }
+
+        final String comma = ", ";
+        if (text.contains(comma)) {
+            final String firstPart = text.split(comma)[0];
+            final String secondPart = text.split(comma)[1];
+            final String translatedFirstPart = translateToEnglish(langFrom, firstPart, addToDictionary, dictionary);
+            final String translatedSecondPart = translateToEnglish(langFrom, secondPart, addToDictionary, dictionary);
+            return translatedFirstPart + comma + translatedSecondPart;
+        }
+
+        String translated = getValueFromDictionary(text, "en", dictionary);
+        if (isTranslated(translated, text)) {
             return translated;
         }
 
         try {
-            translated = translateWithGoogle(languageFrom, "en", text).trim();
-            if (translated.equals(text)) {
+            translated = translateToEnglishWithGoogle(langFrom, text).trim();
+            if (!isTranslated(translated, text)) {
                 return text;
             }
             if (addToDictionary) {
-                addToDictionary(text, translated, languageFrom);
+                addToDictionary(text, translated, langFrom, dictionary);
             }
         } catch (final IOException e) {
-            try {
-                translated = transliterate(text);
-                if (addToDictionary) {
-                    addToDictionary(text, translated, languageFrom);
-                }
-            } catch (final IOException e1) {
-                return text;
-            }
+            e.printStackTrace();
+            return text;
+        }
+        if (startsWithUppercase) {
+            translated = capitalize(translated);
         }
         return translated;
     }
 
-    private static String parseAndTranslate(final String languageTo, String text, final ItemService service) {
-        final String empty = null;
+    public static boolean isTranslated(final String translated, final String original) {
+        return translated != null && !translated.equalsIgnoreCase(original);
+    }
 
-        if (false) { // parsing is turned off
-            return empty;
-        }
-
+    private static String parseAndTranslate(final String languageTo, String text, final List<String> dictionary) {
         final Map<String, String> map = new HashMap<>();
         int i = 0;
         final String s = "#";
         for (final List<String> subList : getAllSubListsSortedBySize(splitIntoWords(text))) {
             final String toTranslate = wordsIntoText(subList);
-            final String translated = getValueFromDictionary(toTranslate, languageTo);
-            if (translated != null) {
+            final String translated = getValueFromDictionary(toTranslate, languageTo, dictionary);
+            if (translated != null && !translated.equalsIgnoreCase(toTranslate)) {
                 final String key = s + i++;
                 text = text.replace(toTranslate, key);
                 map.put(key, translated);
@@ -282,7 +286,6 @@ public class TranslatorUtil {
         }
 
         return text;
-
     }
 
     private static List<List<String>> getAllSubListsSortedBySize(final List<String> words) {
@@ -302,118 +305,140 @@ public class TranslatorUtil {
         return subArrays;
     }
 
-    public static String translateToEnglish(final String languageFrom, final ItemData itemData) {
-        String nameInEnglish = itemData.getName();
-        if (nameInEnglish != null) {
-            return nameInEnglish;
-        } else {
-            final String localizedName = itemData.getLocalizedName();
-            nameInEnglish = getValueFromDictionary(localizedName, languageFrom);
-            if (nameInEnglish == null) {
-                try {
-                    nameInEnglish = translateWithGoogle(languageFrom, "en", localizedName);
-                    addToDictionary(localizedName, nameInEnglish, languageFrom);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return nameInEnglish;
-    }
-
     public static boolean isInEnglish(final String text) {
         return !containsCyrillic(text);
     }
 
     private static boolean containsCyrillic(final String text) {
-        for(int i = 0; i < text.length(); i++) {
-            if(Character.UnicodeBlock.of(text.charAt(i)).equals(Character.UnicodeBlock.CYRILLIC)) {
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.UnicodeBlock.of(text.charAt(i)).equals(Character.UnicodeBlock.CYRILLIC)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static String transliterate(String message){
-        char[] abcCyr =   {' ','а','б','в','г','д','е','ё', 'ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х', 'ц','ч', 'ш','щ','ъ','ы','ь','э', 'ю','я','А','Б','В','Г','Д','Е','Ё', 'Ж','З','И','Й','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х', 'Ц', 'Ч','Ш', 'Щ','Ъ','Ы','Ь','Э','Ю','Я','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-        String[] abcLat = {" ","a","b","v","g","d","e","e","zh","z","i","y","k","l","m","n","o","p","r","s","t","u","f","h","ts","ch","sh","sch", "","i", "","e","ju","ja","A","B","V","G","D","E","E","Zh","Z","I","Y","K","L","M","N","O","P","R","S","T","U","F","H","Ts","Ch","Sh","Sch", "","I", "","E","Ju","Ja","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < message.length(); i++) {
-            for (int x = 0; x < abcCyr.length; x++ ) {
-                if (message.charAt(i) == abcCyr[x]) {
-                    builder.append(abcLat[x]);
-                }
-            }
-        }
-        return builder.toString();
-    }
-
     private static boolean translationResultIsBroken(final String translationResult) {
         return translationResult.contains("??") || translationResult.contains("? ?");
     }
 
-    private static String getValueFromDictionary(String value, final String language) {
-        value = value.trim();
-        final Set<String> lines = FileUtil.getTxtFileLines(FileUtil.getDictionaryFilePath());
-        for (final String line : lines) {
-            if (line.split(DICTIONARY_SEPARATOR).length < 3) {
-                continue;
-            }
+    private static String getValueFromDictionary(String value,
+                                                 final String lang,
+                                                 final List<String> dictionary) {
+        if (value == null) {
+            return null;
+        }
 
-            if (language.equals("en")) {
-                if (line.split(DICTIONARY_SEPARATOR)[2].equals(value)) {
-                    return line.split(DICTIONARY_SEPARATOR)[1];
-                }
-            } else {
-                if (line.contains(language + DICTIONARY_SEPARATOR + value + DICTIONARY_SEPARATOR)) {
-                    final String translated = line.split(DICTIONARY_SEPARATOR)[2];
-                    if (translationResultIsBroken(translated)) {
-                        return null;
+        value = value.trim();
+
+        if (SpecificStringUtil.isEmpty(value)) {
+            return value;
+        }
+
+        if (containsOnlyDigitsAndDash(value)) {
+            return value;
+        }
+
+        final boolean startsWithUppercase = startsWithUppercase(value);
+
+        if (endChars.contains(getLastChar(value)) && value.length() > 1) {
+            final String beforeLastChar = removeLastChar(value);
+            final String translatedBeforeLastChar = getValueFromDictionary(beforeLastChar, lang, dictionary);
+            return value.replaceFirst(beforeLastChar, translatedBeforeLastChar);
+        }
+
+        if (isSingleWord(value)) {
+            if (isName(value)) {
+                String translated = find(value, lang, dictionary);
+                if (isFound(value, translated)) {
+                    if (startsWithUppercase) {
+                        translated = capitalize(translated);
                     }
                     return translated;
                 }
+                try {
+                    final String beforeNumber = value.split(getSubstringWithFirstNumber(value))[0];
+                    final String translatedBeforeNumber = getValueFromDictionary(beforeNumber, lang, dictionary);
+                    return value.replaceFirst(beforeNumber, translatedBeforeNumber);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (startsWithNumber(value)) {
+                final String afterNumber = value.replace(getSubstringWithFirstNumber(value), "");
+                final String translatedAfterNumber = getValueFromDictionary(afterNumber, lang, dictionary);
+                return value.replaceFirst(afterNumber, translatedAfterNumber);
+            }
+
+            if (isBetweenParenthesises(value)) {
+                return "(" + getValueFromDictionary(getStringBetweenParentheses(value), lang, dictionary) + ")";
             }
         }
-        return null;
+
+        String translated = find(value, lang, dictionary);
+        if (startsWithUppercase) {
+            translated = capitalize(translated);
+        }
+        return translated;
+    }
+
+    private static String find(final String value, final String lang, final List<String> dictionary) {
+        String translated = value;
+        for (final String line : dictionary) {
+            if (line.split(DICTIONARY_SEPARATOR).length < 3) {
+                continue;
+            }
+            if (lang.equals("en")) {
+                if (line.split(DICTIONARY_SEPARATOR)[2].equalsIgnoreCase(value)) {
+                    translated = line.split(DICTIONARY_SEPARATOR)[1];
+                    break;
+                }
+            } else {
+                if (line.toLowerCase()
+                        .contains(lang + DICTIONARY_SEPARATOR + value.toLowerCase() + DICTIONARY_SEPARATOR)) {
+                    translated = line.split(DICTIONARY_SEPARATOR)[2];
+                    if (translationResultIsBroken(translated)) {
+                        return value;
+                    }
+                    break;
+                }
+            }
+        }
+        return translated;
+    }
+
+    private static boolean isFound(final String input, final String output) {
+        return !input.equalsIgnoreCase(output);
     }
 
     private static void addToDictionary(final String value,
                                         final String valueInEnglish,
-                                        final String language) throws IOException {
+                                        final String language,
+                                        final List<String> dictionary) {
         if (language.equals("en")) {
             return;
         }
 
         final String newDictionaryLine = createDictionaryLine(language, valueInEnglish, value);
-        final Path dictionaryPath = FileUtil.getDictionaryFilePath();
-        final Set<String> fileContent = FileUtil.getTxtFileLines(dictionaryPath);
-        String foundInDictionary = getValueFromDictionary(valueInEnglish, language);
+        String foundInDictionary = getValueFromDictionary(valueInEnglish, language, dictionary);
         if (foundInDictionary != null) {
-            fileContent.remove(foundInDictionary);
+            dictionary.remove(foundInDictionary);
         }
-        fileContent.add(newDictionaryLine);
-        Files.write(dictionaryPath, getSortedFileLines(fileContent), StandardCharsets.UTF_8);
+        dictionary.add(newDictionaryLine);
     }
 
-    private static List<String> getSortedFileLines(final Set<String> fileContent) {
-        final List<String> sortedFileContent = new ArrayList<>(fileContent);
-        sortedFileContent.sort(String::compareTo);
-        return sortedFileContent;
+    private static String createDictionaryLine(final String lang,
+                                               final String valueInEnglish,
+                                               final String value) {
+        return lang + DICTIONARY_SEPARATOR + valueInEnglish + DICTIONARY_SEPARATOR + value;
     }
 
-    private static String createDictionaryLine(final String languageCode,
-                                               final String valueInDefaultLanguage,
-                                               final String valueInSpecifiedLanguage) {
-        return languageCode
-                + DICTIONARY_SEPARATOR + valueInDefaultLanguage
-                + DICTIONARY_SEPARATOR + valueInSpecifiedLanguage;
-    }
-
-    private static String translateWithGoogle(final String languageFrom,
-                                              final String languageTo,
-                                              final String s) throws IOException {
-
-        final String urlString = getUrlString(languageFrom, languageTo, s);
+    private static String translateToEnglishWithGoogle(final String langFrom, final String text) throws IOException {
+        final String urlString = "https://translate.googleapis.com/translate_a/single?client=gtx&" +
+                "sl=" + langFrom +
+                "&tl=" + "en" +
+                "&dt=t&q=" + URLEncoder.encode(text, "UTF-8");
 
         final URL url = new URL(urlString);
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -428,23 +453,21 @@ public class TranslatorUtil {
         }
 
         in.close();
-        return getTranslation(response.toString());
+
+        final JSONArray jsonArray = new JSONArray(response.toString());
+        final JSONArray jsonArray2 = (JSONArray) jsonArray.get(0);
+        final JSONArray jsonArray3 = (JSONArray) jsonArray2.get(0);
+        return jsonArray3.get(0).toString();
     }
 
-    private static String getUrlString(final String sourceLanguage,
-                                       final String toLanguage,
-                                       final String stringToTranslate) throws UnsupportedEncodingException {
-        return "https://translate.googleapis.com/translate_a/single?client=gtx&" +
-                "sl=" + sourceLanguage +
-                "&tl=" + toLanguage +
-                "&dt=t&q=" + URLEncoder.encode(stringToTranslate, "UTF-8");
+    public static void addLang(final String lang) {
+        final Set<String> langs = new HashSet<>(getTxtFileTextLines(LANGS));
+        langs.add(lang);
+        FileUtil.createFile(LANGS, new ArrayList<>(langs));
     }
 
-    private static String getTranslation(final String inputJson) {
-        final JSONArray jsonArray = new JSONArray(inputJson); // [[["नमस्ते","hello",,,1]],,"en"]
-        final JSONArray jsonArray2 = (JSONArray) jsonArray.get(0); // [["नमस्ते","hello",,,1]]
-        final JSONArray jsonArray3 = (JSONArray) jsonArray2.get(0); // ["नमस्ते","hello",,,1]
-        return jsonArray3.get(0).toString(); // "नमस्ते"
+    public static Path getDictionaryFilePath(final String lang) {
+        return getTxtFilePath(FileName.DICTIONARY + "_" + lang);
     }
 
 }

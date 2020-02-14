@@ -5,6 +5,7 @@ import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.Link;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.entity.factory.LinkFactory;
+import org.apache.commons.validator.routines.UrlValidator;
 
 public class LinkUtil {
 
@@ -68,13 +69,17 @@ public class LinkUtil {
         }
     }
 
-    private static Link getLink(final String linkType, final Item item) {
+    public static Link getLink(final String linkType, final Item item) {
         for (final Link link : item.getLinks()) {
-            if (link.getType().equalsIgnoreCase(linkType)) {
+            if (link != null && link.getType().equalsIgnoreCase(linkType)) {
                 return link;
             }
         }
         return null;
+    }
+
+    public static boolean isUrl(final String s) {
+        return UrlValidator.getInstance().isValid(s);
     }
 
 }

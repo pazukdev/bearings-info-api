@@ -6,11 +6,11 @@ import lombok.EqualsAndHashCode;
 /**
  * @author Siarhei Sviarkaltsau
  */
-@Data
 @EqualsAndHashCode(callSuper = true)
-public class ImgViewData extends AbstractDto {
+@Data
+public class AdminMessage extends Message {
 
-    private String img;
-    private String defaultImg;
+    private String link;
+    private String linkText;
 
 }

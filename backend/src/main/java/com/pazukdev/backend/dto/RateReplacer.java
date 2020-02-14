@@ -17,5 +17,6 @@ public class RateReplacer implements Serializable {
     private Long itemId;
     private LikeListDto likeList;
     private List<NestedItemDto> replacers;
+    private int newUserRating;
 
 }

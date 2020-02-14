@@ -1,9 +1,10 @@
 package com.pazukdev.backend.dto.view;
 
+import com.pazukdev.backend.dto.AdminMessage;
 import com.pazukdev.backend.dto.LikeListDto;
 import com.pazukdev.backend.dto.NestedItemDto;
+import com.pazukdev.backend.dto.UserActionDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
-import com.pazukdev.backend.dto.table.PartsTable;
 import com.pazukdev.backend.dto.table.ReplacersTable;
 import com.pazukdev.backend.dto.user.UserDto;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class ItemView extends AbstractView {
 
     private boolean searchEnabled;
     private boolean newItem;
-    private boolean hardDelete;
+    private boolean hardDelete = true;
     private boolean partsEnabled = true;
     private boolean ordinaryItem;
     private Long itemId;
@@ -33,22 +34,29 @@ public class ItemView extends AbstractView {
     private String localizedCategory = "-";
     private String localizedName = "-";
     private UserDto userData;
+    private UserDto creatorData;
     private HeaderTable header;
-    private PartsTable partsTable;
+    private List<NestedItemDto> children = new ArrayList<>();
+    private List<NestedItemDto> allChildren = new ArrayList<>();
     private ReplacersTable replacersTable;
     private List<NestedItemDto> possibleParts = new ArrayList<>();
     private List<NestedItemDto> possibleReplacers = new ArrayList<>();
     private List<String> allCategories = new ArrayList<>();
     private Set<Long> idsToRemove = new HashSet<>();
-    private Long creatorId;
-    private String creatorName;
     private Set<Long> wishListIds = new HashSet<>();
+    private Set<String> adminMessages = new HashSet<>();
+    private String errorMessage = "-";
     private LikeListDto likeList;
+    private ItemView parents;
     private String wikiLink;
     private String websiteLink;
     private String websiteLang;
     private double businessLogicTime;
     private double translationTime;
     private double responseTotalTime;
+    private AdminMessage adminMessage;
+    private List<UserActionDto> lastVehicles = new ArrayList<>();
+    private List<UserActionDto> lastReplacers = new ArrayList<>();
+//    private DictionaryData dictionaryData;
 
 }

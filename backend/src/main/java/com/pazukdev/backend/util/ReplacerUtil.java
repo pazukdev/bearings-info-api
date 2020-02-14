@@ -9,32 +9,40 @@ import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.pazukdev.backend.util.NestedItemUtil.prepareNestedItemDtosToConverting;
+import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
 public class ReplacerUtil {
 
     public static List<Replacer> createReplacers(final TransitiveItem transitiveItem,
                                                  final ItemService itemService,
-                                                 final TransitiveItemService transitiveItemService) {
+                                                 final TransitiveItemService transitiveItemService,
+                                                 final List<String> infoCategories) {
         final List<Replacer> replacers = new ArrayList<>();
         final String replacersSourceString = transitiveItem.getReplacer();
+        if (isEmpty(replacersSourceString)) {
+            return replacers;
+        }
         if (replacersSourceString == null || replacersSourceString.equals("-")) {
             return replacers;
         }
-        for (final String replacerData : Arrays.asList(replacersSourceString.split("; "))) {
+        for (final String replacerData : replacersSourceString.split("; ")) {
             String replacerName;
             String comment = null;
-            if (SpecificStringUtil.containsParentheses(replacerData)) {
-                replacerName = SpecificStringUtil.getStringBeforeParentheses(replacerData);
-                comment = SpecificStringUtil.getStringBetweenParentheses(replacerData);
+            if (containsParentheses(replacerData)) {
+                replacerName = getStringBeforeParentheses(replacerData);
+                comment = getStringBetweenParentheses(replacerData);
             } else {
                 replacerName = replacerData;
             }
             final String category = transitiveItem.getCategory();
             final TransitiveItem transitiveReplacerItem = transitiveItemService.find(category, replacerName);
-            final Item replacerItem = itemService.getOrCreate(transitiveReplacerItem);
+            final Item replacerItem = itemService.create(transitiveReplacerItem, infoCategories);
 
             final Replacer replacer = new Replacer();
             replacer.setName(NestedItemUtil.createName(transitiveItem.getName(), replacerName));
@@ -57,7 +65,7 @@ public class ReplacerUtil {
 
         final Set<Replacer> replacersFromItemView = new HashSet<>();
         for (final NestedItemDto dto : dtos) {
-            final Item replacerItem = itemService.getOne(dto.getItemId());
+            final Item replacerItem = itemService.findOne(dto.getItemId());
 
             final Replacer replacer = new Replacer();
             replacer.setId(dto.getId());

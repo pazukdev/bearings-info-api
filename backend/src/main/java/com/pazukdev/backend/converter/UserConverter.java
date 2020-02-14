@@ -1,6 +1,7 @@
 package com.pazukdev.backend.converter;
 
 import com.pazukdev.backend.converter.abstraction.EntityDtoConverter;
+import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.dto.user.UserDto;
 import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.UserEntity;
@@ -31,14 +32,18 @@ public class UserConverter implements EntityDtoConverter<UserEntity, UserDto> {
     }
 
     public UserView convertToUserView(final UserEntity user) {
+        final ImgViewData imgViewData = ImgUtil.getImg(user);
+
         final UserView userView = new UserView();
         userView.setId(user.getId());
         userView.setName(user.getName());
         userView.setRole(user.getRole().toString().toLowerCase());
         userView.setRating(user.getRating().toString());
         userView.setEmail(user.getEmail());
-        userView.setImg(ImgUtil.getImg(user));
+        userView.setImg(imgViewData.getImg());
+        userView.setDefaultImg(imgViewData.getDefaultImg());
         userView.setCountry(user.getCountry());
+        userView.setStatus(user.getStatus());
         return userView;
     }
 

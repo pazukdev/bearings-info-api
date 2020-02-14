@@ -17,7 +17,7 @@ public class WishListService extends AbstractService<WishList, WishListDto> {
     }
 
     @Override
-    public WishList findByName(final String name) {
+    public WishList findFirstByName(final String name) {
         return ((WishListRepository) repository).findByName(name);
     }
 
