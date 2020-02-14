@@ -19,10 +19,6 @@ import javax.persistence.Table;
 @Table(name = "child_item")
 public class ChildItem extends AbstractEntity {
 
-//    @OneToOne(
-//            fetch = FetchType.EAGER,
-//            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
-//    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OneToOne
     @JoinColumn(name = "item_id")
     private Item item;

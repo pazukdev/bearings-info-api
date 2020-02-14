@@ -19,10 +19,6 @@ import javax.persistence.Table;
 @Table(name = "replacer")
 public class Replacer extends AbstractEntity {
 
-//    @OneToOne(
-//            fetch = FetchType.EAGER,
-//            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
-//    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OneToOne
     @JoinColumn(name = "item_id")
     private Item item;

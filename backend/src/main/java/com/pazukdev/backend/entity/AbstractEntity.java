@@ -15,7 +15,6 @@ public abstract class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-//    @NotNull
     @Column(name = "name")
     private String name = "-";
     private String status = "active";
