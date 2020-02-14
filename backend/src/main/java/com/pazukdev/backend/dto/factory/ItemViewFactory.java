@@ -384,7 +384,7 @@ public class ItemViewFactory {
     private ItemView removeItem(final ItemView view,
                                 final UserEntity user,
                                 final UserService userService) {
-        removeItems (view.getIdsToRemove(), user, userService);
+        removeItems(view.getIdsToRemove(), user, userService);
         view.getIdsToRemove().clear();
         view.setWishListIds(collectIds(user.getWishList().getItems()));
         return view;
@@ -405,7 +405,7 @@ public class ItemViewFactory {
         itemToRemove.setStatus(Status.DELETED);
         itemToRemove.setUserActionDate(DateUtil.now());
         itemService.update(itemToRemove);
-        processItemAction(ActionType.DELETE, itemToRemove, user, itemService);
+//        processItemAction(ActionType.DELETE, itemToRemove, user, itemService);
     }
 
     private void removeItemFromAllWishLists(final Item itemToRemove, final UserService userService) {

@@ -3,6 +3,7 @@ package com.pazukdev.backend.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -15,7 +16,7 @@ public abstract class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-//    @NotNull
+    @NotNull
     @Column(name = "name")
     private String name = "-";
     private String status = "active";
