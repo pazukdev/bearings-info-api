@@ -25,7 +25,7 @@ public class UserAction extends AbstractEntity {
     @Column(name = "action_type")
     private String actionType = "-";
     @Column(name = "parent_item_id")
-    private Long parentItemId;
+    private Long parentItemId = 0L;
     @Column(name = "item_id")
     private Long itemId;
     @Column(name = "item_type")
