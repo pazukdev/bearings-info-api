@@ -1,16 +1,19 @@
-Category:,Rolling element,,,,,,
-Name,Type,"Size, mm",Standard,Manufacturer,Material,Replacer,Image
-6601209,Cylindrical roller,5x12,-,USSR,SHH-15,610A0512,-
-7201209,Cylindrical roller,7x10,-,USSR,SHH-15,ZRB7X10,-
-610A0512,Cylindrical roller,5x12,-,Kawasaki,-,-,rolling_element_610A0512.png
-Ball,Ball,-,-,-,-,-,-
-Needle,Needle,-,-,-,-,-,-
-Needle 2.5x10,Needle,2.5x10,GOST 6870-54,USSR,-,NRB 2.5x9.8-G2,rolling_element_needle_2.5x10.png
-Needle 3x15.8,Needle,3x15.8,-,USSR,-,NRB 3x15.8-G2,rolling_element_needle_3x15.8.png
-NRB 2.5x9.8-G2,Needle,2.5x9.8,-,INA,-,-,-
-NRB 3x15.8-G2,Needle,3x15.8,-,INA,-,-,rolling_element_nrb_3x15.8-g2.png
-Roller,Roller,-,-,-,-,-,-
-Roller 6.5x6.5,Cylindrical roller,6.5x6.5,-,USSR,SHH-15,ZRB 6.5x6.5,rolling_element_roller_6.5x6.5.png
-Tapered roller,Tapered roller,-,-,-,-,-,-
-ZRB 6.5x6.5,Cylindrical roller,6.5x6.5,-,INA,-,-,-
-ZRB7X10,Cylindrical roller,7x10,DIN 1/1/5402,INA,-,-,-
+Category:,Rolling element,,,,,,,,,
+Name,Type,"Size, mm",Standard,Manufacturer,Material,Wiki,Website,Website lang,Replacer,Image
+Ball,Ball,-,-,-,-,-,-,-,-,-
+Ball D5.556,Ball,5.556,-,-,ШХ-15,https://aprom.by/cgi-bin/boardauto.pl?&words=948066&sharrol=1,-,-,-,-
+Ball D11.112mm,Ball,11.112,-,-,ШХ-15,https://aprom.by/cgi-bin/boardauto.pl?&words=207&sharrol=1,-,-,-,-
+Roller 2.5x10,Roller,2.5x10,GOST 6870-54,USSR,-,-,-,-,NRB 2.5x9.8-G2,https://drive.google.com/open?id=1D6odD3a7ft3xXNBh0vh288FWUm7cSPbn
+Roller 3x15.8,Roller,3x15.8,-,USSR,-,-,-,-,NRB 3x15.8-G2,https://drive.google.com/open?id=11pne_4V98K6wYMn2enKbVv67PQ3KCU2r
+Roller 5x12,Roller,5x12,-,USSR,-,https://aprom.by/cgi-bin/boardauto.pl?&words=864708&sharrol=1,-,-,-,-
+NRB 2.5x9.8-G2,Roller,2.5x9.8,-,INA,-,-,-,-,-,-
+NRB 3x15.8-G2,Roller,3x15.8,-,INA,-,-,-,-,-,https://drive.google.com/open?id=1-CO4uveLOKin46lBYGXqd7Qe7BxtzuyH
+Roller,Roller,-,-,-,-,-,-,-,-,-
+6601209,"Roller, cylindrical",5x12,-,USSR,ШХ-15,-,-,-,610A0512,-
+7201209,"Roller, cylindrical",7x10,-,USSR,ШХ-15,-,-,-,ZRB7X10,-
+610A0512,"Roller, cylindrical",5x12,-,Kawasaki,-,-,-,-,-,https://drive.google.com/open?id=1KdD9B8i3lB4vyi6wqwrIvpxbhDdS-2CQ
+Roller 6.5x6.5,"Roller, cylindrical",6.5x6.5,-,USSR,ШХ-15,https://aprom.by/cgi-bin/boardauto.pl?&words=12204&sharrol=1,-,-,ZRB 6.5x6.5,https://drive.google.com/open?id=1ng5WGSFL-jynEsmDP-s7EQW2C9mMve0Q
+Roller 10x10,"Roller, cylindrical",10x10,-,USSR,ШХ-15,https://aprom.by/cgi-bin/boardauto.pl?&words=42209&sharrol=1,-,-,-,-
+ZRB 6.5x6.5,"Roller, cylindrical",6.5x6.5,-,INA,-,-,-,-,-,-
+ZRB7X10,"Roller, cylindrical",7x10,DIN 1/1/5402,INA,-,-,-,-,-,-
+Tapered roller,"Roller, tapered",-,-,-,-,-,-,-,-,-

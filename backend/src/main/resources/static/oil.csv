@@ -1,22 +1,26 @@
-Category:,Oil,,,,,,
-Usage,Name,"Viscosity, SAE",Base,Seasonality,Manufacturer,Replacer,Image
-Motor,M8,20W-20,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
-Motor,SAE 50 Mineral,50,Mineral,Summer use,-,-,-
-Motor,20W-50 Mineral,20W-50,Mineral,Multigrade,Areca; Mannol,-,-
-Motor,25W-70 Mineral,25W-70,Mineral,Multigrade,-,-,-
-Motor,15W-50 Semisynthetic,15W-50,Semisynthetic,Multigrade,-,-,-
-Motor,SAE 60 Synthetic,60,Synthetic,Summer use,-,-,-
-Motor,5W-50 Synthetic,5W-50,Synthetic,Multigrade,-,-,-
-Motor,5W-60 Synthetic,5W-60,Synthetic,Multigrade,-,-,-
-Motor,10W-50 Synthetic,10W-50,Synthetic,Multigrade,-,-,-
-Motor,10W-60 Synthetic,10W-60,Synthetic,Multigrade,Agip; Eni; Mannol,-,-
-Motor,15W-50 Synthetic,15W-50,Synthetic,Multigrade,-,-,-
-Motor,20W-50 Synthetic,20W-50,Synthetic,Multigrade,-,-,-
-Motor,20W-60 Synthetic,20W-60,Synthetic,Multigrade,-,-,-
-Gear,Gear oil for gearbox,-,Mineral,Multigrade,-,80W-90; 85W-90; 75W-90,-
-Gear,Gear oil for final drive,-,Mineral,Multigrade,-,85W-140; 80W-140,-
-Gear,80W-90,80W-90,Mineral,Multigrade,-,-,-
-Gear,85W-90,85W-90,Mineral,Multigrade,-,-,-
-Gear,85W-140,85W-140,Mineral,Multigrade,-,-,-
-Gear,75W-90,75W-90,Synthetic,Multigrade,-,-,-
-Gear,80W-140,80W-140,Synthetic,Multigrade,-,-,-
+Category:,Oil,,,,,,,
+Usage,Name,"Viscosity, SAE",Standard,Base,Seasonality,Manufacturer,Replacer,Image
+Motor / gear,АК-10,-,GOST 1862-57,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
+Motor / gear,АК-15,-,GOST 1862-57,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
+Motor,М-8,20W-20,-,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
+Motor,М-12В,-,-,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
+Motor,М-12Б,-,-,Mineral,Multigrade,USSR,SAE 50 Mineral; 20W-50 Mineral; 25W-70 Mineral; 15W-50 Semisynthetic; SAE 60 Synthetic; 5W-50 Synthetic; 5W-60 Synthetic; 10W-50 Synthetic; 10W-60 Synthetic; 15W-50 Synthetic; 20W-50 Synthetic; 20W-60 Synthetic,-
+Motor,SAE 50 Mineral,50,-,Mineral,Summer use,-,-,-
+Motor,20W-50 Mineral,20W-50,-,Mineral,Multigrade,Areca; Mannol,-,-
+Motor,25W-70 Mineral,25W-70,-,Mineral,Multigrade,-,-,-
+Motor,15W-50 Semisynthetic,15W-50,-,Semisynthetic,Multigrade,-,-,-
+Motor,SAE 60 Synthetic,60,-,Synthetic,Summer use,-,-,-
+Motor,5W-50 Synthetic,5W-50,-,Synthetic,Multigrade,-,-,-
+Motor,5W-60 Synthetic,5W-60,-,Synthetic,Multigrade,-,-,-
+Motor,10W-50 Synthetic,10W-50,-,Synthetic,Multigrade,-,-,-
+Motor,10W-60 Synthetic,10W-60,-,Synthetic,Multigrade,Agip; Eni; Mannol,-,-
+Motor,15W-50 Synthetic,15W-50,-,Synthetic,Multigrade,-,-,-
+Motor,20W-50 Synthetic,20W-50,-,Synthetic,Multigrade,-,-,-
+Motor,20W-60 Synthetic,20W-60,-,Synthetic,Multigrade,-,-,-
+Gear,Gear oil for gearbox,-,-,Mineral,Multigrade,-,80W-90; 85W-90; 75W-90,-
+Gear,Gear oil for final drive,-,-,Mineral,Multigrade,-,85W-140; 80W-140,-
+Gear,80W-90,80W-90,-,Mineral,Multigrade,-,-,-
+Gear,85W-90,85W-90,-,Mineral,Multigrade,-,-,-
+Gear,85W-140,85W-140,-,Mineral,Multigrade,-,-,-
+Gear,75W-90,75W-90,-,Synthetic,Multigrade,-,-,-
+Gear,80W-140,80W-140,-,Synthetic,Multigrade,-,-,-
