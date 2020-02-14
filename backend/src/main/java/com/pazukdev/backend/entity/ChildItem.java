@@ -4,10 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -19,11 +16,11 @@ import javax.persistence.Table;
 @Table(name = "child_item")
 public class ChildItem extends AbstractEntity {
 
-//    @OneToOne(
-//            fetch = FetchType.EAGER,
-//            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
+    @OneToOne(
+            fetch = FetchType.EAGER,
+            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
 //    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @OneToOne
+//    @OneToOne
     @JoinColumn(name = "item_id")
     private Item item;
     private String location = "-";
