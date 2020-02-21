@@ -1,5 +1,5 @@
 Category:,Seal,,,,,,,,
-"Size, mm",Name,Manufacturer,Seal direction,Material,Replacer,Wiki,Website,Website lang,Image
+"Size, mm",Name,Manufacturer,Direction,Material,Replacer,Wiki,Website,Website lang,Image
 11.5x25.1x7,6204147,USSR,-,-,OAS-12X25x7-NBR,-,-,-,-
 11x6.5x11,6326155,USSR,-,Oil-resistant rubber,-,-,-,-,https://drive.google.com/open?id=1dYUCtjfGxcY_yvo7HQ9YH_vH1L1hoauy
 11x6.5x11,7203213,USSR,-,Felt,-,-,-,-,https://drive.google.com/open?id=1v54cB-ui7Hc6PUd4nR4D3QwXUsV3gVzy
@@ -88,3 +88,6 @@ Felt seal 4 mm thickness,7206114,USSR,-,Felt,-,-,-,-,-
 Felt seal 4.5 mm thickness,7204116,USSR,-,Felt,-,-,-,-,-
 Felt seal 4.5 mm thickness,7204142,USSR,-,Felt,-,-,-,-,-
 Felt seal 6 mm thickness,5308156,USSR,-,Felt,-,-,-,-,-
+17x30x7,17x30x7,East Germany,-,-,01019951B; 01002180B,-,-,-,-
+17x30x7,01019951B,Corteco,-,FPM,-,http://ecatcorteco.com/web/corteco/en_GB/$catalogue/140/$product/01019951B_2048/datasheet.xhtml,-,-,https://ecatcorteco.com/pim/upload/cortecoImages/image/web/babduo_bmp.png
+17x30x7,01002180B,Corteco,-,NBR,-,http://ecatcorteco.com/web/corteco/en_GB/$catalogue/140/$product/01002180B_2048/datasheet.xhtml,-,-,https://ecatcorteco.com/pim/upload/cortecoImages/image/web/badsl_bmp.png

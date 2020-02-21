@@ -2,7 +2,6 @@ package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.NestedItemDto;
-import com.pazukdev.backend.dto.UserActionDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.dto.table.ReplacersTable;
@@ -65,15 +64,6 @@ public class TranslatorUtil {
             view.setAllChildren(translateItemDtoList(langFrom, langTo, view.getAllChildren(), dictionary));
             view.setPossibleParts(translateItemDtoList(langFrom, langTo, view.getPossibleParts(), dictionary));
             view.setPossibleReplacers(translateItemDtoList(langFrom, langTo, view.getPossibleReplacers(), dictionary));
-            if (view.getAdminMessage() != null) {
-                view.getAdminMessage().translate(langTo, dictionary);
-            }
-            for (final UserActionDto userAction : view.getLastVehicles()) {
-                userAction.translate(langTo, dictionary);
-            }
-            for (final UserActionDto userAction : view.getLastReplacers()) {
-                userAction.translate(langTo, dictionary);
-            }
 
             if (view.getParents() != null) {
                 translate(langFrom, langTo, view.getParents(), addToDictionary, dictionary);
@@ -125,8 +115,10 @@ public class TranslatorUtil {
                                                            final String langTo,
                                                            final List<NestedItemDto> dtos,
                                                            final List<String> dictionary) {
-        for (final NestedItemDto dto : dtos) {
-            dto.translate(langFrom, langTo, dictionary);
+        if (langFrom.equals("en")) {
+            for (final NestedItemDto dto : dtos) {
+                dto.translateToLang(langTo, dictionary);
+            }
         }
         return dtos;
     }

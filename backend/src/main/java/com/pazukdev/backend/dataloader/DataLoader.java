@@ -82,7 +82,7 @@ public class DataLoader implements ApplicationRunner {
         user.setRole(role);
         user.setPassword(password);
         if (name.equalsIgnoreCase("admin")) {
-            user.setEmail("pazuk1985@gmail.com");
+            user.setEmail("pazukdev@gmail.com");
             user.setImg("https://drive.google.com/open?id=1iuDdjYXtphxQ8UlQD-jjWYnEb_JC9OcG");
             user.setCountry("ZW");
         } else if (name.equalsIgnoreCase("dominator")) {

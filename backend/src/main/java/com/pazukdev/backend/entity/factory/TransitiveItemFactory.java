@@ -1,5 +1,6 @@
 package com.pazukdev.backend.entity.factory;
 
+import com.pazukdev.backend.entity.AbstractEntity;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.service.TransitiveItemService;
 import com.pazukdev.backend.tablemodel.TableRow;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static com.pazukdev.backend.util.CategoryUtil.Category;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.*;
 import static com.pazukdev.backend.util.CategoryUtil.isDescriptionIgnored;
 
@@ -40,10 +42,13 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         super.applyCharacteristics(item, tableRow);
 
         applyCategory(item, tableRow);
+        final boolean vehicle = item.getCategory().equals(Category.VEHICLE);
+
+        applyStatus(item, tableRow, vehicle);
         applyImage(item, tableRow);
         applyDescription(item, tableRow);
         applyReplacers(item, tableRow);
-        applyLinks(item, tableRow);
+        applyLinks(item, tableRow, vehicle);
     }
 
     private void applyCategory(final TransitiveItem item, final TableRow tableRow) {
@@ -53,6 +58,14 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
 
     private void applyImage(final TransitiveItem item, final TableRow tableRow) {
         item.setImage(tableRow.getData().get(IMAGE));
+    }
+
+    protected void applyStatus(final AbstractEntity entity, final TableRow tableRow, final boolean vehicle) {
+        if (!vehicle) {
+            return;
+        }
+        final String status = tableRow.getData().get(STATUS);
+        entity.setStatus(status != null ? status : "active");
     }
 
     private void applyDescription(final TransitiveItem item, final TableRow tableRow) {
@@ -72,10 +85,15 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         item.setReplacer(replacer != null ? replacer : "-");
     }
 
-    private void applyLinks(final TransitiveItem item, final TableRow tableRow) {
+    private void applyLinks(final TransitiveItem item, final TableRow tableRow, final boolean vehicle) {
         item.setWiki(tableRow.getData().get(WIKI));
         item.setWebsite(tableRow.getData().get(WEBSITE));
         item.setWebsiteLang(tableRow.getData().get(WEBSITE_LANG));
+        if (vehicle) {
+            item.setManual(tableRow.getData().get(MANUAL));
+            item.setParts(tableRow.getData().get(PARTS_CATALOG));
+            item.setDrawings(tableRow.getData().get(DRAWINGS));
+        }
     }
 
 }

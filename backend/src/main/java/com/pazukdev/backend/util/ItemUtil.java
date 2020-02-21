@@ -1,6 +1,5 @@
 package com.pazukdev.backend.util;
 
-import com.pazukdev.backend.dto.ItemQuantity;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.table.HeaderTable;
@@ -16,9 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.pazukdev.backend.util.CategoryUtil.Category.MANUFACTURER;
-import static com.pazukdev.backend.util.CategoryUtil.Category.SEAL;
-import static com.pazukdev.backend.util.CategoryUtil.Parameter.SIZE;
 import static com.pazukdev.backend.util.CategoryUtil.isAddManufacturer;
 import static com.pazukdev.backend.util.CategoryUtil.isInfo;
 import static com.pazukdev.backend.util.FileUtil.*;
@@ -38,7 +34,7 @@ public class ItemUtil {
     public enum SpecialItemId {
 
         ITEMS_MANAGEMENT_VIEW(-1L),
-        MOTORCYCLE_CATALOGUE_VIEW(-2L),
+        VEHICLES_VIEW(-2L),
         WISH_LIST_VIEW(-3L),
         USER_LIST_VIEW(-4L);
 
@@ -56,28 +52,6 @@ public class ItemUtil {
                 item.setCategory("-");
             }
             categories.add(item.getCategory());
-        }
-        return categories;
-    }
-
-    public static Set<String> getItemQuantityCategories(final List<ItemQuantity> items) {
-        final Set<String> categories = new HashSet<>();
-        for (final ItemQuantity item : items) {
-            if (item.getItem().getCategory() == null) {
-                item.getItem().setCategory("-");
-            }
-            categories.add(item.getItem().getCategory());
-        }
-        return categories;
-    }
-
-    public static Set<String> getChildItemsCategories(final List<ChildItem> childItems) {
-        final Set<String> categories = new HashSet<>();
-        for (final ChildItem childItem : childItems) {
-            if (childItem.getItem().getCategory() == null) {
-                childItem.getItem().setCategory("-");
-            }
-            categories.add(childItem.getItem().getCategory());
         }
         return categories;
     }
@@ -182,32 +156,6 @@ public class ItemUtil {
         } else {
             return item.getName();
         }
-    }
-
-    public static String createSelectText(final Item item,
-                                          final String manufacturer,
-                                          final Map<String, String> descriptionMap) {
-        final String itemCategory = item.getCategory();
-        final String itemName = item.getName();
-        final boolean addManufacturer = isAddManufacturer(item, manufacturer, true);
-        if (itemCategory.equals(SEAL)) {
-            return descriptionMap.get(SIZE) + " " + (addManufacturer ? manufacturer + " " : "") + itemName;
-        }
-        if (addManufacturer) {
-            return manufacturer + " " + itemName;
-        }
-        return itemName;
-    }
-
-    public static Item getUssrSealBySize(final String searchingSize, final ItemService itemService) {
-        final List<Item> ussrSeals = filter(itemService.find(SEAL), MANUFACTURER, "USSR");
-        for (Item seal : ussrSeals) {
-            final String actualSize = getValueFromDescription(seal.getDescription(), SIZE);
-            if (actualSize.equals(searchingSize)) {
-                return seal;
-            }
-        }
-        return null;
     }
 
     public static List<Item> filter(final List<Item> items,

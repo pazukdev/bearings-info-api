@@ -3,23 +3,17 @@ package com.pazukdev.backend.service;
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.converter.ItemConverter;
 import com.pazukdev.backend.converter.ReplacerConverter;
-import com.pazukdev.backend.dto.AdminMessage;
 import com.pazukdev.backend.dto.RateReplacer;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.TransitiveItemDto;
 import com.pazukdev.backend.dto.factory.ItemViewFactory;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
-import com.pazukdev.backend.repository.ChildItemRepository;
-import com.pazukdev.backend.repository.ItemRepository;
-import com.pazukdev.backend.repository.ReplacerRepository;
-import com.pazukdev.backend.repository.UserActionRepository;
+import com.pazukdev.backend.repository.*;
 import com.pazukdev.backend.util.DateUtil;
 import com.pazukdev.backend.util.LinkUtil;
 import com.pazukdev.backend.util.RateUtil;
-import com.pazukdev.backend.util.UserActionUtil;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,8 +27,7 @@ import static com.pazukdev.backend.util.FileUtil.FileName.INFO_CATEGORIES;
 import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
 import static com.pazukdev.backend.util.ItemUtil.*;
 import static com.pazukdev.backend.util.ReplacerUtil.createReplacers;
-import static com.pazukdev.backend.util.UserActionUtil.processItemAction;
-import static com.pazukdev.backend.util.UserActionUtil.processReplacerAction;
+import static com.pazukdev.backend.util.UserActionUtil.*;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -50,8 +43,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     private final ReplacerRepository replacerRepository;
     private final ReplacerConverter replacerConverter;
     private final ItemRepository itemRepository;
-    @Setter
-    private AdminMessage adminMessage;
+    private final AdminMessageRepository adminMessageRepository;
 
     private int bearingReplacerCounter = 0;
     private int sealReplacerCounter = 0;
@@ -65,7 +57,8 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
                        final UserService userService,
                        final UserActionRepository userActionRepository,
                        final ReplacerRepository replacerRepository,
-                       final ReplacerConverter replacerConverter) {
+                       final ReplacerConverter replacerConverter,
+                       final AdminMessageRepository adminMessageRepository) {
         super(itemRepository, converter);
         this.transitiveItemService = transitiveItemService;
         this.childItemRepository = childItemRepository;
@@ -74,6 +67,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         this.replacerRepository = replacerRepository;
         this.replacerConverter = replacerConverter;
         this.itemRepository = itemRepository;
+        this.adminMessageRepository = adminMessageRepository;
     }
 
     @Transactional
@@ -92,6 +86,13 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     public List<Item> findAll() {
         final List<Item> items = itemRepository.findAll();
         items.removeIf(entity -> !entity.getStatus().equals(Status.ACTIVE));
+        return items;
+    }
+
+    @Transactional
+    public List<Item> findAll(final String status) {
+        final List<Item> items = itemRepository.findAll();
+        items.removeIf(entity -> !entity.getStatus().equals(status));
         return items;
     }
 
@@ -138,7 +139,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         final Item newItem = new Item();
         newItem.setName(name);
         newItem.setCategory(category);
-        newItem.setStatus(Status.ACTIVE);
+        newItem.setStatus(transitiveItem.getStatus());
         newItem.setDescription(createItemDescription(descriptionMap));
         newItem.getChildItems().addAll(childItems);
         newItem.getReplacers().addAll(replacers);
@@ -150,7 +151,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         itemRepository.save(newItem);
 
         if (category.equals(VEHICLE)) {
-            processItemAction(UserActionUtil.ActionType.CREATE, newItem, getUserService().getAdmin(), this);
+            processItemAction(ActionType.CREATE, newItem, getUserService().getAdmin(), this);
         }
 
         for (final Replacer replacer : replacers) {
@@ -158,7 +159,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
                     || (category.equals(SPARK_PLUG) && sparkPlugReplacerCounter++ < 2)
                     || (category.equals(BEARING) && bearingReplacerCounter++ < 2)
                     || (category.equals(OIL_FILTER) && oilFilterReplacerCounter++ < 3)) {
-                processReplacerAction(UserActionUtil.ActionType.ADD, replacer, newItem, getUserService().getAdmin(), this);
+                processReplacerAction(ActionType.ADD, replacer, newItem, getUserService().getAdmin(), this);
             }
         }
 
@@ -171,8 +172,8 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public ItemView createItemsManagementView(final String userName, final String language) {
-        return createNewItemViewFactory().createItemsManagementView(userName, language);
+    public ItemView createItemsListView(final String itemsStatus, final String userName, final String language) {
+        return createNewItemViewFactory().createItemsListView(itemsStatus, userName, language);
     }
 
     @Transactional
@@ -182,7 +183,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
 
     @Transactional
     public ItemView createItemView(final Long itemId, final String userName, final String language) {
-        return createNewItemViewFactory().createItemView(itemId, userName, language);
+        return createNewItemViewFactory().createItemView(itemId, Status.ACTIVE, userName, language);
     }
 
     @Transactional
@@ -215,6 +216,9 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     public Set<String> collectCategories(final List<Item> items) {
         final Set<String> categories = new HashSet<>();
         for (final Item item : items) {
+            if (!item.getStatus().equals(Status.ACTIVE)) {
+                continue;
+            }
             categories.add(item.getCategory());
         }
         return categories;

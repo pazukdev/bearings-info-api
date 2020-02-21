@@ -61,9 +61,13 @@ public class CategoryUtil {
 
         public static class DescriptionIgnored {
             public static final String CATEGORY = "Category";
+            public static final String DRAWINGS = "Drawings";
             public static final String IMAGE = "Image";
+            public static final String MANUAL = "Manual";
             public static final String NAME = "Name";
+            public static final String PARTS_CATALOG = "Parts catalog";
             public static final String REPLACER = "Replacer";
+            public static final String STATUS = "Status";
             public static final String WEBSITE = "Website";
             public static final String WEBSITE_LANG = "Website lang";
             public static final String WIKI = "Wiki";

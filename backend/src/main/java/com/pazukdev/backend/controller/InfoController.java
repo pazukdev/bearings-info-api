@@ -1,6 +1,6 @@
 package com.pazukdev.backend.controller;
 
-import com.pazukdev.backend.dto.AdminMessage;
+import com.pazukdev.backend.entity.AdminMessage;
 import com.pazukdev.backend.service.ItemService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +24,7 @@ public class InfoController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create new message from admin")
     public void setAdminMessage(@RequestBody final AdminMessage adminMessage) {
-        itemService.setAdminMessage(adminMessage);
+        AdminMessage.save(adminMessage, itemService.getAdminMessageRepository());
     }
 
 }

@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.createReplacer;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter;
-import static com.pazukdev.backend.util.ItemUtil.toMap;
 import static com.pazukdev.backend.util.SpecificStringUtil.fixParam;
 import static com.pazukdev.backend.util.SpecificStringUtil.fixValue;
 
@@ -33,14 +32,12 @@ public class TableUtil {
         return replacersTable;
     }
 
-    public static HeaderTable createHeader(final Item item, final ItemService service) {
+    public static HeaderTable createHeader(final Item item,
+                                           final Map<String, String> description,
+                                           final ItemService service) {
         final String itemName = item.getName();
         final String itemCategory = item.getCategory();
-        if (itemCategory == null) {
-            int i = 0;
-        }
         final String tableName = getHeaderTableName(itemCategory, itemName);
-        final Map<String, String> description = toMap(item.getDescription());
 
         final List<HeaderTableRow> headerTableRows = new ArrayList<>();
         headerTableRows.add(HeaderTableRow.create(Parameter.DescriptionIgnored.NAME, itemName, service));

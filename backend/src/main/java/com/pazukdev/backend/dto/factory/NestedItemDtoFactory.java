@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.pazukdev.backend.util.CategoryUtil.*;
-import static com.pazukdev.backend.util.ItemUtil.*;
+import static com.pazukdev.backend.util.ItemUtil.createButtonText;
+import static com.pazukdev.backend.util.ItemUtil.toMap;
 import static com.pazukdev.backend.util.SpecificStringUtil.capitalize;
 import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 
@@ -44,10 +45,9 @@ public class NestedItemDtoFactory {
 
         final NestedItemDto vehicleDto = createBasicNestedItemDto(vehicle, userService);
         vehicleDto.setComment(map.get(Parameter.PRODUCTION));
-        vehicleDto.setSecondComment(vehicle.getImg());
+        vehicleDto.setSecondComment(vehicle.getLink("img"));
         vehicleDto.setItemCategory(map.get(Category.MANUFACTURER));
         vehicleDto.setDeletable(false);
-        vehicleDto.setVehicleIcon(vehicle.getImg());
         vehicleDto.setVehicleClass(map.get(Parameter.CLASS));
 
         return vehicleDto;
@@ -113,7 +113,10 @@ public class NestedItemDtoFactory {
         dto.setItemCategory(item.getCategory());
         dto.setRating(item.getRating());
         dto.setButtonText(createButtonText(item, manufacturer));
-        dto.setSelectText(createSelectText(item, manufacturer, descriptionMap));
+        if (item.getCategory().equals(Category.SEAL)) {
+            dto.setSize(descriptionMap.get(Parameter.SIZE));
+        }
+        dto.setManufacturer(manufacturer);
         dto.setStatus(item.getStatus());
         dto.setCreatorName(creatorName);
         dto.setCreatorId(item.getCreatorId());

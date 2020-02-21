@@ -33,7 +33,7 @@ public class ImgUtil {
     }
 
     public static ImgViewData getImg(final Item item) {
-        final String itemImg = item.getImg();
+        final String itemImg = item.getLink("img");
         final String itemCategory = item.getCategory();
         final String imgPath = getImgPath(itemImg, itemCategory, false);
         final String defaultImgPath = getImgIfItemHasNoSpecificImg(itemCategory);

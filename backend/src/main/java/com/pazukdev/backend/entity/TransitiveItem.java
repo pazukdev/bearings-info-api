@@ -24,6 +24,9 @@ public class TransitiveItem extends AbstractEntity {
     private String replacer = "-";
     private String wiki;
     private String website;
+    private String manual;
+    private String parts;
+    private String drawings;
     @Column(name = "website_lang")
     private String websiteLang;
 

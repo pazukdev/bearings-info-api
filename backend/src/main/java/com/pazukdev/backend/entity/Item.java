@@ -10,6 +10,8 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.pazukdev.backend.util.LinkUtil.LinkType;
+
 /**
  * @author Siarhei Sviarkaltsau
  */
@@ -31,7 +33,7 @@ public class Item extends AbstractEntity {
     private String description;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_child_item",
             joinColumns = @JoinColumn(name = "parent_item_id"),
@@ -40,7 +42,7 @@ public class Item extends AbstractEntity {
     private Set<ChildItem> childItems = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_replacer",
             joinColumns = @JoinColumn(name = "original_item_id"),
@@ -49,7 +51,7 @@ public class Item extends AbstractEntity {
     private Set<Replacer> replacers = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "item_link",
             joinColumns = @JoinColumn(name = "item_id"),
@@ -57,14 +59,8 @@ public class Item extends AbstractEntity {
     )
     private Set<Link> links = new HashSet<>();
 
-    public String getImg() {
-        final Link link = LinkUtil.getLink("img", this);
-        return link != null ? link.getName() : null;
-    }
-
-    public String getWiki() {
-        final Link link = LinkUtil.getLink("wiki", this);
-        return link != null ? link.getName() : null;
+    public String getLink(final String linkType) {
+        return LinkUtil.getLink(linkType, this);
     }
 
     public void setImg(final String img) {
@@ -75,14 +71,14 @@ public class Item extends AbstractEntity {
         }
         if (imgLink == null) {
             imgLink = new Link();
-            imgLink.setType("img");
+            imgLink.setType(LinkType.IMG);
         }
         imgLink.setName(img);
         links.add(imgLink);
     }
 
     private Link getImgLink() {
-        return LinkUtil.getLink("img", this);
+        return LinkUtil.getLink(LinkType.IMG, this.getLinks());
     }
 
 }

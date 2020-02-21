@@ -15,12 +15,12 @@ public class LinkFactory {
         return linkObj;
     }
 
-    public static Link createWikiLink(final String link) {
+    public static Link createLink(final String linkType, final String link) {
         final Link linkObj = createLink(link);
         if (linkObj == null) {
             return null;
         }
-        linkObj.setType("wiki");
+        linkObj.setType(linkType);
         linkObj.setLang("all");
         return linkObj;
     }

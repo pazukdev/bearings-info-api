@@ -11,6 +11,8 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pazukdev.backend.util.CategoryUtil.Parameter;
+
 /**
  * @author Siarhei Sviarkaltsau
  */
@@ -64,8 +66,7 @@ public abstract class AbstractEntityFactory<Entity extends AbstractEntity> {
     }
 
     protected void applyName(final AbstractEntity entity, final TableRow tableRow) {
-        String name = tableRow.getData().get("Name");
-        entity.setName(name);
+        entity.setName(tableRow.getData().get(Parameter.DescriptionIgnored.NAME));
     }
 
     @SuppressWarnings("unchecked")

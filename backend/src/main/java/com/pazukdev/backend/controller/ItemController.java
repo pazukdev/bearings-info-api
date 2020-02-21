@@ -29,11 +29,13 @@ public class ItemController {
         return service.createItemView(id, userName, language);
     }
 
-    @GetMapping("/view/items-management/{userName}/{language}")
+    @GetMapping("/view/items/{status}/{userName}/{language}")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get items management view")
-    public ItemView getAll(@PathVariable final String userName, @PathVariable final String language) {
-        return service.createItemsManagementView(userName, language);
+    @ApiOperation(value = "Get items items list view")
+    public ItemView getAll(@PathVariable(name = "status") final String itemsStatus,
+                           @PathVariable final String userName,
+                           @PathVariable final String language) {
+        return service.createItemsListView(itemsStatus, userName, language);
     }
 
     @GetMapping("/view/home/{userName}/{language}")
