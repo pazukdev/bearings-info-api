@@ -1,3 +1,5 @@
+ru=#1 Pay Pal donation box=#1 Pay Pal ящик для доната
+ru=#2 Yandex donation box=#2 Яндекс ящик для доната
 ru=2 rows=2-рядный
 ru=AL=АЛ
 ru=By using this app you agree to the terms below=Используя данное приложение вы соглашаетесь с условиями ниже
@@ -12,6 +14,7 @@ ru=Dnepr=Днепр
 ru=Dynamic load rating, N=Динамическая нагрузка, Н
 ru=Dynamic load rating=Dynamic load рейтинг
 ru=East Germany=ГДР
+ru=Editing is available in English only=Редактирование доступно только на английском языке
 ru=Exhaust=Выхлоп
 ru=For rear journal only=Для rear journal only
 ru=Forgot password?=Забыли пароль?
@@ -63,6 +66,7 @@ ru=New dictionary accepted=Новый словарь принят
 ru=New parameter=Новый параметр
 ru=New size is=новый размер
 ru=No image=Нет изображения
+ru=Old Vehicles=Старая техника
 ru=Page error. Please return to previous page=Ошибка страницы. Пожалуйсто вернитесь на предыдущую страницу
 ru=Password change via email is temporarily not available=Смена пароля через email временно недоступна
 ru=Piston stroke=Высота поршня
@@ -89,6 +93,7 @@ ru=Ural=Урал
 ru=Value=Значение
 ru=We do not collect any user information implicitly=Мы не собираем никакой информации о пользователе неявным образом
 ru=We do not transfer account information to third parties unless required by the law=Мы не передаем информацию об аккаунте пользователя третьим лицам, если этого не требует закон
+ru=Welcome to app v 2.0 open testing=Открытое тестирование версии 2.0
 ru=Wiki link=ссылка на Wiki
 ru=You can help the project=Вы можете помочь проекту
 ru=Your account has been blocked by the administrator=Ваш аккаунт был заблокирован админом
@@ -195,6 +200,7 @@ ru=gearbox=коробка передач
 ru=general specifications=общие технические условия
 ru=generator=генератор
 ru=germany=германия
+ru=getting data time=время на получение данных
 ru=guest=гость
 ru=half-bearing=вкладыш
 ru=heat range=калильное число
@@ -223,6 +229,7 @@ ru=limiting speed=макс. скорость
 ru=line at a time=строк(у) единовременно
 ru=lines were removed=строк удалено
 ru=lines=строк
+ru=link=ссылка
 ru=links=ссылки
 ru=loading=загружается
 ru=location=расположение
@@ -279,6 +286,7 @@ ru=passwords are different=пароли не совпадают
 ru=pcs/vol=кол-во/объем
 ru=pcs=шт
 ru=pendulum type=маятникового типа
+ru=performance report=скорость работы
 ru=piston assembly=поршень в сборе
 ru=piston pin=поршневой палец
 ru=piston rings=поршневые кольца
@@ -307,6 +315,7 @@ ru=repeat new password=повторить новый пароль
 ru=repeat password=повторить пароль
 ru=replacer=заменитель
 ru=replacers=заменители
+ru=response total time=суммарное время
 ru=role=роль
 ru=roller bearing=роликовый
 ru=roller, cylindrical=ролик, цилиндрический
@@ -370,6 +379,7 @@ ru=tire=шина
 ru=to change password input your old password=для изменения пароля введите ваш старый пароль
 ru=to=к
 ru=torque=крутящий момент
+ru=translation time=время на перевод
 ru=tube=камера
 ru=type=тип
 ru=tyre=шина
