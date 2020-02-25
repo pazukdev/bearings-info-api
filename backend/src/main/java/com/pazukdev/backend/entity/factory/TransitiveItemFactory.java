@@ -44,7 +44,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         applyCategory(item, tableRow);
         final boolean vehicle = item.getCategory().equals(Category.VEHICLE);
 
-        applyStatus(item, tableRow, vehicle);
+        applyStatus(item, tableRow);
         applyImage(item, tableRow);
         applyDescription(item, tableRow);
         applyReplacers(item, tableRow);
@@ -60,10 +60,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         item.setImage(tableRow.getData().get(IMAGE));
     }
 
-    protected void applyStatus(final AbstractEntity entity, final TableRow tableRow, final boolean vehicle) {
-        if (!vehicle) {
-            return;
-        }
+    protected void applyStatus(final AbstractEntity entity, final TableRow tableRow) {
         final String status = tableRow.getData().get(STATUS);
         entity.setStatus(status != null ? status : "active");
     }

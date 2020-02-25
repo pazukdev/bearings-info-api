@@ -257,8 +257,8 @@ public class ItemViewFactory {
 
         view.setChildren(dtos);
         view.setAdminMessage(AdminMessage.getMessage(itemService.getAdminMessageRepository()));
-        view.setLastVehicles(getLast10NewVehicles(itemService));
-        view.setLastReplacers(getLast10NewReplacers(itemService));
+        view.setLastVehicles(getLastNewVehicles(itemService));
+        view.setLastReplacers(getLastNewReplacers(itemService));
         return view;
     }
 

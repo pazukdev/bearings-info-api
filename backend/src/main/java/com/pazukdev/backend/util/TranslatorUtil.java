@@ -95,7 +95,18 @@ public class TranslatorUtil {
             }
 
             row.setParameter(translate(langFrom, langTo, row.getParameter(), false, true, dictionary));
-            row.setValue(translate(langFrom, langTo, row.getValue(), name, addToDictionary, dictionary));
+
+            final String value = row.getValue();
+            if (value.contains("; ")) {
+                String translatedValue = "";
+                for (final String word : value.split("; ")) {
+                    final String translatedWord = translate(langFrom, langTo, word, name, addToDictionary, dictionary);
+                    translatedValue += translatedWord + "; ";
+                }
+                row.setValue(removeLastChar(translatedValue.trim()));
+            } else {
+                row.setValue(translate(langFrom, langTo, value, name, addToDictionary, dictionary));
+            }
         }
 
         return headerTable;
@@ -170,9 +181,10 @@ public class TranslatorUtil {
             return translated;
         } else {
             if (name) {
-                return text;
+                return getValueFromDictionary(text, langTo, dictionary);
             }
-            return translateToEnglish(langFrom, text, addToDictionary, dictionary);
+//            return translateToEnglish(langFrom, text, addToDictionary, dictionary);
+            return parseAndTranslate(langTo, text, dictionary);
         }
     }
 
@@ -260,13 +272,15 @@ public class TranslatorUtil {
         return translated != null && !translated.equalsIgnoreCase(original);
     }
 
-    private static String parseAndTranslate(final String languageTo, String text, final List<String> dictionary) {
+    private static String parseAndTranslate(final String langTo,
+                                            String text,
+                                            final List<String> dictionary) {
         final Map<String, String> map = new HashMap<>();
         int i = 0;
         final String s = "#";
         for (final List<String> subList : getAllSubListsSortedBySize(splitIntoWords(text))) {
             final String toTranslate = wordsIntoText(subList);
-            final String translated = getValueFromDictionary(toTranslate, languageTo, dictionary);
+            final String translated = getValueFromDictionary(toTranslate, langTo, dictionary);
             if (translated != null && !translated.equalsIgnoreCase(toTranslate)) {
                 final String key = s + i++;
                 text = text.replace(toTranslate, key);
@@ -323,7 +337,7 @@ public class TranslatorUtil {
 
         value = value.trim();
 
-        if (SpecificStringUtil.isEmpty(value)) {
+        if (isEmpty(value)) {
             return value;
         }
 

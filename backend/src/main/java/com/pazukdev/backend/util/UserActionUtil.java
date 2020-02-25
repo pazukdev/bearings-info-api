@@ -1,5 +1,6 @@
 package com.pazukdev.backend.util;
 
+import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.dto.UserActionDto;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.repository.UserActionRepository;
@@ -62,7 +63,7 @@ public class UserActionUtil {
         return PageRequest.of(0, size, Sort.Direction.DESC, "id");
     }
 
-    public static List<UserActionDto> getLast10NewVehicles(final ItemService service) {
+    public static List<UserActionDto> getLastNewVehicles(final ItemService service) {
         final UserActionRepository repository = service.getUserActionRepository();
         final String create = ActionType.CREATE;
         final Pageable p = getPageRequest(10);
@@ -70,7 +71,7 @@ public class UserActionUtil {
         return getLastUserActionsReport(actions.getContent(), service);
     }
 
-    public static List<UserActionDto> getLast10NewReplacers(final ItemService service) {
+    public static List<UserActionDto> getLastNewReplacers(final ItemService service) {
         final UserActionRepository repository = service.getUserActionRepository();
         final String add = ActionType.ADD;
         final Pageable p = getPageRequest(10);
@@ -105,7 +106,7 @@ public class UserActionUtil {
 
         final UserEntity user = service.getUserService().findOne(userId);
         final Item item = service.findOne(itemId);
-        if (user == null || item == null) {
+        if (user == null || item == null || !item.getStatus().equals(Status.ACTIVE)) {
             return null;
         }
 
@@ -297,7 +298,8 @@ public class UserActionUtil {
                                           final Item child,
                                           final Item parent,
                                           final String itemType) {
-        return actionType + " " + child.getName() + " to " + parent.getName() + " as " + itemType;
+        final String toOrFrom = actionType.equals("add") ? "to" : "from";
+        return actionType + " " + child.getName() + " " + toOrFrom + " " + parent.getName() + " as " + itemType;
     }
 
     private static UserAction create(final UserEntity user,
