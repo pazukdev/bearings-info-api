@@ -18,8 +18,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static com.pazukdev.backend.dto.DictionaryData.getDictionaryFromFile;
-import static com.pazukdev.backend.util.CategoryUtil.Category;
-import static com.pazukdev.backend.util.CategoryUtil.Parameter;
 import static com.pazukdev.backend.util.FileUtil.*;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
@@ -58,8 +56,10 @@ public class TranslatorUtil {
             translate(langFrom, langTo, replacersTable, dictionary);
             translate(langFrom, langTo, categories, addToDictionary, dictionary);
 
+            boolean name = langTo.equals("en");
+
             view.setLocalizedCategory(translate(langFrom, langTo, category, false, addToDictionary, dictionary));
-            view.setLocalizedName(translate(langFrom, langTo, localizedName, true, false, dictionary));
+            view.setLocalizedName(translate(langFrom, langTo, localizedName, name, false, dictionary));
             view.setChildren(translateItemDtoList(langFrom, langTo, view.getChildren(), dictionary));
             view.setAllChildren(translateItemDtoList(langFrom, langTo, view.getAllChildren(), dictionary));
             view.setPossibleParts(translateItemDtoList(langFrom, langTo, view.getPossibleParts(), dictionary));
@@ -87,11 +87,18 @@ public class TranslatorUtil {
         if (headerTable == null) {
             return null;
         }
+
+        boolean name;
+
         for (final HeaderTableRow row : headerTable.getRows()) {
-            boolean name = row.getName().equalsIgnoreCase(Parameter.DescriptionIgnored.NAME)
-                    || row.getName().equalsIgnoreCase(Category.MANUFACTURER);
-            if (name) {
-                addToDictionary = false;
+            if (!langTo.equals("en")) {
+                name = false;
+            } else {
+                name = row.getName().equalsIgnoreCase(CategoryUtil.Parameter.DescriptionIgnored.NAME)
+                        || row.getName().equalsIgnoreCase(CategoryUtil.Category.MANUFACTURER);
+                if (name) {
+                    addToDictionary = false;
+                }
             }
 
             row.setParameter(translate(langFrom, langTo, row.getParameter(), false, true, dictionary));
