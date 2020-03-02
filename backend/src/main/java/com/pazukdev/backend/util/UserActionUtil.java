@@ -204,6 +204,7 @@ public class UserActionUtil {
         userAction.setActionType(actionType);
         userAction.setActionDate(LocalDateTime.now().toString());
         userAction.setUserId(user.getId());
+        userAction.setItemId(0L);
 
         repository.save(userAction);
     }

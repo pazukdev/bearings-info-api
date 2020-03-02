@@ -40,8 +40,12 @@ public class ReplacerUtil {
             } else {
                 replacerName = replacerData;
             }
-            final String category = transitiveItem.getCategory();
-            final TransitiveItem transitiveReplacerItem = transitiveItemService.find(category, replacerName);
+            String category = transitiveItem.getCategory();
+            TransitiveItem transitiveReplacerItem = transitiveItemService.find(category, replacerName);
+            if (transitiveReplacerItem == null && category.equals("Rubber part")) {
+                category = "Bearing";
+                transitiveReplacerItem = transitiveItemService.find(category, replacerName);
+            }
             final Item replacerItem = itemService.create(transitiveReplacerItem, infoCategories);
 
             final Replacer replacer = new Replacer();

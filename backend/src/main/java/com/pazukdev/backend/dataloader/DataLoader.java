@@ -125,7 +125,10 @@ public class DataLoader implements ApplicationRunner {
         final List<ReplacerData> replacersData = ItemUtil.parseReplacersSourceString(item.getReplacer());
 
         for (final ReplacerData replacerData : replacersData) {
-            final TransitiveItem replacer = transitiveItemService.find(category, replacerData.getName());
+            TransitiveItem replacer = transitiveItemService.find(category, replacerData.getName());
+            if (replacer == null && category.equals("Rubber part")) {
+                replacer = transitiveItemService.find("Bearing", replacerData.getName());
+            }
             if (replacer == null) {
                 final TransitiveItem stubReplacer = new TransitiveItem();
                 stubReplacer.setName(replacerData.getName());

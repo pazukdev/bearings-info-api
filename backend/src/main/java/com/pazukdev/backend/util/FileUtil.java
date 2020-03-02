@@ -71,6 +71,7 @@ public class FileUtil {
                 "rolling_element",
                 "cage",
                 "bearing",
+                "rubber_part",
                 "universal_joint",
                 "wheel",
                 "chassis",

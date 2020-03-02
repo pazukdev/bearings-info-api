@@ -111,12 +111,12 @@ public class NestedItemUtil {
             }
 
             boolean addPart = isPart(category, infoCategories) && !category.equals(parent.getCategory());
-            boolean addReplacer = category.equals(parent.getCategory());
+            boolean addReplacer = category.equals(parent.getCategory())
+                    || (parent.getCategory().equals("Rubber part") && category.equals("Bearing"));
 
             NestedItemDto dto = null;
             if (addPart) {
                 dto = createBasicNestedItemDto(item, userService);
-//                dto.setSelectText(category + " " + dto.getSelectText());
                 view.getPossibleParts().add(dto);
             }
             if (addReplacer) {
