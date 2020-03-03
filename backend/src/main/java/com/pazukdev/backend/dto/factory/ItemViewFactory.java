@@ -1,6 +1,7 @@
 package com.pazukdev.backend.dto.factory;
 
 import com.pazukdev.backend.constant.Status;
+import com.pazukdev.backend.constant.security.Role;
 import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.dto.NestedItemDto;
@@ -64,11 +65,14 @@ public class ItemViewFactory {
 
     public ItemView createItemView(final Long itemId,
                                    final String status,
-                                   final String userName,
+                                   String userName,
                                    final String userLang) {
         final long businessLogicStartTime = System.nanoTime();
 
         final UserService userService = itemService.getUserService();
+        if (isEmpty(userName) || userName.equals("undefined")) {
+            userName = Role.GUEST.name().toLowerCase();
+        }
         final UserEntity currentUser = userService.findFirstByName(userName);
         final WishList wishList = currentUser.getWishList();
 
