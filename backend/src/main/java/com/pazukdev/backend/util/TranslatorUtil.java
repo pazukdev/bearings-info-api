@@ -8,6 +8,8 @@ import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.dto.table.ReplacersTable;
 import com.pazukdev.backend.dto.view.ItemView;
 import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +29,8 @@ import static com.pazukdev.backend.util.SpecificStringUtil.*;
  */
 public class TranslatorUtil {
 
+    private static final Logger LOG = LoggerFactory.getLogger("TranslatorUtil");
+
     private static String WORD_SEPARATOR = " ";
     public static String DICTIONARY_SEPARATOR = "=";
     public static String LANGS = "langs";
@@ -35,6 +39,9 @@ public class TranslatorUtil {
                                  final String langTo,
                                  final ItemView view,
                                  final boolean addToDictionary) throws Exception {
+        if (!isValid(langFrom) || !isValid(langTo)) {
+            return;
+        }
         final String lang = !langFrom.equals("en") ? langFrom : langTo;
         final DictionaryData dictionaryData = getDictionaryFromFile(lang);
         translate(langFrom, langTo, view, addToDictionary, dictionaryData.getDictionary());
@@ -485,7 +492,8 @@ public class TranslatorUtil {
         return jsonArray3.get(0).toString();
     }
 
-    public static void addLang(final String lang) {
+    public static void addLang(final String lang) throws Exception {
+        validate(lang);
         final Set<String> langs = new HashSet<>(getTxtFileTextLines(LANGS));
         langs.add(lang);
         FileUtil.createFile(LANGS, new ArrayList<>(langs));
@@ -493,6 +501,25 @@ public class TranslatorUtil {
 
     public static Path getDictionaryFilePath(final String lang) {
         return getTxtFilePath(FileName.DICTIONARY + "_" + lang);
+    }
+
+    public static void validate(final String lang) throws Exception {
+        if (lang == null
+                || lang.length() != 2
+                || !Arrays.asList(Locale.getISOLanguages()).contains(lang.toLowerCase())) {
+            final String message = "Invalid language code: " + lang;
+            LOG.info(message);
+            throw new Exception(message);
+        }
+    }
+
+    public static boolean isValid(final String lang) {
+        try {
+            validate(lang);
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
 }

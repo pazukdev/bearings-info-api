@@ -3,10 +3,10 @@ package com.pazukdev.backend.dto;
 import com.pazukdev.backend.util.TranslatorUtil;
 import lombok.Data;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,9 +26,14 @@ public class DictionaryData implements Serializable {
     private List<String> langs;
     private List<String> dictionary;
 
-    public static DictionaryData getDictionaryFromFile(final String lang) {
+    public static DictionaryData getDictionaryFromFile(final String lang) throws Exception {
+        TranslatorUtil.validate(lang);
         final DictionaryData dictionaryData = new DictionaryData();
-        dictionaryData.setDictionary(getTxtFileTextLines(getDictionaryFilePath(lang)));
+        if (lang.equals("en")) {
+            dictionaryData.setDictionary(new ArrayList<>());
+        } else {
+            dictionaryData.setDictionary(getTxtFileTextLines(getDictionaryFilePath(lang)));
+        }
         dictionaryData.setLangs(getTxtFileTextLines("langs"));
         dictionaryData.setLang(lang);
         return dictionaryData;
@@ -56,14 +61,19 @@ public class DictionaryData implements Serializable {
         return dictionaryData;
     }
 
-    public static void saveDictionary(final DictionaryData dictionaryData) {
-        try {
-            final String lang = dictionaryData.getLang();
-            final List<String> dictionary = dictionaryData.getDictionary();
-            Files.write(getDictionaryFilePath(lang), getSortedFileLines(dictionary), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void saveDictionary(final DictionaryData dictionaryData) throws Exception {
+        validate(dictionaryData);
+        final String lang = dictionaryData.getLang();
+        final List<String> dictionary = dictionaryData.getDictionary();
+        Files.write(getDictionaryFilePath(lang), getSortedFileLines(dictionary), StandardCharsets.UTF_8);
+    }
+
+    public static void validate(final DictionaryData dictionaryData) throws Exception {
+        TranslatorUtil.validate(dictionaryData.getLang());
+        if (dictionaryData.getDictionary().size() < 1) {
+            throw new Exception("Empty dictionary");
         }
     }
+
 
 }

@@ -24,11 +24,14 @@ ru=G-414=Г-414
 ru=G-424=Г-424
 ru=GOST=ГОСТ
 ru=IMZ=ИМЗ
+ru=IZHMASH=ИЖМАШ
+ru=If you still see the message above=Если вы все еще видите сообщение выше
 ru=Incorrect login or password!=Неверный логин или пароль!
 ru=Information about seals, bearings and other parts of soviet boxers and some other old or rare vehicles=Информация о сальниках, подшипниках и других деталях советских оппозитов и некоторых других старых или редких транспортных средств
 ru=Irbitskiy Mototsikletniy Zavod=Ирбитский Мотоциклетный Завод
 ru=It's prohibited to post information irrelevant to the app=В приложении запрещено постить информацию не соответствующую тематике приложения
 ru=It's prohibited to post information whose placement violates international and national laws=В приложении запрещено размещать информацию размещение которой нарушает международные или национальные законы
+ru=Jupiter=Юпитер
 ru=K-650=К-650
 ru=K-750=К-750
 ru=K-750M=К-750М
@@ -40,21 +43,22 @@ ru=Length: 2 - 26 characters: letters, numbers, - , _ , space=Длина: 2 - 26
 ru=M-61 Irbit=М-61 Ирбит
 ru=M-61=М-61
 ru=M-62=М-62
-ru=M-63 Ural-2=М-63 Урал-2
 ru=M-63=М-63
-ru=M-66 Ural-3=М-66 Урал-3
 ru=M-66=М-66
 ru=M-67-36=М-67-36
 ru=M-67=М-67
 ru=M-72=М-72
 ru=M-72M=М-72М
 ru=M-72N=М-72Н
-ru=M1M Monkey=М1М Макака
+ru=M1M=М1М
 ru=MMVZ=ММВЗ
 ru=MT-10-32=МТ-10-32
 ru=MT-10-36=МТ-10-36
+ru=MT-10-36=МТ-10-36
+ru=MT-10=МТ-10
 ru=MT-10=МТ-10
 ru=MT-8=МТ-8
+ru=MT-9=МТ-9
 ru=MT-9=МТ-9
 ru=MTZ=МТЗ
 ru=MV-650=МВ-650
@@ -66,13 +70,16 @@ ru=New dictionary accepted=Новый словарь принят
 ru=New parameter=Новый параметр
 ru=New size is=новый размер
 ru=No image=Нет изображения
+ru=No server response=Нет ответа с сервера
 ru=Old Vehicles=Старая техника
 ru=Page error. Please return to previous page=Ошибка страницы. Пожалуйсто вернитесь на предыдущую страницу
 ru=Password change via email is temporarily not available=Смена пароля через email временно недоступна
 ru=Piston stroke=Высота поршня
+ru=Planet=Планета
 ru=Pneumatic tires for motorcycles, cycle-cars, scooters and mopeds=Шины для мотоциклов. мотоколясок, мотороллеров и мопедов
 ru=Refresh page to implement changes on current page=Для того чтобы изменения вступили в силу обновите страницу
 ru=Responsibility for the information posted lies with the person who posted it=Ответственность за размещенную информацию лежит на лице ее разместившем
+ru=Rubber part=РТИ
 ru=Russia=Россия
 ru=Specification=Характеристики
 ru=Static load rating, N=Статическая нагрузка, Н
@@ -83,6 +90,8 @@ ru=The app is free=Приложение является бесплатным
 ru=The app is not a mass media=Приложение не является средствомм массовой информации
 ru=The app is not a web-store=Приложение не является интернет-магазином
 ru=Translation isn't finished because of the error. To remove this message please select English=Перевод не завершен из-за ошибки. Чтобы скрыть это сообщение пожалуйста выберете английский язык
+ru=U - means strengthened=У - в маркировке означает усиленная
+ru=U.4301-3401485=У.4301-3401485
 ru=USA=США
 ru=USSR=СССР
 ru=Ukraine=Украина
@@ -118,10 +127,12 @@ ru=aluminum=алюминий
 ru=amperage=ток
 ru=app data=все данные
 ru=as=как
+ru=assembly=в сборе
 ru=back=назад
 ru=ball=шарик
 ru=base=база
 ru=bearing=подшипник
+ru=bidirectional=двунаправленный
 ru=bolt=болт
 ru=boxer=оппозит
 ru=bronze=бронза
@@ -131,11 +142,14 @@ ru=cancel=отменить
 ru=car=легковой автомобиль
 ru=carburetor=карбюратор
 ru=cardan shaft groove diameter=диаметр канавки на карданном валу
+ru=casing=картер
 ru=category not specified=не указана категория
 ru=category=категория
 ru=change password=изменить пароль
 ru=chassis=шасси
 ru=class=класс
+ru=clutch release rod=шток сцепления
+ru=clutch shaft=первичный вал
 ru=config=расположение цилиндров
 ru=confirm deletion=подтвердить удаление
 ru=continue as guest=продолжить как гость
@@ -155,6 +169,7 @@ ru=cylinder bore=диаметр цилиндра
 ru=cylinders=цилиндры
 ru=cylindrical roller bearing=роликовый
 ru=deepgroove bearing=радиальный
+ru=default universal joint=стандартная крестовина в сборе
 ru=defunct=закрыто
 ru=dictionary contains more then 1 languages=словарь содержит более чем 1 язык
 ru=dimensions=размеры
@@ -164,8 +179,11 @@ ru=displacement=объем
 ru=download dictionary=скачать словарь
 ru=draisine=дрезина
 ru=drawings=чертежи
+ru=drive pinion=ведущая шестерня
+ru=driven fork=ведомая вилка
 ru=duralumin cage=дюралевый сепаратор
 ru=duralumin=дюраль
+ru=early=ранний
 ru=eccentric inner flat snap rings=эксцентричные внутренние плоские пружинные кольца
 ru=edit quantity in the right column=изменяйте количество в правой колонке
 ru=edit=редактировать
@@ -197,6 +215,7 @@ ru=gasket=прокладка
 ru=gear oil=трансмиссионное масло
 ru=gear=трансмиссия
 ru=gearbox=коробка передач
+ru=gearshift lever=рычаг переключения передач
 ru=general specifications=общие технические условия
 ru=generator=генератор
 ru=germany=германия
@@ -208,12 +227,14 @@ ru=heat resistant wire insulation=изоляция токопроводящих 
 ru=high voltage wires for tractor ignition devices=провода автотракторные высокого напряжения для приборов зажигания
 ru=high voltage=высокого напряжения
 ru=home=home
+ru=hub=ступица
 ru=image link=ссылка на изображение
 ru=info=информация
 ru=inner eccentric flat thrust spring retaining rings and grooves=кольца пружинные упорные плоские внутренние эксцентрические и канавки для них
 ru=insulation rubber=резина кабельная изоляционная
 ru=insulation=изоляция
 ru=invalid email=неверный  email
+ru=invalid language code=неправильный код языка
 ru=item is in WishList=объект в Wishlist'e
 ru=item name not specified=не указано имя
 ru=item with this name already exists in the category=в данной категории уже существует объект с таким именем
@@ -223,6 +244,7 @@ ru=kit=комплект
 ru=km/h=км/ч
 ru=km=км
 ru=kmh=км/ч
+ru=language=язык
 ru=last 10 new replacers=последние 10 новых заменителей
 ru=last 10 new vehicles=последние 10 новых транспортных средств
 ru=limiting speed=макс. скорость
@@ -236,6 +258,9 @@ ru=location=расположение
 ru=lock ring=стопорное кольцо
 ru=login=войти
 ru=logout=выйти
+ru=low quality expected=возможно низкое качество
+ru=low resource expected=возможен низкий ресурс
+ru=main shaft=вторичный вал
 ru=manual=руководство по эксплуатации
 ru=manufacturer=производитель
 ru=material=материал
@@ -249,6 +274,7 @@ ru=mineral=минеральное
 ru=mm=мм
 ru=model=модель
 ru=modern=современный
+ru=monkey=макака
 ru=moped=мопед
 ru=more than=более чем
 ru=motor=двигатель
@@ -270,11 +296,13 @@ ru=no=нет
 ru=non-ferrous metals and alloys=цветные металлы и сплавы
 ru=not specified=не указан
 ru=oil filter=масляный фильтр
+ru=oil-resistant rubber=маслостойкая резина
 ru=oil=масло
 ru=old password=старый пароль
 ru=open=открытый
 ru=or higher=или выше
 ru=outer concentric flat thrust spring retaining rings and grooves=кольца пружинные упорные плоские наружные концентрические и канавки для них
+ru=outer diameter=наружный диаметр
 ru=outer shield material=оплетка
 ru=paper=бумага
 ru=part=часть
@@ -305,6 +333,7 @@ ru=production=годы пр-ва
 ru=publish message=опубликовать сообщение
 ru=publish=опубликовать
 ru=purpose=применение
+ru=quality unknown=неизвестного качества
 ru=quantity shouldn't be zero=кол-во не должно быть 0
 ru=quantity shouldn't contain -=количество не должно содержать -
 ru=rating=рейтинг
@@ -365,6 +394,7 @@ ru=store / seller / official website link=ссылка на магазин / п�
 ru=stranded, copper=многопроволочная, медная
 ru=strokes=такты
 ru=summer use=летнее
+ru=swingarm=маятник
 ru=synthetic=синтетика
 ru=tapered roller bearing=конический роликовый
 ru=telescopic=телескопическая
@@ -386,6 +416,7 @@ ru=tyre=шина
 ru=units / parts=узлы / детали
 ru=units=агрегаты
 ru=universal joint cross=крестовина
+ru=universal joint unit=узел карданного шарнира
 ru=universal joint=крестовина в сборе
 ru=upload dictionary=загрузить словарь
 ru=usage=использование

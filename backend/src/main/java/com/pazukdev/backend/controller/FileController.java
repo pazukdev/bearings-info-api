@@ -22,6 +22,7 @@ import java.util.List;
 
 import static com.pazukdev.backend.util.FileUtil.*;
 import static com.pazukdev.backend.util.TranslatorUtil.addLang;
+import static com.pazukdev.backend.util.TranslatorUtil.translate;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -38,7 +39,7 @@ public class FileController {
 
     @GetMapping(value = "/dictionary-data/{lang}")
     @ApiOperation(value = "Get dictionary data: 1. dictionary according to specified language; 2. available languages")
-    public DictionaryData getDictionary(@PathVariable final String lang) {
+    public DictionaryData getDictionary(@PathVariable final String lang) throws Exception {
         return DictionaryData.getDictionaryFromFile(lang);
     }
 
@@ -60,26 +61,40 @@ public class FileController {
     public Message upload(@PathVariable final String fileName,
                           @PathVariable final String username,
                           @PathVariable final String lang,
-                          @RequestBody final Message request) throws Exception {
-
-        final DictionaryData oldDictionary = DictionaryData.getDictionaryFromFile(lang);
+                          @RequestBody final Message request) {
 
         final Message response = new Message();
+        DictionaryData oldDictionary = null;
 
-        if (fileName == null) {
-            response.setText("File name is null");
+        try {
+            oldDictionary = DictionaryData.getDictionaryFromFile(lang);
+
+            if (fileName == null) {
+                response.setText("File name is null");
+                response.translate(lang, oldDictionary.getDictionary());
+                return response;
+            }
+
+            if (fileName.equals(FileName.DICTIONARY)) {
+                return uploadDictionaryFile(username, lang, request, response, oldDictionary);
+            }
+
+            createFileInFileSystem(fileName, request.getText().getBytes(StandardCharsets.UTF_8));
+
+            response.setText("New " + fileName + " file accepted");
             response.translate(lang, oldDictionary.getDictionary());
-            return response;
+        } catch (final Exception e) {
+            final String eMessage = e.getMessage();
+
+            response.setText(eMessage);
+            response.setLocalizedText(eMessage);
+
+            if (oldDictionary != null) {
+                final List<String> dictionary = oldDictionary.getDictionary();
+                response.setLocalizedText(translate("en", lang, response.getText(), false, false, dictionary));
+            }
         }
 
-        if (fileName.equals(FileName.DICTIONARY)) {
-            return uploadDictionaryFile(username, lang, request, response, oldDictionary);
-        }
-
-        createFileInFileSystem(fileName, request.getText().getBytes(StandardCharsets.UTF_8));
-
-        response.setText("New " + fileName + " file accepted");
-        response.translate(lang, oldDictionary.getDictionary());
         return response;
     }
 
@@ -87,7 +102,7 @@ public class FileController {
                                          final String oldDictionaryLang,
                                          final Message request,
                                          final Message response,
-                                         final DictionaryData oldDictionary) {
+                                         final DictionaryData oldDictionary) throws Exception {
         final UserEntity user = userService.findFirstByName(username);
 
         final String text = request.getText();
@@ -103,7 +118,8 @@ public class FileController {
         final String newDictionaryLang = newDictionary.getLang();
 
         final String acceptedMessage = "New dictionary accepted";
-        if (!newDictionaryLang.equals(oldDictionaryLang)) {
+        final boolean isNewLang = !getTxtFileTextLines("langs").contains(newDictionaryLang);
+        if (isNewLang) {
             DictionaryData.saveDictionary(newDictionary);
             addLang(newDictionaryLang);
             final String toTranslate = acceptedMessage + ". New language added";

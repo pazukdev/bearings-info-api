@@ -33,6 +33,7 @@ import static com.pazukdev.backend.util.NestedItemUtil.addPossiblePartsAndReplac
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.TableUtil.createHeader;
 import static com.pazukdev.backend.util.TableUtil.createReplacersTable;
+import static com.pazukdev.backend.util.TranslatorUtil.isValid;
 import static com.pazukdev.backend.util.TranslatorUtil.translate;
 import static com.pazukdev.backend.util.UserActionUtil.*;
 import static com.pazukdev.backend.util.UserUtil.createLikeListDto;
@@ -100,7 +101,7 @@ public class ItemViewFactory {
         final double businessLogicEndTime = System.nanoTime();
         final double businessLogicDuration = businessLogicEndTime - businessLogicStartTime;
 
-        if (!userLang.equals("en") && !userListView) {
+        if (!userLang.equals("en") && !userListView && isValid(userLang)) {
             try {
                 translate("en", userLang, view, false);
             } catch (Exception e) {
@@ -117,7 +118,7 @@ public class ItemViewFactory {
     public ItemView createNewItemView(final String category,
                                       final String name,
                                       final String userName,
-                                      final String userLanguage) {
+                                      final String userLanguage) throws Exception {
         final long businessLogicStartTime = System.nanoTime();
 
         final Item item = createNewItem(name, category, userName, userLanguage);
@@ -131,10 +132,10 @@ public class ItemViewFactory {
     private Item createNewItem(String name,
                                String category,
                                final String userName,
-                               final String userLang) {
+                               final String userLang) throws Exception {
         final UserEntity creator = itemService.getUserService().findFirstByName(userName);
 
-        if (!userLang.equals("en")) {
+        if (!userLang.equals("en") && isValid(userLang)) {
             final DictionaryData dictionaryData = getDictionaryFromFile(userLang);
             final List<String> dictionary = dictionaryData.getDictionary();
             name = translate(userLang, "en", name, true, false, dictionary);
@@ -313,7 +314,7 @@ public class ItemViewFactory {
         final long businessLogicStartTime = System.nanoTime();
 
         final long translationFromUserLang = System.nanoTime();
-        if (!userLang.equals("en")) {
+        if (!userLang.equals("en") && isValid(userLang)) {
             try {
                 translate(userLang, "en", view, true);
             } catch (Exception e) {
