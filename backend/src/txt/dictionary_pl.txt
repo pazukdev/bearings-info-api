@@ -1,0 +1,3 @@
+pl=Old Vehicles=Stare pojazdy
+pl=Back=Wstecz
+pl=Language=Język
