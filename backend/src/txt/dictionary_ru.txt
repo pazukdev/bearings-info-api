@@ -1,7 +1,9 @@
+
 ru=#1 Pay Pal donation box=#1 Pay Pal ящик для доната
 ru=#2 Yandex donation box=#2 Яндекс ящик для доната
 ru=2 rows=2-рядный
 ru=AL=АЛ
+ru=Beer for the developer=Налить пива разработчику
 ru=By using this app you agree to the terms below=Используя данное приложение вы соглашаетесь с условиями ниже
 ru=China=Китай
 ru=Contact us by email: pazukdev@gmail.com=Вы можете связаться с нами по email: pazukdev@gmail.com
@@ -119,19 +121,20 @@ ru=additional info=доп. информация
 ru=admin=админ
 ru=all units / parts=все узлы / детали
 ru=all units and parts=все узлы и детали
+ru=all=все
 ru=aluminium A5-grade 0.5mm=алюминий первичный марки А5 0.5мм
 ru=aluminium alloy= алюминиевый сплав
 ru=aluminium bronze=алюминиевая бронза
 ru=aluminium=алюминий
 ru=aluminum=алюминий
 ru=amperage=ток
-ru=app data=все данные
 ru=as=как
 ru=assembly=в сборе
 ru=back=назад
 ru=ball=шарик
 ru=base=база
 ru=bearing=подшипник
+ru=beer for developer=налить пива разработчику
 ru=bidirectional=двунаправленный
 ru=bolt=болт
 ru=boxer=оппозит
@@ -150,6 +153,7 @@ ru=chassis=шасси
 ru=class=класс
 ru=clutch release rod=шток сцепления
 ru=clutch shaft=первичный вал
+ru=coating=покрытие
 ru=config=расположение цилиндров
 ru=confirm deletion=подтвердить удаление
 ru=continue as guest=продолжить как гость
@@ -166,11 +170,13 @@ ru=created=создал
 ru=creating=создается
 ru=cycle-car=мотоколяска
 ru=cylinder bore=диаметр цилиндра
+ru=cylinder=цилиндр
 ru=cylinders=цилиндры
 ru=cylindrical roller bearing=роликовый
 ru=deepgroove bearing=радиальный
 ru=default universal joint=стандартная крестовина в сборе
 ru=defunct=закрыто
+ru=developer likes beer=разработчик любит пиво
 ru=dictionary contains more then 1 languages=словарь содержит более чем 1 язык
 ru=dimensions=размеры
 ru=direction=направление
@@ -200,6 +206,7 @@ ru=for=для
 ru=fork inner diameter=внутренний диаметр вилки
 ru=found=найдено
 ru=founded=основано
+ru=foundry cast iron=литейный чугун
 ru=foundry tin bronzes=бронзы оловянные литейные
 ru=front fork=передняя вилка
 ru=fuel capacity=объем бензобака
@@ -247,6 +254,7 @@ ru=kmh=км/ч
 ru=language=язык
 ru=last 10 new replacers=последние 10 новых заменителей
 ru=last 10 new vehicles=последние 10 новых транспортных средств
+ru=left=левый
 ru=limiting speed=макс. скорость
 ru=line at a time=строк(у) единовременно
 ru=lines were removed=строк удалено
@@ -345,6 +353,7 @@ ru=repeat password=повторить пароль
 ru=replacer=заменитель
 ru=replacers=заменители
 ru=response total time=суммарное время
+ru=right=правый
 ru=role=роль
 ru=roller bearing=роликовый
 ru=roller, cylindrical=ролик, цилиндрический
@@ -385,6 +394,7 @@ ru=spark plug=свеча зажигания
 ru=spark plugs for car, tractor and motorcycle engines=свечи зажигательные искровые для автомобильных, тракторных и мотоциклетных двигателей
 ru=spark plugs for tractor type engines=свечи зажигательные искровые для двигателей автотракторного типа
 ru=spark plugs=свечи зажигания искровые
+ru=special cast iron=специальный чугун
 ru=spring steel=пружинная сталь
 ru=stainless=нержавеющая
 ru=standard=стандарт
@@ -427,8 +437,8 @@ ru=user=пользователь
 ru=username=имя пользователя
 ru=users=пользователи
 ru=valvetrain=ГРМ
-ru=vehicle=транспортное средство
-ru=vehicles=транспортные средства
+ru=vehicle=техника
+ru=vehicles=техника
 ru=viscosity=вязкость
 ru=voltage=напряжение
 ru=washer=шайба

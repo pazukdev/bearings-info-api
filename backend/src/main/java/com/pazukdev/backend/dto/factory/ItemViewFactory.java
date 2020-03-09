@@ -119,9 +119,14 @@ public class ItemViewFactory {
                                       final String name,
                                       final String userName,
                                       final String userLanguage) throws Exception {
+
         final long businessLogicStartTime = System.nanoTime();
 
-        final Item item = createNewItem(name, category, userName, userLanguage);
+        if (containsEmpty(category, name, userName, userLanguage)) {
+            throw new Exception("category, name, userName or userLanguage is empty");
+        }
+
+        final Item item = createNewItem(name.trim(), category.trim(), userName, userLanguage);
         final ItemView view = createItemView(item.getId(), Status.ACTIVE, userName, userLanguage);
         view.setNewItem(true);
 

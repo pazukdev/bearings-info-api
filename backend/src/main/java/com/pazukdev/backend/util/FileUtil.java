@@ -51,6 +51,7 @@ public class FileUtil {
                 "manufacturer",
                 "standard",
                 "material",
+                "cylinder",
                 "wire",
                 "gasket",
                 "washer",

@@ -79,7 +79,7 @@ public class NestedItemUtil {
     }
 
     public static boolean equalNestedItemsAlreadyInList(final List<NestedItemDto> nestedItems,
-                                                  final NestedItemDto checkingNestedItem) {
+                                                        final NestedItemDto checkingNestedItem) {
         final Long checkingNestedItemId = checkingNestedItem.getId();
         for (final NestedItemDto nestedItem : nestedItems) {
             final Long nestedItemId = nestedItem.getId();

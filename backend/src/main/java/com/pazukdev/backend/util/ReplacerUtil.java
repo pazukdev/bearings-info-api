@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.pazukdev.backend.util.NestedItemUtil.prepareNestedItemDtosToConverting;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
 public class ReplacerUtil {
@@ -64,7 +63,8 @@ public class ReplacerUtil {
     public static Set<Replacer> createReplacersFromItemView(final ItemView itemView,
                                                             final ItemService itemService) {
         final ReplacersTable replacersTable = itemView.getReplacersTable();
-        final List<NestedItemDto> dtos = prepareNestedItemDtosToConverting(replacersTable.getReplacers());
+//        final List<NestedItemDto> dtos = prepareNestedItemDtosToConverting(replacersTable.getReplacers());
+        final List<NestedItemDto> dtos = replacersTable.getReplacers();
         final String parentName = ChildItemUtil.getParentName(itemView, itemService);
 
         final Set<Replacer> replacersFromItemView = new HashSet<>();

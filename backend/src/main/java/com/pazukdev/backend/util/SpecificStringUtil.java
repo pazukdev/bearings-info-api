@@ -220,6 +220,18 @@ public class SpecificStringUtil {
         return StringUtils.isBlank(data) || isNullKey(data);
     }
 
+    public static boolean containsEmpty(final String... strings) {
+        if (strings == null) {
+            return true;
+        }
+        for (final String s : strings) {
+            if (isEmpty(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean isNullKey(final String source) {
         return nullKeys.contains(source);
     }

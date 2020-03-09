@@ -10,7 +10,6 @@ import com.pazukdev.backend.service.TransitiveItemService;
 
 import java.util.*;
 
-import static com.pazukdev.backend.util.NestedItemUtil.prepareNestedItemDtosToConverting;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
 public class ChildItemUtil {
@@ -46,7 +45,8 @@ public class ChildItemUtil {
     }
 
     public static Set<ChildItem> createChildrenFromItemView(final ItemView view, final ItemService itemService) {
-        final List<NestedItemDto> preparedItems = prepareNestedItemDtosToConverting(view.getChildren());
+//        final List<NestedItemDto> preparedItems = prepareNestedItemDtosToConverting(view.getChildren());
+        final List<NestedItemDto> preparedItems = view.getChildren();
         final String parentName = getParentName(view, itemService);
 
         final Set<ChildItem> partsFromItemView = new HashSet<>();
