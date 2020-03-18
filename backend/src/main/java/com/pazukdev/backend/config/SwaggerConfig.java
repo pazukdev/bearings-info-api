@@ -23,10 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SwaggerConfig {
 
-    private static final String TITLE = "bearings-info API";
-    private static final String DESCRIPTION = "API for bearings-info server";
+    private static final String TITLE = "Old Vehicles app API";
+    private static final String DESCRIPTION = "API for Old Vehicles app server";
     private static final String CONTACT_NAME = "Siarhei Sviarkaltsau";
-    private static final String CONTACT_WEBSITE_URL ="http://sovietboxers.com/";
+    private static final String CONTACT_WEBSITE_URL ="https://old-vehicles.com";
     private static final String CONTACT_EMAIL = "pazukdev@gmail.com";
 
     @Bean

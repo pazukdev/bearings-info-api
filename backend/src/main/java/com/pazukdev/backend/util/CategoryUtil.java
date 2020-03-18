@@ -12,8 +12,6 @@ import static com.pazukdev.backend.util.CategoryUtil.Parameter.*;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.CATEGORY;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.NAME;
 import static com.pazukdev.backend.util.ClassUtil.getFieldsValues;
-import static com.pazukdev.backend.util.FileUtil.FileName.INFO_CATEGORIES;
-import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
 import static com.pazukdev.backend.util.ItemUtil.getValueFromDescription;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
@@ -157,23 +155,14 @@ public class CategoryUtil {
         return weight != null ? weight : 0;
     }
 
-    public static boolean isAddManufacturer(final Item item,
-                                            final String manufacturer,
-                                            final boolean selectText) {
-        if (isEmpty(manufacturer) || manufacturer.equalsIgnoreCase("ussr")) {
+    public static boolean isAddManufacturer(final Item item, final String manufacturer, final boolean selectText) {
+        if (isEmpty(manufacturer) || isCountry(manufacturer)) {
             return false;
         }
         if (selectText) {
             return true;
         }
-        final String name = item.getName();
-        if (name.equals(manufacturer + name.replace(manufacturer, ""))
-                || name.equals(name.replace(manufacturer, "") + manufacturer)) {
-            return false;
-        }
-
-        final String category = item.getCategory();
-        return category.equalsIgnoreCase(SEAL) || category.equalsIgnoreCase(SPARK_PLUG);
+        return !item.getCategory().equalsIgnoreCase(VEHICLE);
     }
 
     public static boolean isInfo(final String category, final List<String> infoCategories) {
@@ -189,10 +178,6 @@ public class CategoryUtil {
 
     public static boolean isPart(String category, final List<String> infoCategories) {
         return !isInfo(category, infoCategories);
-    }
-
-    public static List<String> getInfoCategories() {
-        return getTxtFileTextLines(INFO_CATEGORIES);
     }
 
     public static String getCategory(final String param) {

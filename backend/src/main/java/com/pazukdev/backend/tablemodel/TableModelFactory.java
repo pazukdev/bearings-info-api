@@ -1,17 +1,16 @@
 package com.pazukdev.backend.tablemodel;
 
-import com.pazukdev.backend.util.CSVFileUtil;
 import com.pazukdev.backend.util.SpecificStringUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.pazukdev.backend.util.FileUtil.readGoogleDocSpreadsheet;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -25,12 +24,12 @@ public class TableModelFactory {
         return new TableModelFactory();
     }
 
-    public TableModel createTableModel(final String... filePaths) {
+    public TableModel createTableModel(final String... fileUrls) {
         final List<TableRow> tableRows = new ArrayList<>();
-        for (final String filePath : filePaths) {
-            try (final InputStream inputStream = getClass().getResourceAsStream(filePath)) {
-                tableRows.addAll(getTableRows(CSVFileUtil.readInputStreamFromCSVFile(inputStream)));
-            } catch (IOException e) {
+        for (final String fileUrl : fileUrls) {
+            try {
+                tableRows.addAll(getTableRows(readGoogleDocSpreadsheet(fileUrl)));
+            } catch (final Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
         }

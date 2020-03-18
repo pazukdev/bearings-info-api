@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static com.pazukdev.backend.util.CategoryUtil.isAddManufacturer;
 import static com.pazukdev.backend.util.CategoryUtil.isInfo;
-import static com.pazukdev.backend.util.FileUtil.*;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.UserActionUtil.ActionType.*;
 import static com.pazukdev.backend.util.UserActionUtil.processPartAction;
@@ -151,11 +150,20 @@ public class ItemUtil {
     }
 
     public static String createButtonText(final Item item, final String manufacturer) {
+        String itemName = item.getName();
         if (isAddManufacturer(item, manufacturer, false)) {
-            return manufacturer + " " + item.getName();
-        } else {
-            return item.getName();
+            final String manufacturerText = manufacturer.replaceAll("KMZ; IMZ", "IMZ; KMZ").replaceAll("; ", " / ");
+            if (!itemName.contains(manufacturerText)) {
+                itemName = manufacturerText + " " + itemName;
+            }
         }
+        if (item.getCategory().equals(CategoryUtil.Category.SEAL)) {
+            final String size = ItemUtil.getValueFromDescription(item.getDescription(), "Size, mm");
+            if (size != null && !size.equals(item.getName())) {
+                itemName = size + "=" + itemName;
+            }
+        }
+        return itemName;
     }
 
     public static List<Item> filter(final List<Item> items,
@@ -235,25 +243,25 @@ public class ItemUtil {
         }
 
         if (renameCategory) {
-            final List<String> textLines = getTxtFileTextLines(getTxtFilePath(FileName.COMMENTS));
+            final List<String> textLines = FileUtil.getComments();
             for (final String line : new HashSet<>(textLines)) {
                 if (line.split("=")[0].equalsIgnoreCase(oldCategory)) {
                     textLines.remove(line);
                     textLines.add(newCategory + "=" + line.split("=")[1]);
                 }
             }
-            createFile(FileName.COMMENTS, textLines);
+//            createFile(FileName.COMMENTS, textLines);
         }
 
         if (renameCategory && infoItem) {
-            final List<String> textLines = getTxtFileTextLines(getTxtFilePath(FileName.INFO_CATEGORIES));
+            final List<String> textLines = FileUtil.getInfoCategories();
             for (final String line : new HashSet<>(textLines)) {
                 if (line.equalsIgnoreCase(oldCategory)) {
                     textLines.remove(line);
                     textLines.add(newCategory);
                 }
             }
-            createFile(FileName.INFO_CATEGORIES, textLines);
+//            createFile(FileName.INFO_CATEGORIES, textLines);
         }
 
         return moveItemToAnotherCategory;

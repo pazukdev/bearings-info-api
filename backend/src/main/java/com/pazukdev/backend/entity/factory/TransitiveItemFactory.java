@@ -29,7 +29,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
 
     @Override
     protected String[] getCSVFilesPaths() {
-        return FileUtil.getCSVFilesPaths();
+        return FileUtil.getGoogleSheetsUrls();
     }
 
     @Override

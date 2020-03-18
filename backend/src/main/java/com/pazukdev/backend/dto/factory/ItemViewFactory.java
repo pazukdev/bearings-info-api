@@ -10,23 +10,17 @@ import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
-import com.pazukdev.backend.util.DateUtil;
-import com.pazukdev.backend.util.ImgUtil;
-import com.pazukdev.backend.util.LinkUtil;
-import com.pazukdev.backend.util.TableUtil;
+import com.pazukdev.backend.util.*;
 import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
 import static com.pazukdev.backend.dto.DictionaryData.getDictionaryFromFile;
-import static com.pazukdev.backend.dto.DictionaryData.saveDictionary;
 import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.*;
 import static com.pazukdev.backend.util.CategoryUtil.Category.VEHICLE;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter;
 import static com.pazukdev.backend.util.ChildItemUtil.collectIds;
 import static com.pazukdev.backend.util.ChildItemUtil.createChildrenFromItemView;
-import static com.pazukdev.backend.util.FileUtil.FileName;
-import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
 import static com.pazukdev.backend.util.ItemUtil.SpecialItemId.*;
 import static com.pazukdev.backend.util.ItemUtil.*;
 import static com.pazukdev.backend.util.NestedItemUtil.addPossiblePartsAndReplacers;
@@ -145,7 +139,7 @@ public class ItemViewFactory {
             final List<String> dictionary = dictionaryData.getDictionary();
             name = translate(userLang, "en", name, true, false, dictionary);
             category = translate(userLang, "en", category, false, true, dictionary);
-            saveDictionary(dictionaryData);
+//            saveDictionary(dictionaryData);
         }
 
         final Item item = new Item();
@@ -274,7 +268,7 @@ public class ItemViewFactory {
 
     private ItemView createItemsListView(final ItemView view, final String itemsStatus) {
         final List<Item> items = itemService.findAll(itemsStatus);
-        final List<String> comments = getTxtFileTextLines(FileName.COMMENTS);
+        final List<String> comments = FileUtil.getComments();
 
         final List<NestedItemDto> dtos = new ArrayList<>();
         items.forEach(item -> dtos.add(createItemForItemsManagement(item, itemService.getUserService(), comments)));
@@ -287,7 +281,7 @@ public class ItemViewFactory {
     private ItemView createParentItemsView(final Item item,
                                            final UserService userService,
                                            final List<Item> allItems) {
-        final List<String> comments = getTxtFileTextLines(FileName.COMMENTS);
+        final List<String> comments = FileUtil.getComments();
 
         final ItemView view = new ItemView();
         final List<NestedItemDto> dtos = new ArrayList<>();

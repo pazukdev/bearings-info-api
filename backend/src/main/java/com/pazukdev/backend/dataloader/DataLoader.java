@@ -9,6 +9,7 @@ import com.pazukdev.backend.repository.TransitiveItemRepository;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 import com.pazukdev.backend.util.BearingUtil;
+import com.pazukdev.backend.util.FileUtil;
 import com.pazukdev.backend.util.ItemUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,9 +21,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-
-import static com.pazukdev.backend.util.FileUtil.FileName;
-import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -51,7 +49,7 @@ public class DataLoader implements ApplicationRunner {
         final long start = System.nanoTime();
         final String startTime = LocalTime.now().toString();
 
-        final List<String> infoCategories = getTxtFileTextLines(FileName.INFO_CATEGORIES);
+        final List<String> infoCategories = FileUtil.readGoogleDocDocument(FileUtil.FileName.INFO_CATEGORIES);
 
         createDefaultUsers();
         createTransitiveItems();

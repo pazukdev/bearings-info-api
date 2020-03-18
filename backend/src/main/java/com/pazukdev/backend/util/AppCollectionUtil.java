@@ -1,5 +1,7 @@
 package com.pazukdev.backend.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +36,14 @@ public class AppCollectionUtil {
 
     public static boolean contains(final List<String> list, final String element) {
         return list.stream().anyMatch(element::equalsIgnoreCase);
+    }
+
+    public static List<List<String>> listOfArraysToListOfLists(final List<String[]> arrays) {
+        final List<List<String>> lists = new ArrayList<>();
+        for (final String[] array : arrays) {
+            lists.add(new ArrayList<>(Arrays.asList(array)));
+        }
+        return lists;
     }
 
 }

@@ -1,18 +1,15 @@
 package com.pazukdev.backend.dto;
 
+import com.pazukdev.backend.util.FileUtil;
+import com.pazukdev.backend.util.SpecificStringUtil;
 import com.pazukdev.backend.util.TranslatorUtil;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-
-import static com.pazukdev.backend.util.FileUtil.getSortedFileLines;
-import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
-import static com.pazukdev.backend.util.TranslatorUtil.getDictionaryFilePath;
+import java.util.Set;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -22,58 +19,47 @@ public class DictionaryData implements Serializable {
 
     private final static long serialVersionUID = 12343L;
 
+    public static final String SEPARATOR = "=";
+
     private String lang;
     private List<String> langs;
     private List<String> dictionary;
+    private String dictionaryId;
 
-    public static DictionaryData getDictionaryFromFile(final String lang) throws Exception {
+    public static DictionaryData getDictionaryFromFile(String lang) throws Exception {
+        if (lang == null) {
+            lang = "en";
+        } else {
+            lang = SpecificStringUtil.removeUtf8BOM(lang.toLowerCase());
+        }
+
         TranslatorUtil.validate(lang);
-        final DictionaryData dictionaryData = new DictionaryData();
-        if (lang.equals("en")) {
-            dictionaryData.setDictionary(new ArrayList<>());
-        } else {
-            dictionaryData.setDictionary(getTxtFileTextLines(getDictionaryFilePath(lang)));
-        }
-        dictionaryData.setLangs(getTxtFileTextLines("langs"));
-        dictionaryData.setLang(lang);
-        return dictionaryData;
-    }
 
-    public static DictionaryData createDictionary(final String text) throws Exception {
-        return createDictionary(Arrays.asList(text.split(System.getProperty("line.separator"))));
-    }
-
-    public static DictionaryData createDictionary(final List<String> dictionary) throws Exception {
-        dictionary.sort(String::compareTo);
-        final String lang;
-        final String firstLineLang = dictionary.get(0).split(TranslatorUtil.DICTIONARY_SEPARATOR)[0];
-        final String lastLineLang = dictionary.get(dictionary.size() - 1).split(TranslatorUtil.DICTIONARY_SEPARATOR)[0];
-        if (firstLineLang != null && firstLineLang.equalsIgnoreCase(lastLineLang)) {
-            lang = firstLineLang;
-        } else {
-            throw new Exception("Dictionary is not accepted: dictionary contains more then 1 languages");
+        final Set<String> langs = new HashSet<>();
+        langs.add("en");
+        String filename = null;
+        final List<String> langsData = FileUtil.readGoogleDocDocument(FileUtil.FileName.LANGS);
+        for (final String langData : langsData) {
+            if (SpecificStringUtil.isEmpty(langData) || !langData.contains(SEPARATOR)) {
+                continue;
+            }
+            final String[] data = langData.replaceAll(" ", "").split(SEPARATOR);
+            final String langCode = SpecificStringUtil.removeUtf8BOM(data[0].toLowerCase());
+            if (langCode.length() != 2) {
+                continue;
+            }
+            langs.add(langCode);
+            if (!lang.equals("en") && lang.equalsIgnoreCase(langCode)) {
+                filename = data[1];
+            }
         }
 
         final DictionaryData dictionaryData = new DictionaryData();
-        dictionaryData.setDictionary(dictionary);
+        dictionaryData.setDictionary(lang.equals("en") ? new ArrayList<>() : FileUtil.readGoogleDocDocument(filename));
+        dictionaryData.setLangs(new ArrayList<>(langs));
         dictionaryData.setLang(lang);
-
+        dictionaryData.setDictionaryId(filename);
         return dictionaryData;
     }
-
-    public static void saveDictionary(final DictionaryData dictionaryData) throws Exception {
-        validate(dictionaryData);
-        final String lang = dictionaryData.getLang();
-        final List<String> dictionary = dictionaryData.getDictionary();
-        Files.write(getDictionaryFilePath(lang), getSortedFileLines(dictionary), StandardCharsets.UTF_8);
-    }
-
-    public static void validate(final DictionaryData dictionaryData) throws Exception {
-        TranslatorUtil.validate(dictionaryData.getLang());
-        if (dictionaryData.getDictionary().size() < 1) {
-            throw new Exception("Empty dictionary");
-        }
-    }
-
 
 }

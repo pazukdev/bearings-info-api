@@ -8,6 +8,7 @@ import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
+import com.pazukdev.backend.util.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityExistsException;
 import java.util.List;
 import java.util.Set;
-
-import static com.pazukdev.backend.util.CategoryUtil.getInfoCategories;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -59,7 +58,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get user list view")
     public ItemView getUserListView(@PathVariable final String userName, @PathVariable final String language) {
-        final ItemViewFactory factory = new ItemViewFactory(itemService, getInfoCategories());
+        final ItemViewFactory factory = new ItemViewFactory(itemService, FileUtil.getInfoCategories());
         return factory.createUserListView(userName, language);
     }
 

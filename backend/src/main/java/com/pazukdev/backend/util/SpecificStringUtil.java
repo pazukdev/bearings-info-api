@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class SpecificStringUtil {
 
+    // FEFF because this is the Unicode char represented by the UTF-8 byte order mark (EF BB BF).
+    public static final String UTF8_BOM = "\uFEFF";
     public static final String WORD_SEPARATOR = " ";
 
     @Getter
@@ -46,10 +48,55 @@ public class SpecificStringUtil {
     public static final List<String> nullKeys = Arrays.asList("?", "-", "null");
     public static final List<String> abbreviation = Arrays
             .asList("imz", "kmz", "gost", "bmw", "ussr", "al", "usa", "fag");
-    public final static List<Character> endChars = Arrays.asList('.', ',', ';', ':', '-', '?', '!');
-    public final static List<String> units = Arrays
+    public static final List<Character> endChars = Arrays.asList('.', ',', ';', ':', '-', '?', '!');
+    public static final List<String> units = Arrays
             .asList("mm", "cm", "m", "g", "kg", "km/h", "kmh", "mph", "s", "min", "n", "nm", "ml", "L", "t", "hp",
                     "rpm", "L/100km", "CC", "cc");
+
+    public static final List<String> countries = Arrays.asList(
+            "Belarus",
+            "Bulgaria",
+            "China",
+            "Czech Republic",
+            "Czechoslovakia",
+            "East Germany",
+            "England",
+            "Estonia",
+            "Finland",
+            "France",
+            "GDR",
+            "German Democratic Republic",
+            "Germany",
+            "Hungary",
+            "India",
+            "Italy",
+            "Latvia",
+            "Lithuania",
+            "Moldova",
+            "Norway",
+            "Poland",
+            "Portugal",
+            "Romania",
+            "Russia",
+            "Russian Empire",
+            "Serbia",
+            "Slovakia",
+            "Soviet Russia",
+            "Spain",
+            "Sweden",
+            "Taiwan",
+            "UK",
+            "US",
+            "USA",
+            "USSR",
+            "Ukraine",
+            "United Kingdom",
+            "Yugoslavia"
+    );
+
+    public static boolean isCountry(final String s) {
+        return AppCollectionUtil.contains(countries, s);
+    }
 
     public static List<String> getList(String source) {
         return Arrays.asList(removeSpaces(source).split(Separator.SEMICOLON.getSeparator()));
@@ -497,6 +544,16 @@ public class SpecificStringUtil {
             return null;
         }
         return d - d.intValue() == 0 ? String.valueOf(d.intValue()) : String.format("%.01f", d);
+    }
+
+    public static String removeUtf8BOM(final String s) {
+        if (s == null) {
+            return null;
+        }
+        if (StringUtils.startsWith(s, UTF8_BOM)) {
+            return s.substring(1);
+        }
+        return s;
     }
 
 }

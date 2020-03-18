@@ -23,12 +23,6 @@ public class ReplacerConverter implements EntityDtoConverter<Replacer, NestedIte
         return dto;
     }
 
-    public NestedItemDto convertToDto(final Replacer replacer, final String itemNameToDisplay) {
-        final NestedItemDto dto = convertToDto(replacer);
-        dto.setButtonText(itemNameToDisplay);
-        return dto;
-    }
-
     @Override
     public Replacer convertToEntity(final NestedItemDto dto) {
         return modelMapper.map(dto, Replacer.class);

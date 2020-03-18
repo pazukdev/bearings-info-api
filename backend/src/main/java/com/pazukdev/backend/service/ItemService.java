@@ -11,6 +11,7 @@ import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.repository.*;
 import com.pazukdev.backend.util.DateUtil;
+import com.pazukdev.backend.util.FileUtil;
 import com.pazukdev.backend.util.LinkUtil;
 import com.pazukdev.backend.util.RateUtil;
 import lombok.Getter;
@@ -23,10 +24,9 @@ import static com.pazukdev.backend.util.CategoryUtil.Category.*;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.INSULATION;
 import static com.pazukdev.backend.util.CategoryUtil.isInfo;
 import static com.pazukdev.backend.util.ChildItemUtil.createParts;
-import static com.pazukdev.backend.util.FileUtil.FileName.INFO_CATEGORIES;
-import static com.pazukdev.backend.util.FileUtil.getTxtFileTextLines;
 import static com.pazukdev.backend.util.ItemUtil.*;
 import static com.pazukdev.backend.util.ReplacerUtil.createReplacers;
+import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 import static com.pazukdev.backend.util.UserActionUtil.*;
 
 /**
@@ -128,9 +128,12 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
 
         final TransitiveItemDescriptionMap descriptionMap
                 = createDescriptionMap(transitiveItem, transitiveItemService, infoCategories);
-        final Map<String, String> items = descriptionMap.getItems();
+        final Map<String, String> items = new HashMap<>(descriptionMap.getItems());
         final List<ChildItem> childItems = createParts(transitiveItem, items, this, transitiveItemService, infoCategories);
         final List<Replacer> replacers = createReplacers(transitiveItem, this, transitiveItemService, infoCategories);
+
+        final String rating = descriptionMap.getParameters().get("Rating");
+        descriptionMap.getParameters().remove("Rating");
 
         final Long soyuzRetromechanicId = 5L;
         final Long adminId = userService.getAdmin().getId();
@@ -146,6 +149,9 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         newItem.setCreatorId(creatorId);
         newItem.setUserActionDate(DateUtil.now());
         newItem.setImg(transitiveItem.getImage());
+        if (!isEmpty(rating)) {
+            newItem.setRating(Integer.valueOf(rating));
+        }
         LinkUtil.addLinksToItem(newItem, transitiveItem);
 
         itemRepository.save(newItem);
@@ -164,6 +170,11 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         }
 
         return newItem;
+    }
+
+    private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {
+        descriptionMap.getItems().clear();
+        return toDescription(descriptionMap);
     }
 
     @Transactional
@@ -224,13 +235,8 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         return categories;
     }
 
-    private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {
-        descriptionMap.getItems().clear();
-        return toDescription(descriptionMap);
-    }
-
     private ItemViewFactory createNewItemViewFactory() {
-        return new ItemViewFactory(this, getTxtFileTextLines(INFO_CATEGORIES));
+        return new ItemViewFactory(this, FileUtil.getInfoCategories());
     }
 
     public List<Item> findParents(final Item item,
