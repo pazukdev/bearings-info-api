@@ -27,6 +27,7 @@ public class TableRow {
         if (value != null) {
             value = value.trim();
         }
+
         data.put(key, value);
     }
 

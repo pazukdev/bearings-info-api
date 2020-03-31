@@ -6,6 +6,7 @@ import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.Replacer;
 import com.pazukdev.backend.entity.TransitiveItem;
+import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 
@@ -21,7 +22,9 @@ public class ReplacerUtil {
     public static List<Replacer> createReplacers(final TransitiveItem transitiveItem,
                                                  final ItemService itemService,
                                                  final TransitiveItemService transitiveItemService,
-                                                 final List<String> infoCategories) {
+                                                 final List<String> infoCategories,
+                                                 final List<UserEntity> users,
+                                                 final UserEntity admin) {
         final List<Replacer> replacers = new ArrayList<>();
         final String replacersSourceString = transitiveItem.getReplacer();
         if (isEmpty(replacersSourceString)) {
@@ -45,7 +48,7 @@ public class ReplacerUtil {
                 category = "Bearing";
                 transitiveReplacerItem = transitiveItemService.find(category, replacerName);
             }
-            final Item replacerItem = itemService.create(transitiveReplacerItem, infoCategories);
+            final Item replacerItem = itemService.create(transitiveReplacerItem, infoCategories, users, admin);
 
             final Replacer replacer = new Replacer();
             replacer.setName(NestedItemUtil.createName(transitiveItem.getName(), replacerName));

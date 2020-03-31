@@ -17,9 +17,11 @@ public class UserDto extends AbstractDto {
     private String email;
     private String password;
     private String repeatedPassword;
-    private Integer rating = 0;
+    private String img;
+    private String country;
     @ApiModelProperty(hidden = true)
     private String role = "USER";
     private Long wishListId;
+    private Integer rating = 0;
 
 }

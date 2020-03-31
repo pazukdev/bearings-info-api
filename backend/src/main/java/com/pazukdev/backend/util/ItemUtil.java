@@ -15,8 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.pazukdev.backend.util.CategoryUtil.isAddManufacturer;
-import static com.pazukdev.backend.util.CategoryUtil.isInfo;
+import static com.pazukdev.backend.util.CategoryUtil.*;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.UserActionUtil.ActionType.*;
 import static com.pazukdev.backend.util.UserActionUtil.processPartAction;
@@ -26,8 +25,6 @@ import static com.pazukdev.backend.util.UserActionUtil.processReplacerAction;
  * @author Siarhei Sviarkaltsau
  */
 public class ItemUtil {
-
-    public static final String MULTI_PARAM_SEPARATOR = " #";
 
     @Getter
     public enum SpecialItemId {
@@ -157,26 +154,14 @@ public class ItemUtil {
                 itemName = manufacturerText + " " + itemName;
             }
         }
-        if (item.getCategory().equals(CategoryUtil.Category.SEAL)) {
+        final String category = item.getCategory();
+        if (category.equals(Category.SEAL) || category.equals(Category.LOCK_RING)) {
             final String size = ItemUtil.getValueFromDescription(item.getDescription(), "Size, mm");
             if (size != null && !size.equals(item.getName())) {
                 itemName = size + "=" + itemName;
             }
         }
         return itemName;
-    }
-
-    public static List<Item> filter(final List<Item> items,
-                                    final String parameter,
-                                    final String searchingValue) {
-        final List<Item> filteredItems = new ArrayList<>();
-        for (Item item : items) {
-            final String value = getValueFromDescription(item.getDescription(), parameter);
-            if (value != null && value.equals(searchingValue)) {
-                filteredItems.add(item);
-            }
-        }
-        return filteredItems;
     }
 
     public static boolean updateNameAndCategory(final Item item,

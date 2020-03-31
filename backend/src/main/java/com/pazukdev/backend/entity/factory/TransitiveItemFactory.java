@@ -38,7 +38,7 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
     }
 
     @Override
-    protected void applyCharacteristics(TransitiveItem item, TableRow tableRow) {
+    protected void applyCharacteristics(final TransitiveItem item, final TableRow tableRow) {
         super.applyCharacteristics(item, tableRow);
 
         applyCategory(item, tableRow);

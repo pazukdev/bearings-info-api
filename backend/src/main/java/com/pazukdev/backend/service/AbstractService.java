@@ -64,6 +64,10 @@ public abstract class AbstractService<Entity extends AbstractEntity, Dto extends
         return repository.save(entity);
     }
 
+    public Entity findFirstByName(final String name, final List<Entity> entities) {
+        return entities.stream().filter(entity -> entity.getName().equals(name)).findFirst().orElse(null);
+    }
+
     @Transactional
     public abstract Entity findFirstByName(final String name);
 

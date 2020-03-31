@@ -293,7 +293,7 @@ public class TranslatorUtil {
     }
 
     public static boolean isTranslated(final String translated, final String original) {
-        return translated != null && !translated.equalsIgnoreCase(original);
+        return translated != null;
     }
 
     private static String parseAndTranslate(final String langTo, String text, final List<String> dictionary) {

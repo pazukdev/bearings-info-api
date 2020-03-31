@@ -19,10 +19,4 @@ public class ReplacersTable extends AbstractDto {
 
     private List<NestedItemDto> replacers = new ArrayList<>();
 
-    public static ReplacersTable createStub() {
-        final ReplacersTable replacersTable = new ReplacersTable();
-        replacersTable.setName("stub");
-        return replacersTable;
-    }
-
 }

@@ -5,6 +5,7 @@ import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.ChildItem;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.TransitiveItem;
+import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.TransitiveItemService;
 
@@ -18,7 +19,9 @@ public class ChildItemUtil {
                                               final Map<String, String> childItemsDescription,
                                               final ItemService itemService,
                                               final TransitiveItemService transitiveItemService,
-                                              final List<String> infoCategories) {
+                                              final List<String> infoCategories,
+                                              final List<UserEntity> users,
+                                              final UserEntity admin) {
         final List<ChildItem> childItems = new ArrayList<>();
         for (final Map.Entry<String, String> entry : childItemsDescription.entrySet()) {
             final String category = entry.getKey();
@@ -26,7 +29,7 @@ public class ChildItemUtil {
                 final String[] names = entry.getValue().split("; ");
                 for (final String name : names) {
                     final ChildItem child
-                            = createChild(parent, name, category, itemService, transitiveItemService, infoCategories);
+                            = createChild(parent, name, category, itemService, transitiveItemService, infoCategories, users, admin);
                     if (child != null) {
                         childItems.add(child);
                     }
@@ -34,7 +37,7 @@ public class ChildItemUtil {
             } else {
                 final String name = entry.getValue();
                 final ChildItem child
-                        = createChild(parent, name, category, itemService, transitiveItemService, infoCategories);
+                        = createChild(parent, name, category, itemService, transitiveItemService, infoCategories, users, admin);
                 if (child != null) {
                     childItems.add(child);
                 }
@@ -72,7 +75,9 @@ public class ChildItemUtil {
                                          final String category,
                                          final ItemService itemService,
                                          final TransitiveItemService transitiveItemService,
-                                         final List<String> infoCategories) {
+                                         final List<String> infoCategories,
+                                         final List<UserEntity> users,
+                                         final UserEntity admin) {
         String name;
         String location = "";
         String quantity;
@@ -89,7 +94,7 @@ public class ChildItemUtil {
 
         final TransitiveItem oldChild = transitiveItemService.find(category, name);
         if (oldChild != null) {
-            final Item child = itemService.create(oldChild, infoCategories);
+            final Item child = itemService.create(oldChild, infoCategories, users, admin);
 
             final ChildItem childItem = new ChildItem();
             childItem.setName(getName(parent.getName(), name));

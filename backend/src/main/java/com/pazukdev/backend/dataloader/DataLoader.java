@@ -1,6 +1,5 @@
 package com.pazukdev.backend.dataloader;
 
-import com.pazukdev.backend.constant.security.Role;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.entity.TransitiveItem;
 import com.pazukdev.backend.entity.UserEntity;
@@ -17,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -42,55 +41,28 @@ public class DataLoader implements ApplicationRunner {
         populateEmptyTables();
     }
 
-    private void populateEmptyTables() {
+    @Transactional
+    public void populateEmptyTables() {
         if (!repositoryIsEmpty(transitiveItemService.getTransitiveItemRepository())) {
             return;
         }
         final long start = System.nanoTime();
-        final String startTime = LocalTime.now().toString();
 
         final List<String> infoCategories = FileUtil.readGoogleDocDocument(FileUtil.FileName.INFO_CATEGORIES);
 
-        createDefaultUsers();
+        final List<UserEntity> users = itemService.getUserService().getUsersFromRecoveryFile(true);
         createTransitiveItems();
-        createItems(infoCategories);
+        createItems(infoCategories, users);
+        itemService.getUserService().recoverUserActions(users, itemService);
+        itemService.getUserService().save(users);
 
         final long stop = System.nanoTime();
-//        LOG.info("Start time: " + startTime);
-//        LOG.info("Stop time: " + LocalTime.now());
-        final Double time = (stop - start) * 0.000000001;
-        LOG.info("DB created in " + time.intValue() + " seconds");
+        final double time = (stop - start) * 0.000000001;
+        LOG.info("DB created in " + (int) time + " seconds");
     }
 
     private boolean repositoryIsEmpty(final TransitiveItemRepository repository) {
         return repository.findAll().isEmpty();
-    }
-
-    private void createDefaultUsers() {
-        createUser(Role.GUEST, "guest", "$2a$10$unchbvwqbdJHEaRU/zT03emzPvORNIDnVYXgWUh8tN8G2WlcnPH6y");
-        createUser(Role.ADMIN, "admin", "$2a$10$LJDm6BOaekdsan3q3j15Q.ceRCSHHb1J8kAPqQasWZSdKoJtDAnyO");
-        createUser(Role.ADMIN, "dominator", "$2a$10$mRsNu6BVh3YAm1vKWwsbz.AlOUqzoi0eW9TAcV5AysIciUyusnxrm");
-        createUser(Role.USER, "user", "$2a$10$50E.w9jZJAIjGlsb4OU0N.wSvxrfWe.VEmiAV7.filaKuuKN.f992");
-        createUser(Role.SELLER, "soyuz retromechanic", "$2a$10$50E.w9jZJAIjGlsb4OU0N.wSvxrfWe.VEmiAV7.filaKuuKN.f992");
-    }
-
-    private void createUser(final Role role, final String name, final String password) {
-        final UserEntity user = new UserEntity();
-        user.setName(name);
-        user.setRole(role);
-        user.setPassword(password);
-        if (name.equalsIgnoreCase("admin")) {
-            user.setEmail("pazukdev@gmail.com");
-            user.setImg("https://drive.google.com/open?id=1iuDdjYXtphxQ8UlQD-jjWYnEb_JC9OcG");
-            user.setCountry("ZW");
-        } else if (name.equalsIgnoreCase("dominator")) {
-            user.setCountry("MC");
-            user.setImg("https://drive.google.com/open?id=1YUwn8rh8ZNjg4sw_MPVccY936D87fman");
-        } else if (name.equalsIgnoreCase("soyuz retromechanic")) {
-            user.setCountry("BY");
-            user.setImg("https://drive.google.com/open?id=1rtWwJf6XvEp2EV8p79ok5_NwlsOwawVC");
-        }
-        itemService.getUserService().getRepository().save(user);
     }
 
     private void createTransitiveItems() {
@@ -99,9 +71,10 @@ public class DataLoader implements ApplicationRunner {
         createStubReplacers(transitiveItems);
     }
 
-    private void createItems(final List<String> infoCategories) {
+    private void createItems(final List<String> infoCategories, final List<UserEntity> users) {
+        final UserEntity admin = itemService.getUserService().findAdmin(users);
         for (final TransitiveItem transitiveItem : transitiveItemService.findAll()) {
-            itemService.create(transitiveItem, infoCategories);
+            itemService.create(transitiveItem, infoCategories, users, admin);
         }
     }
 

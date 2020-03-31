@@ -20,14 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static com.pazukdev.backend.util.CategoryUtil.Category.*;
+import static com.pazukdev.backend.util.CategoryUtil.Category.MATERIAL;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.INSULATION;
 import static com.pazukdev.backend.util.CategoryUtil.isInfo;
 import static com.pazukdev.backend.util.ChildItemUtil.createParts;
 import static com.pazukdev.backend.util.ItemUtil.*;
 import static com.pazukdev.backend.util.ReplacerUtil.createReplacers;
 import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
-import static com.pazukdev.backend.util.UserActionUtil.*;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -117,7 +116,10 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public Item create(final TransitiveItem transitiveItem, final List<String> infoCategories) {
+    public Item create(final TransitiveItem transitiveItem,
+                       final List<String> infoCategories,
+                       final List<UserEntity> users,
+                       final UserEntity admin) {
         final String category = transitiveItem.getCategory();
         final String name = transitiveItem.getName();
 
@@ -129,15 +131,25 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         final TransitiveItemDescriptionMap descriptionMap
                 = createDescriptionMap(transitiveItem, transitiveItemService, infoCategories);
         final Map<String, String> items = new HashMap<>(descriptionMap.getItems());
-        final List<ChildItem> childItems = createParts(transitiveItem, items, this, transitiveItemService, infoCategories);
-        final List<Replacer> replacers = createReplacers(transitiveItem, this, transitiveItemService, infoCategories);
+        final List<ChildItem> childItems
+                = createParts(transitiveItem, items, this, transitiveItemService, infoCategories, users, admin);
+        final List<Replacer> replacers
+                = createReplacers(transitiveItem, this, transitiveItemService, infoCategories, users, admin);
 
         final String rating = descriptionMap.getParameters().get("Rating");
         descriptionMap.getParameters().remove("Rating");
 
-        final Long soyuzRetromechanicId = 5L;
-        final Long adminId = userService.getAdmin().getId();
-        final Long creatorId = name.toLowerCase().contains("soyuz retromechanic") ? soyuzRetromechanicId : adminId;
+        final String creatorName = descriptionMap.getParameters().get("Creator");
+        descriptionMap.getParameters().remove("Creator");
+
+        Long creatorId = admin.getId();
+
+        if (!isEmpty(creatorName)) {
+            final UserEntity customCreator = userService.findFirstByName(creatorName, users);
+            if (customCreator != null) {
+                creatorId = customCreator.getId();
+            }
+        }
 
         final Item newItem = new Item();
         newItem.setName(name);
@@ -155,20 +167,6 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         LinkUtil.addLinksToItem(newItem, transitiveItem);
 
         itemRepository.save(newItem);
-
-        if (category.equals(VEHICLE)) {
-            processItemAction(ActionType.CREATE, newItem, getUserService().getAdmin(), this);
-        }
-
-        for (final Replacer replacer : replacers) {
-            if ((category.equals(SEAL) && sealReplacerCounter++ < 3)
-                    || (category.equals(SPARK_PLUG) && sparkPlugReplacerCounter++ < 2)
-                    || (category.equals(BEARING) && bearingReplacerCounter++ < 2)
-                    || (category.equals(OIL_FILTER) && oilFilterReplacerCounter++ < 3)) {
-                processReplacerAction(ActionType.ADD, replacer, newItem, getUserService().getAdmin(), this);
-            }
-        }
-
         return newItem;
     }
 
@@ -282,6 +280,17 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
             }
         }
         return parents;
+    }
+
+    public List<Item> getItems(final String idsSource) {
+        final List<Item> items = new ArrayList<>();
+        if (isEmpty(idsSource)) {
+            return items;
+        }
+        for (String s : idsSource.split(";")) {
+            repository.findById(Long.valueOf(s.trim())).ifPresent(items::add);
+        }
+        return items;
     }
 
 }
