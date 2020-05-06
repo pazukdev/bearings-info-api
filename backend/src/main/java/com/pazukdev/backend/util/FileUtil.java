@@ -96,7 +96,7 @@ public class FileUtil {
     }
 
     public static String[] getItemsDataGoogleSheetsIds(final boolean fromGoogleDocs) {
-        if (false) {
+        if (true) {
             final String fileId = "147-PuU3hmvjcvb4uIJHQ3zy3UMLFRvul4oOsbdXRO5M";
             final List<String> dataFilesIds = new ArrayList<>();
             for (final String line : readGoogleDocDocument(fileId)) {
