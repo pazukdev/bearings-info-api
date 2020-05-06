@@ -5,26 +5,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="create_transitive_item_table" author="sviarkaltsau">
-        <createTable tableName="transitive_item">
-            <column name="id" type="bigserial" autoIncrement="true">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="name" type="varchar(255)"/>
-            <column name="category" type="varchar(255)"/>
-            <column name="image" type="varchar(255)"/>
-            <column name="status" type="varchar(255)"/>
-            <column name="description" type="varchar(1000)"/>
-            <column name="replacer" type="varchar(1000)"/>
-            <column name="wiki" type="varchar(1000)"/>
-            <column name="website" type="varchar(1000)"/>
-            <column name="manual" type="varchar(1000)"/>
-            <column name="parts" type="varchar(1000)"/>
-            <column name="drawings" type="varchar(1000)"/>
-            <column name="website_lang" type="varchar(2)"/>
-        </createTable>
-    </changeSet>
-
     <changeSet id="create_item_table" author="sviarkaltsau">
         <createTable tableName="item">
             <column name="id" type="bigserial" autoIncrement="true">
@@ -32,7 +12,6 @@
             </column>
             <column name="name" type="varchar(255)"/>
             <column name="category" type="varchar(255)"/>
-            <column name="rating" type="int"/>
             <column name="status" type="varchar(255)"/>
             <column name="creator_id" type="bigserial"/>
             <column name="user_action_date" type="varchar(255)"/>
@@ -44,15 +23,13 @@
             <column name="id" type="bigserial" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="name" type="varchar(255)"/>
             <column name="user_id" type="bigserial"/>
             <column name="action_date" type="varchar(255)"/>
             <column name="action_type" type="varchar(255)"/>
-            <column name="parent_item_id" type="bigserial"/>
+            <column name="parent_id" type="bigserial"/>
             <column name="item_id" type="bigserial"/>
-            <column name="item_type" type="varchar(255)"/>
-            <column name="item_category" type="varchar(255)"/>
-            <column name="status" type="varchar(255)"/>
+            <column name="note" type="varchar(255)"/>
+            <column name="message" type="varchar(1000)"/>
         </createTable>
     </changeSet>
 
@@ -75,20 +52,10 @@
             <column name="name" type="varchar(255)"/>
             <column name="status" type="varchar(255)"/>
             <column name="item_id" type="bigserial"/>
-            <column name="location" type="varchar(255)"/>
-            <column name="quantity" type="varchar(255)"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="create_replacer_table" author="sviarkaltsau">
-        <createTable tableName="replacer">
-            <column autoIncrement="true" name="id" type="bigserial">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="name" type="varchar(255)"/>
-            <column name="status" type="varchar(255)"/>
-            <column name="item_id" type="bigserial"/>
             <column name="comment" type="varchar(255)"/>
+            <column name="quantity" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>
+            <column name="creator_id" type="bigserial"/>
         </createTable>
     </changeSet>
 
@@ -97,10 +64,11 @@
             <column autoIncrement="true" name="id" type="bigserial">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="name" type="varchar(1000)"/>
+            <column name="name" type="varchar(255)"/>
             <column name="status" type="varchar(255)"/>
             <column name="type" type="varchar(255)"/>
-            <column name="lang" type="varchar(255)"/>
+            <column name="url" type="varchar(1000)"/>
+            <column name="country_code" type="varchar(255)"/>
         </createTable>
     </changeSet>
 
@@ -130,7 +98,7 @@
                 <constraints foreignKeyName="fk_item_replacer_original_item_id" references="item (id)"/>
             </column>
             <column name="replacer_item_id" type="bigserial">
-                <constraints foreignKeyName="fk_item_replacer_replacer_item_id" references="replacer (id)"/>
+                <constraints foreignKeyName="fk_item_replacer_replacer_item_id" references="child_item (id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -167,7 +135,6 @@
             <column name="password" type="varchar(255)"/>
             <column name="role" type="varchar(255)"/>
             <column name="wishlist_id" type="bigserial"/>
-            <column name="likelist_id" type="bigserial"/>
             <column name="img" type="varchar(255)"/>
             <column name="country" type="varchar(2)"/>
         </createTable>
@@ -213,6 +180,39 @@
             </column>
             <column name="link_id" type="bigserial">
                 <constraints foreignKeyName="fk_item_link_link_id" references="link (id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_item_buy_link_table" author="sviarkaltsau">
+        <createTable tableName="item_buy_link">
+            <column name="item_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_buy_link_item_id" references="item (id)"/>
+            </column>
+            <column name="link_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_buy_link_link_id" references="link (id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_item_liked_user_table" author="sviarkaltsau">
+        <createTable tableName="item_liked_user">
+            <column name="item_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_liked_user_item_id" references="item (id)"/>
+            </column>
+            <column name="user_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_liked_user_user_id" references="user_table (id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_item_disliked_user_table" author="sviarkaltsau">
+        <createTable tableName="item_disliked_user">
+            <column name="item_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_disliked_user_item_id" references="item (id)"/>
+            </column>
+            <column name="user_id" type="bigserial">
+                <constraints foreignKeyName="fk_item_disliked_user_user_id" references="user_table (id)"/>
             </column>
         </createTable>
     </changeSet>
