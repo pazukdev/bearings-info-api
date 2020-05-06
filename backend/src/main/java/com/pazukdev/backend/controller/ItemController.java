@@ -1,5 +1,6 @@
 package com.pazukdev.backend.controller;
 
+import com.pazukdev.backend.dataloader.DataLoader;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.service.ItemService;
 import io.swagger.annotations.Api;
@@ -14,19 +15,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/item")
 @RequiredArgsConstructor
-@Api(tags = "Item Controller", value = "API methods for items")
+@Api(tags = "API methods for items")
 @CrossOrigin
 public class ItemController {
 
     private final ItemService service;
+    private final DataLoader dataLoader;
 
-    @GetMapping("/view/item/{id}/{userName}/{language}")
+    @GetMapping("/view/item/{id}/{userName}/{lang}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get item")
     public ItemView get(@PathVariable final Long id,
                         @PathVariable final String userName,
-                        @PathVariable final String language)  {
-        return service.createItemView(id, userName, language);
+                        @PathVariable final String lang)  {
+        return service.createItemView(id, userName, lang);
     }
 
     @GetMapping("/view/items/{status}/{userName}/{language}")

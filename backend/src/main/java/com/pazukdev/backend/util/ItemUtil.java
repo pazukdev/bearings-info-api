@@ -1,5 +1,6 @@
 package com.pazukdev.backend.util;
 
+import com.pazukdev.backend.dto.NestedItemDto;
 import com.pazukdev.backend.dto.ReplacerData;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.table.HeaderTable;
@@ -8,18 +9,16 @@ import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.repository.ItemRepository;
 import com.pazukdev.backend.service.ItemService;
-import com.pazukdev.backend.service.TransitiveItemService;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.pazukdev.backend.converter.NestedItemConverter.convert;
 import static com.pazukdev.backend.util.CategoryUtil.*;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
-import static com.pazukdev.backend.util.UserActionUtil.ActionType.*;
-import static com.pazukdev.backend.util.UserActionUtil.processPartAction;
-import static com.pazukdev.backend.util.UserActionUtil.processReplacerAction;
+import static com.pazukdev.backend.util.UserActionUtil.createActions;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -102,7 +101,7 @@ public class ItemUtil {
     }
 
     public static TransitiveItemDescriptionMap createDescriptionMap(final TransitiveItem item,
-                                                                    final TransitiveItemService service,
+                                                                    final List<TransitiveItem> transitiveItems,
                                                                     final List<String> infoCategories) {
         final Map<String, String> unsortedMap = toMap(item.getDescription());
         final TransitiveItemDescriptionMap itemDescriptionMap = new TransitiveItemDescriptionMap();
@@ -112,7 +111,7 @@ public class ItemUtil {
             final String value = StringUtils.trim(entry.getValue());
             if (isInfo(parameter, infoCategories)) {
                 itemDescriptionMap.getParameters().put(parameter, value);
-            } else if (service.isPart(parameter, infoCategories)) {
+            } else if (TransitiveItemUtil.isPart(parameter, transitiveItems, infoCategories)) {
                 itemDescriptionMap.getItems().put(parameter, value);
             } else {
                 itemDescriptionMap.getParameters().put(parameter, value);
@@ -146,7 +145,9 @@ public class ItemUtil {
         return data;
     }
 
-    public static String createButtonText(final Item item, final String manufacturer) {
+    public static String createButtonText(final Item item,
+                                          final String manufacturer,
+                                          final String partNumber) {
         String itemName = item.getName();
         if (isAddManufacturer(item, manufacturer, false)) {
             final String manufacturerText = manufacturer.replaceAll("KMZ; IMZ", "IMZ; KMZ").replaceAll("; ", " / ");
@@ -160,6 +161,14 @@ public class ItemUtil {
             if (size != null && !size.equals(item.getName())) {
                 itemName = size + "=" + itemName;
             }
+        } else if (category.equals(Category.ROLLING_ELEMENT)) {
+            final String type = ItemUtil.getValueFromDescription(item.getDescription(), "Type");
+            if (type != null && !type.equals(item.getName()) && !item.getName().contains(type)) {
+                itemName = type + " = " + itemName.replaceAll("Roller ", "");
+            }
+        }
+        if (!isEmpty(partNumber) && !partNumber.equals(item.getName())) {
+            itemName = itemName + " " + partNumber;
         }
         return itemName;
     }
@@ -235,7 +244,6 @@ public class ItemUtil {
                     textLines.add(newCategory + "=" + line.split("=")[1]);
                 }
             }
-//            createFile(FileName.COMMENTS, textLines);
         }
 
         if (renameCategory && infoItem) {
@@ -246,7 +254,6 @@ public class ItemUtil {
                     textLines.add(newCategory);
                 }
             }
-//            createFile(FileName.INFO_CATEGORIES, textLines);
         }
 
         return moveItemToAnotherCategory;
@@ -264,77 +271,31 @@ public class ItemUtil {
         return ItemUtil.toDescription(descriptionMap);
     }
 
-    public static void updateChildItems(final Item item,
-                                        final ItemView itemView,
-                                        final ItemService itemService,
-                                        final UserEntity user) {
-        final Set<ChildItem> oldChildItems = new HashSet<>(item.getChildItems());
-        final Set<ChildItem> newChildItems
-                = new HashSet<>(ChildItemUtil.createChildrenFromItemView(itemView, itemService));
-        item.getChildItems().clear();
-        item.getChildItems().addAll(newChildItems);
+    public static void updateNestedItems(final Item parent,
+                                         final ItemView view,
+                                         final UserEntity user,
+                                         final ItemService service,
+                                         final List<UserAction> actions) {
 
-        for (final ChildItem child : newChildItems) {
-            if (child.getId() == null) {
-                processPartAction(ADD, child, item, user, itemService);
-            }
-        }
+        final Long parentId = parent.getId();
 
-        final List<ChildItem> toSave = new ArrayList<>();
-        for (final ChildItem oldChild : oldChildItems) {
-            for (final ChildItem newChild : newChildItems) {
-                if (newChild.getName().equals(oldChild.getName())) {
-                    toSave.add(oldChild);
-                    if (!newChild.getLocation().equals(oldChild.getLocation())
-                            || !newChild.getQuantity().equals(oldChild.getQuantity())) {
-                        processPartAction(UPDATE, oldChild, item, user, itemService);
-                    }
-                }
-            }
-        }
+        final Set<NestedItem> oldParts = new HashSet<>(parent.getParts());
+        final Set<NestedItem> oldReplacers = new HashSet<>(parent.getReplacers());
 
-        oldChildItems.removeAll(toSave);
+        List<NestedItemDto> partDtos = view.getChildren();
+        List<NestedItemDto> replacerDtos = view.getReplacersTable().getReplacers();
 
-        for (final ChildItem orphan : oldChildItems) {
-            itemService.getChildItemRepository().deleteById(orphan.getId());
-            processPartAction(DELETE, orphan, item, user, itemService);
-        }
-    }
+        Set<NestedItem> newParts = new HashSet<>(convert(partDtos, parentId, service, user));
+        Set<NestedItem> newReplacers = new HashSet<>(convert(replacerDtos, parentId, service, user));
 
-    public static void updateReplacers(final Item item,
-                                       final ItemView itemView,
-                                       final ItemService itemService,
-                                       final UserEntity user) {
-        final Set<Replacer> oldReplacers = new HashSet<>(item.getReplacers());
-        final Set<Replacer> newReplacers =
-                new HashSet<>(ReplacerUtil.createReplacersFromItemView(itemView, itemService));
-        item.getReplacers().clear();
-        item.getReplacers().addAll(newReplacers);
+        parent.getParts().clear();
+        parent.getReplacers().clear();
 
-        for (final Replacer replacer : newReplacers) {
-            if (replacer.getId() == null) {
-                processReplacerAction(ADD, replacer, item, user, itemService);
-            }
-        }
+        parent.getParts().addAll(newParts);
+        parent.getReplacers().addAll(newReplacers);
 
-        final List<Replacer> toSave = new ArrayList<>();
-        for (final Replacer oldReplacer : oldReplacers) {
-            for (final Replacer newReplacer : newReplacers) {
-                if (newReplacer.getName().equals(oldReplacer.getName())) {
-                    toSave.add(oldReplacer);
-                    if (!newReplacer.getComment().equals(oldReplacer.getComment())) {
-                        processReplacerAction(UPDATE, oldReplacer, item, user, itemService);
-                    }
-                }
-            }
-        }
-
-        oldReplacers.removeAll(toSave);
-
-        for (final Replacer orphan : oldReplacers) {
-            itemService.getReplacerRepository().deleteById(orphan.getId());
-            processReplacerAction(DELETE, orphan, item, user, itemService);
-        }
+        actions.addAll(createActions(parent, oldParts, newParts, user, service));
+        actions.addAll(createActions(parent, oldReplacers, newReplacers, user, service));
     }
 
     public static void moveItemToAnotherCategory(final Item item,
@@ -375,14 +336,6 @@ public class ItemUtil {
             }
             item.setDescription(toDescription(newDescriptionMap));
         }
-    }
-
-    public static Set<Long> collectIds(final Set<Item> items) {
-        final Set<Long> ids = new HashSet<>();
-        for (final Item item : items) {
-            ids.add(item.getId());
-        }
-        return ids;
     }
 
 }

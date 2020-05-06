@@ -2,19 +2,22 @@ package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.dto.UserActionDto;
+import com.pazukdev.backend.dto.table.HeaderTable;
+import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.entity.*;
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
+import com.pazukdev.backend.entity.abstraction.Typeable;
 import com.pazukdev.backend.repository.UserActionRepository;
 import com.pazukdev.backend.service.ItemService;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
-import java.time.LocalDateTime;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
-import static com.pazukdev.backend.util.CategoryUtil.Category;
+import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 import static com.pazukdev.backend.util.UserActionUtil.ValueIncrease.*;
 
 public class UserActionUtil {
@@ -29,7 +32,7 @@ public class UserActionUtil {
         public static final String UPLOAD_DICTIONARY = "upload dictionary";
     }
 
-    public static class ItemType {
+    public static class ValuationType {
         public static final String VEHICLE = "vehicle";
         public static final String ITEM = "item";
         public static final String PART = "part";
@@ -59,28 +62,24 @@ public class UserActionUtil {
         }
     }
 
-    private static Pageable getPageRequest(int size) {
-        return PageRequest.of(0, size, Sort.Direction.DESC, "id");
-    }
-
     public static List<UserActionDto> getLastNewVehicles(final ItemService service) {
-        final UserActionRepository repository = service.getUserActionRepository();
+        final UserActionRepository repository = service.getUserActionRepo();
         final String create = ActionType.CREATE;
-        final Pageable p = getPageRequest(10);
-        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndItemCategory(create, "Vehicle", p);
+        final Pageable p = RepositoryUtil.getPageRequest(RepositoryUtil.LAST_TEN);
+        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(create, "Vehicle", p);
         return getLastUserActionsReport(actions.getContent(), service);
     }
 
     public static List<UserActionDto> getLastNewReplacers(final ItemService service) {
-        final UserActionRepository repository = service.getUserActionRepository();
+        final UserActionRepository repository = service.getUserActionRepo();
         final String add = ActionType.ADD;
-        final Pageable p = getPageRequest(10);
-        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndItemType(add, "replacer", p);
+        final Pageable p = RepositoryUtil.getPageRequest(RepositoryUtil.LAST_TEN);
+        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(add, "replacer", p);
         return getLastUserActionsReport(actions.getContent(), service);
     }
 
     public static List<UserActionDto> getLastUserActionsReport(final List<UserAction> actions,
-                                                              final ItemService service) {
+                                                               final ItemService service) {
         final List<UserActionDto> lastUsersActions = new ArrayList<>();
         for (final UserAction action : actions) {
             final UserActionDto actionDto = toDto(action, service);
@@ -115,137 +114,228 @@ public class UserActionUtil {
         dto.setItemId(itemId);
         dto.setUserName(user.getName());
         dto.setItemName(item.getName());
+        dto.setItemCategory(item.getCategory());
         dto.setActionType(actionType);
-        dto.setItemType(action.getItemType());
         dto.setDate(action.getActionDate());
-        dto.setItemCategory(action.getItemCategory());
-
-        final Long parentId = action.getParentItemId();
-        if (parentId != null) {
-            final Item parent = service.findOne(parentId);
-            if (parent != null) {
-                dto.setParentId(parent.getId());
-                dto.setParentName(parent.getName());
-            }
+        dto.setNote(action.getNote());
+        final Item parent = service.findOne(action.getParentId());
+        if (parent != null) {
+            dto.setParentId(parent.getId());
+            dto.setParentName(parent.getName());
         }
         return dto;
     }
 
-    public static void processLinkAction(final String actionType,
-                                         final String linkType,
-                                         final Item item,
-                                         final UserEntity user,
-                                         final ItemService itemService) {
-        final String itemType = ItemType.LINK;
+    public static UserAction createAction(final String actionType,
+                                          final String actionDetails,
+                                          @Nullable final Item parent,
+                                          @Nonnull final AbstractEntity entity,
+                                          final UserEntity user,
+                                          final boolean specifyParentInMessage) {
 
-        updateUserRating(user, actionType, itemType);
-
-        final UserAction action = create(user, actionType, itemType, item);
-        action.setName(action.getName().replace(itemType, linkType + " " + itemType + " for"));
-        itemService.getUserActionRepository().save(action);
-    }
-
-    public static void processItemAction(final String actionType,
-                                         final Item item,
-                                         final UserEntity user,
-                                         final ItemService itemService) {
-        final String category = item.getCategory();
-        final String itemType = category.equals(Category.VEHICLE) ? category.toLowerCase() : ItemType.ITEM;
-
-        updateUserRating(user, actionType, itemType);
-
-        final UserAction action = create(user, actionType, itemType, item);
-        itemService.getUserActionRepository().save(action);
-    }
-
-    public static void processPartAction(final String actionType,
-                                         final ChildItem part,
-                                         final Item parent,
-                                         final UserEntity user,
-                                         final ItemService itemService) {
-        updateUserRating(user, actionType, ItemType.PART);
-
-        final UserAction action = createChildItemAction(user, actionType, parent, part);
-        itemService.getUserActionRepository().save(action);
-    }
-
-    public static void processReplacerAction(final String actionType,
-                                             final Replacer replacer,
-                                             final Item parent,
-                                             final UserEntity user,
-                                             final ItemService itemService) {
-        updateUserRating(user, actionType, ItemType.REPLACER);
-
-        final UserAction action = createReplacerAction(user, actionType, parent, replacer);
-        itemService.getUserActionRepository().save(action);
-    }
-
-
-    public static int processRateItemAction(final Item itemToRate,
-                                             final String actionType,
-                                             final UserEntity user,
-                                             final ItemService itemService) {
-        final int newUserRating = updateUserRating(user, actionType, null);
-
-        final UserAction action = createRateAction(itemToRate, actionType, user);
-        itemService.getUserActionRepository().save(action);
-        return newUserRating;
-    }
-
-    public static void processUploadDictionaryAction(final String actionType,
-                                                     final String changed,
-                                                     final UserEntity user,
-                                                     final UserActionRepository repository) {
-        updateUserRating(user, actionType, null);
-
-        final UserAction userAction = new UserAction();
-
-        userAction.setName(actionType + changed);
-        userAction.setActionType(actionType);
-        userAction.setActionDate(LocalDateTime.now().toString());
-        userAction.setUserId(user.getId());
-        userAction.setItemId(0L);
-
-        repository.save(userAction);
-    }
-
-    private static int updateUserRating(final UserEntity user, final String actionType, final String itemType) {
-        if (!userRatedActions.contains(actionType)) {
-            return user.getRating();
+        if (user == null) {
+            return null;
         }
-        Integer increase = getIncrease(actionType, itemType);
+
+        String message =  entity.toString();
+        if (entity instanceof NestedItem) {
+            message += " item=(" + ((NestedItem) entity).getItem() + ")";
+        }
+        if (!actionType.equals(ActionType.UPDATE)) {
+            message += ": " + actionType.toLowerCase() + "(e)d";
+            if (actionType.equals(ActionType.DELETE) && specifyParentInMessage && parent != null) {
+                String preposition = "from";
+                message += " " + preposition + " " + parent;
+            }
+        }
+        if (!isEmpty(actionDetails)) {
+            if (entity instanceof Item) {
+                message = actionDetails;
+            } else {
+                message += ": " + actionDetails;
+            }
+        }
+
+        final String valuationType;
+        if (entity instanceof Typeable) {
+            valuationType = ((Typeable) entity).getValuationType();
+        } else {
+            valuationType = ValuationType.ITEM;
+        }
+
+        Long parentId = null;
+        if (parent != null) {
+            parentId = parent.getId();
+        }
+
+        String note = "-";
+        Long itemId = entity.getId();
+        if (entity instanceof Item) {
+            note = ((Item) entity).getCategory().toLowerCase();
+        } else if (entity instanceof NestedItem) {
+            final NestedItem nestedItem = (NestedItem) entity;
+            note = nestedItem.getType();
+            itemId = nestedItem.getItem().getId();
+        } else if (entity instanceof Link) {
+            note = "link";
+        }
+
+        final UserAction action = new UserAction();
+        action.setActionType(actionType);
+        action.setActionDate(DateTimeUtil.now());
+        action.setUserId(user.getId());
+        action.setParentId(parentId != null ? parentId : 0L);
+        action.setItemId(itemId != null ? itemId : 0L);
+        action.setMessage(message);
+        action.setNote(note);
+
+        if (!(entity instanceof UserEntity)) {
+            updateUserRating(user, actionType, valuationType);
+        }
+
+        return action;
+    }
+
+    public static List<UserAction> createActions(final Item parent,
+                                                 final Set<NestedItem> oldChildren,
+                                                 final Set<NestedItem> newChildren,
+                                                 final UserEntity user,
+                                                 final ItemService service) {
+
+        final List<UserAction> actions = new ArrayList<>();
+
+        for (final NestedItem child : newChildren) {
+            if (child.getId() == null) {
+                actions.add(createAction(ActionType.ADD, "", parent, child, user, false));
+            }
+        }
+
+        String actionDetails = "";
+        final List<NestedItem> toSave = new ArrayList<>();
+        for (final NestedItem oldChild : oldChildren) {
+            for (final NestedItem newChild : newChildren) {
+                if (newChild.getName().equals(oldChild.getName())) {
+                    toSave.add(oldChild);
+                    final String newComment = newChild.getComment();
+                    final String oldComment = oldChild.getComment();
+                    final String newQuantity = newChild.getQuantity();
+                    final String oldQuantity = oldChild.getQuantity();
+                    final boolean commentChanged = !Objects.equals(newComment, oldComment);
+                    final boolean quantityChanged = !Objects.equals(newQuantity, oldQuantity);
+                    if (commentChanged) {
+                        actionDetails += "new comment: " + newComment;
+                    }
+                    if (quantityChanged) {
+                        actionDetails += "new quantity: " + newQuantity;
+                    }
+                    if (commentChanged || quantityChanged) {
+                        actions.add(createAction(ActionType.UPDATE, actionDetails, parent, oldChild, user, false));
+                    }
+                }
+            }
+        }
+
+        oldChildren.removeAll(toSave);
+
+        for (final NestedItem orphan : oldChildren) {
+            service.getNestedItemRepo().deleteById(orphan.getId());
+            actions.add(createAction(ActionType.DELETE, "", parent, orphan, user, false));
+        }
+
+        return actions;
+    }
+
+    public static void createActions(final HeaderTable header,
+                                     final Item oldItem,
+                                     final String newStatus,
+                                     final List<UserAction> actions,
+                                     final UserEntity user) {
+
+        final List<HeaderTableRow> rows = new ArrayList<>(header.getRows());
+//        rows.add(HeaderTableRow.create("Status", newStatus));
+
+        final Map<String, String> map = ItemUtil.toMap(oldItem.getDescription());
+        map.put("Name", oldItem.getName());
+        map.put("Category", oldItem.getCategory());
+//        map.put("Status", oldItem.getStatus());
+
+        for (final HeaderTableRow row : rows) {
+            final String param = row.getParameter();
+            final String value = row.getValue();
+            final boolean newRow = row.getId() == null;
+            if (newRow) {
+                final String actionDetails = "new param=" + param + " value=" + value + " added";
+                actions.add(createAction(ActionType.ADD, actionDetails, null, oldItem, user, false));
+            } else {
+                String actionDetails = null;
+                final String oldValue = map.get(param);
+                if (oldValue == null) {
+                    actionDetails = "param param=" + param + " value=" + value
+                            + ": new param=" + param;
+                } else if (!oldValue.equals(value)) {
+                    actionDetails = "param param=" + param + " value=" + oldValue
+                            + ": new value=" + value;
+                }
+                if (actionDetails != null) {
+                    actions.add(createAction(ActionType.UPDATE, actionDetails, null, oldItem, user, false));
+                }
+            }
+        }
+
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            boolean deleted = true;
+            for (final HeaderTableRow row : header.getRows()) {
+                if (row.getName().equals(entry.getKey())) {
+                    deleted = false;
+                    break;
+                }
+            }
+            if (deleted) {
+                final String actionDetails = "param " + entry.getKey() + " removed";
+                actions.add(createAction(ActionType.DELETE, actionDetails, null, oldItem, user, false));
+            }
+        }
+    }
+
+    public static void updateUserRating(final UserEntity user,
+                                        final String actionType,
+                                        final String valuationType) {
+        if (!userRatedActions.contains(actionType)) {
+            return;
+        }
+        Integer increase = getIncrease(actionType, valuationType);
         if (increase != null) {
             final Integer rating = user.getRating() + increase;
             user.setRating(rating);
         }
-        return user.getRating();
     }
 
-    private static Integer getIncrease(final String actionType, final String itemType) {
+    private static Integer getIncrease(final String actionType, final String valuationType) {
+
         Integer increase = null;
         if (actionType.equals(ActionType.CREATE)) {
-            switch (itemType) {
-                case ItemType.VEHICLE:
+            switch (valuationType) {
+                case ValuationType.VEHICLE:
                     increase = CREATE_VEHICLE.getValue();
                     break;
-                case ItemType.ITEM:
+                case ValuationType.ITEM:
                     increase = CREATE_ITEM.getValue();
                     break;
             }
         } else if (actionType.equals(ActionType.ADD)) {
-            switch (itemType) {
-                case ItemType.PART:
+            switch (valuationType) {
+                case ValuationType.PART:
                     increase = ADD_PART.getValue();
                     break;
-                case ItemType.REPLACER:
+                case ValuationType.REPLACER:
                     increase = ADD_REPLACER.getValue();
                     break;
-                case ItemType.LINK:
+                case ValuationType.LINK:
                     increase = ADD_OR_UPDATE_LINK.getValue();
                     break;
             }
         } else if (actionType.equals(ActionType.UPDATE)) {
-            if (itemType.equals(ItemType.LINK)) {
+            if (valuationType.equals(ValuationType.LINK)) {
                 increase = ADD_OR_UPDATE_LINK.getValue();
             } else {
                 increase = UPDATE.getValue();
@@ -258,66 +348,12 @@ public class UserActionUtil {
         return increase;
     }
 
-    private static UserAction createRateAction(final Item itemToRate,
-                                               final String actionType,
-                                               final UserEntity user) {
-        return create(user, actionType, "replacer", itemToRate);
-    }
-
-    private static UserAction createChildItemAction(final UserEntity user,
-                                                   final String actionType,
-                                                   final Item item,
-                                                   final ChildItem childItem) {
-        final String itemType = "part";
-
-        final UserAction userAction = create(user, actionType, itemType, item);
-        userAction.setItemId(childItem.getItem().getId());
-        userAction.setName(createChildName(actionType, childItem.getItem(), item, itemType));
-        userAction.setParentItemId(item.getId());
-        userAction.setItemType(itemType);
-        userAction.setItemCategory(childItem.getItem().getCategory());
-
-        return userAction;
-    }
-
-    private static UserAction createReplacerAction(final UserEntity user,
-                                                  final String actionType,
-                                                  final Item item,
-                                                  final Replacer replacer) {
-        final String itemType = "replacer";
-
-        final UserAction userAction = create(user, actionType, itemType, item);
-        userAction.setItemId(replacer.getItem().getId());
-        userAction.setName(createChildName(actionType, replacer.getItem(), item, itemType));
-        userAction.setParentItemId(item.getId());
-        userAction.setItemType(itemType);
-
-        return userAction;
-    }
-
     private static String createChildName(final String actionType,
                                           final Item child,
                                           final Item parent,
                                           final String itemType) {
         final String toOrFrom = actionType.equals("add") ? "to" : "from";
         return actionType + " " + child.getName() + " " + toOrFrom + " " + parent.getName() + " as " + itemType;
-    }
-
-    private static UserAction create(final UserEntity user,
-                                     final String actionType,
-                                     final String itemType,
-                                     final Item item) {
-        final String name = actionType + " " + itemType + " " + item.getName();
-
-        final UserAction userAction = new UserAction();
-        userAction.setName(name);
-        userAction.setActionType(actionType);
-        userAction.setActionDate(DateTimeUtil.now());
-        userAction.setUserId(user.getId());
-        userAction.setItemId(item.getId());
-        userAction.setItemCategory(item.getCategory());
-        userAction.setItemType(itemType);
-        return userAction;
     }
 
 }

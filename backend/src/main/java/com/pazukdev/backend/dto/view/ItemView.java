@@ -1,11 +1,11 @@
 package com.pazukdev.backend.dto.view;
 
-import com.pazukdev.backend.dto.LikeListDto;
+import com.pazukdev.backend.dto.LinkDto;
 import com.pazukdev.backend.dto.NestedItemDto;
 import com.pazukdev.backend.dto.UserActionDto;
+import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.ReplacersTable;
-import com.pazukdev.backend.dto.user.UserDto;
 import com.pazukdev.backend.entity.AdminMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,6 +31,7 @@ public class ItemView extends AbstractView {
     private boolean ordinaryItem;
     private Long itemId;
     private String category = "-";
+    private String manufacturer = "-";
     private String vehicleClass;
     private String status;
     private String localizedCategory = "-";
@@ -48,11 +49,10 @@ public class ItemView extends AbstractView {
     private Set<Long> wishListIds = new HashSet<>();
     private Set<String> adminMessages = new HashSet<>();
     private String errorMessage = "-";
-    private LikeListDto likeList;
     private ItemView parents;
+    private List<LinkDto> buyLinks = new ArrayList<>();
     private String wikiLink;
     private String websiteLink;
-    private String websiteLang;
     private String manualLink;
     private String partsCatalogLink;
     private String drawingsLink;

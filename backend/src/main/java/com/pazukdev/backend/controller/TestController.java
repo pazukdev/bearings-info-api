@@ -1,6 +1,5 @@
 package com.pazukdev.backend.controller;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Siarhei Sviarkaltsau
  */
 @RestController
-@Api(tags = "Test Controller", value = "Test methods")
 @RequiredArgsConstructor
 @CrossOrigin
 public class TestController {

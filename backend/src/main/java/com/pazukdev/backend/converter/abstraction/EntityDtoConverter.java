@@ -1,7 +1,7 @@
 package com.pazukdev.backend.converter.abstraction;
 
 import com.pazukdev.backend.dto.AbstractDto;
-import com.pazukdev.backend.entity.AbstractEntity;
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;

@@ -6,15 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pazukdev.backend.util.AppCollectionUtil.contains;
 import static com.pazukdev.backend.util.CategoryUtil.Category.*;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.*;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.CATEGORY;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.NAME;
 import static com.pazukdev.backend.util.ClassUtil.getFieldsValues;
+import static com.pazukdev.backend.util.CollectionUtil.contains;
 import static com.pazukdev.backend.util.ItemUtil.getValueFromDescription;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
+/**
+ * @author Siarhei Sviarkaltsau
+ */
 public class CategoryUtil {
 
     public static class Category {
@@ -67,7 +70,6 @@ public class CategoryUtil {
             public static final String REPLACER = "Replacer";
             public static final String STATUS = "Status";
             public static final String WEBSITE = "Website";
-            public static final String WEBSITE_LANG = "Website lang";
             public static final String WIKI = "Wiki";
         }
 
@@ -134,8 +136,12 @@ public class CategoryUtil {
         for (final String s : commentLine.split("=")[1].split(";")) {
             if (containsParentheses(s)) {
                 final String paramValue = getValueFromDescription(description, getStringBeforeParentheses(s));
-                final String unit = getStringBetweenParentheses(s);
-                value +=  replaceEmptyWithEmpty(paramValue) + " " + replaceEmptyWithEmpty(unit);
+                if (isEmpty(paramValue)) {
+                    value += replaceEmptyWithEmpty(paramValue);
+                } else {
+                    final String unit = getStringBetweenParentheses(s);
+                    value += replaceEmptyWithEmpty(paramValue) + " " + replaceEmptyWithEmpty(unit);
+                }
             } else {
                 final String paramValue = getValueFromDescription(description, s);
                 value += replaceEmptyWithEmpty(paramValue);
@@ -172,8 +178,8 @@ public class CategoryUtil {
         return infoCategories.contains(category);
     }
 
-    public static boolean isDescriptionIgnored(final String parameter) {
-        return contains(getFieldsValues(DescriptionIgnored.class), parameter);
+    public static boolean isDescriptionIgnored(final String param) {
+        return param.length() < 3 || contains(getFieldsValues(DescriptionIgnored.class), param);
     }
 
     public static boolean isPart(String category, final List<String> infoCategories) {

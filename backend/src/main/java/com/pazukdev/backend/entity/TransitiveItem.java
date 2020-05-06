@@ -1,12 +1,13 @@
 package com.pazukdev.backend.entity;
 
+import com.pazukdev.backend.dto.LinkDto;
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -14,8 +15,6 @@ import javax.persistence.Table;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Entity
-@Table(name = "transitive_item")
 public class TransitiveItem extends AbstractEntity {
 
     private String category;
@@ -27,7 +26,6 @@ public class TransitiveItem extends AbstractEntity {
     private String manual;
     private String parts;
     private String drawings;
-    @Column(name = "website_lang")
-    private String websiteLang;
+    private Set<LinkDto> buyLinksDto = new HashSet<>();
 
 }

@@ -17,4 +17,10 @@ public class TransitiveItemDescriptionMap {
     private Map<String, String> selectableParameters = new HashMap<>();
     private Map<String, String> items = new HashMap<>();
 
+    public String getAndRemoveParam(final String key) {
+        final String value = parameters.get(key);
+        parameters.remove(key);
+        return value;
+    }
+
 }

@@ -2,12 +2,15 @@ package com.pazukdev.backend.dto.factory;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.constant.security.Role;
+import com.pazukdev.backend.converter.UserConverter;
 import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.dto.NestedItemDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
+import com.pazukdev.backend.repository.UserActionRepository;
+import com.pazukdev.backend.service.EmailSenderService;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
 import com.pazukdev.backend.util.*;
@@ -15,23 +18,24 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
+import static com.pazukdev.backend.converter.NestedItemConverter.convert;
 import static com.pazukdev.backend.dto.DictionaryData.getDictionaryFromFile;
 import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.*;
+import static com.pazukdev.backend.util.CategoryUtil.Category;
 import static com.pazukdev.backend.util.CategoryUtil.Category.VEHICLE;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter;
 import static com.pazukdev.backend.util.ChildItemUtil.collectIds;
-import static com.pazukdev.backend.util.ChildItemUtil.createChildrenFromItemView;
 import static com.pazukdev.backend.util.ItemUtil.SpecialItemId.*;
 import static com.pazukdev.backend.util.ItemUtil.*;
+import static com.pazukdev.backend.util.LinkUtil.setLinksToItemView;
+import static com.pazukdev.backend.util.LinkUtil.updateLinks;
 import static com.pazukdev.backend.util.NestedItemUtil.addPossiblePartsAndReplacers;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.TableUtil.createHeader;
 import static com.pazukdev.backend.util.TableUtil.createReplacersTable;
-import static com.pazukdev.backend.util.TranslatorUtil.isValid;
 import static com.pazukdev.backend.util.TranslatorUtil.translate;
 import static com.pazukdev.backend.util.UserActionUtil.*;
-import static com.pazukdev.backend.util.UserUtil.createLikeListDto;
-import static com.pazukdev.backend.util.UserUtil.getCreatorData;
+import static com.pazukdev.backend.validator.CodeValidator.isLangCodeValid;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -41,6 +45,7 @@ public class ItemViewFactory {
 
     private final ItemService itemService;
     private final List<String> infoCategories;
+    private final EmailSenderService emailSenderService;
 
     public ItemView createHomeView(final String userName, final String userLanguage) {
         return createItemView(VEHICLES_VIEW.getItemId(), Status.ACTIVE, userName, userLanguage);
@@ -74,7 +79,7 @@ public class ItemViewFactory {
         final ItemView basicView = new ItemView();
         basicView.setItemId(itemId);
         basicView.setWishListIds(collectIds(wishList.getItems()));
-        basicView.setUserData(UserDtoFactory.createItemViewUserData(currentUser));
+        basicView.setUserData(UserConverter.convert(currentUser));
 
         ItemView view;
 
@@ -89,13 +94,13 @@ public class ItemViewFactory {
         } else if (userListView) {
             view = createUsersListView(basicView, userService);
         } else {
-            view = createOrdinaryItemView(basicView, itemId, currentUser, userService);
+            view = createOrdinaryItemView(basicView, itemId, userService);
         }
 
         final double businessLogicEndTime = System.nanoTime();
         final double businessLogicDuration = businessLogicEndTime - businessLogicStartTime;
 
-        if (!userLang.equals("en") && !userListView && isValid(userLang)) {
+        if (!userLang.equals("en") && !userListView && isLangCodeValid(userLang)) {
             try {
                 translate("en", userLang, view, false);
             } catch (Exception e) {
@@ -120,7 +125,16 @@ public class ItemViewFactory {
             throw new Exception("category, name, userName or userLanguage is empty");
         }
 
-        final Item item = createNewItem(name.trim(), category.trim(), userName, userLanguage);
+        final UserEntity creator = itemService.getUserService().findFirstByName(userName);
+        final Item item = createNewItem(name.trim(), category.trim(), creator, userLanguage);
+
+        LoggerUtil.warn(
+                UserActionUtil.createAction(ActionType.CREATE, "", null, item, creator, false),
+                itemService.getUserActionRepo(),
+                item,
+                creator,
+                itemService.getEmailSenderService());
+
         final ItemView view = createItemView(item.getId(), Status.ACTIVE, userName, userLanguage);
         view.setNewItem(true);
 
@@ -130,16 +144,14 @@ public class ItemViewFactory {
 
     private Item createNewItem(String name,
                                String category,
-                               final String userName,
+                               final UserEntity creator,
                                final String userLang) throws Exception {
-        final UserEntity creator = itemService.getUserService().findFirstByName(userName);
 
-        if (!userLang.equals("en") && isValid(userLang)) {
+        if (!userLang.equals("en") && isLangCodeValid(userLang)) {
             final DictionaryData dictionaryData = getDictionaryFromFile(userLang);
             final List<String> dictionary = dictionaryData.getDictionary();
             name = translate(userLang, "en", name, true, false, dictionary);
             category = translate(userLang, "en", category, false, true, dictionary);
-//            saveDictionary(dictionaryData);
         }
 
         final Item item = new Item();
@@ -150,7 +162,7 @@ public class ItemViewFactory {
         item.setUserActionDate(DateUtil.now());
         item.setDescription(createEmptyDescription(category, itemService.getItemRepository()));
         itemService.update(item);
-        processItemAction(ActionType.CREATE, item, creator, itemService);
+        UserActionUtil.createAction(ActionType.CREATE, "", null, item, creator, false);
         return item;
     }
 
@@ -177,10 +189,9 @@ public class ItemViewFactory {
 
     private ItemView createOrdinaryItemView(final ItemView view,
                                             final Long itemId,
-                                            final UserEntity currentUser,
                                             final UserService userService) {
         final Item item = itemService.findOne(itemId);
-        final List<Item> allItems = itemService.findAll();
+        final List<Item> allItems = itemService.findAllActive();
         allItems.remove(item);
         final String category = item.getCategory();
         final String name = item.getName();
@@ -190,6 +201,7 @@ public class ItemViewFactory {
         view.setSearchEnabled(true);
         view.setOrdinaryItem(true);
         view.setCategory(category);
+        view.setManufacturer(description.get(Category.MANUFACTURER));
         if (category.equals(VEHICLE)) {
             view.setVehicleClass(description.get(Parameter.CLASS));
         }
@@ -204,9 +216,8 @@ public class ItemViewFactory {
         view.setAllChildren(createChildren(item, userService, true));
         view.setReplacersTable(createReplacersTable(item, userService));
         addPossiblePartsAndReplacers(view, allItems, item, infoCategories, itemService);
-        view.setCreatorData(getCreatorData(item, itemService.getUserService()));
-        view.setLikeList(createLikeListDto(currentUser));
-        LinkUtil.setLinksToItemView(view, item);
+        view.setCreatorData(UserUtil.getCreator(item, itemService.getUserService()));
+        setLinksToItemView(view, item);
         view.setParents(createParentItemsView(item, userService, allItems));
         return view;
     }
@@ -215,18 +226,18 @@ public class ItemViewFactory {
                                                       final UserService userService,
                                                       final boolean all) {
         final List<NestedItemDto> dtos = new ArrayList<>();
-        addParts(item.getChildItems(), dtos, userService, all, null);
+        addParts(item.getParts(), dtos, userService, all, null);
         return dtos;
     }
 
-    public static void addParts(final Set<ChildItem> parts,
+    public static void addParts(final Set<NestedItem> parts,
                                 final List<NestedItemDto> dtos,
                                 final UserService userService,
                                 final boolean summary,
                                 final Double parentQuantity) {
-        for (final ChildItem part : parts) {
+        for (final NestedItem part : parts) {
             boolean add = true;
-            final NestedItemDto partDto = createChildItem(part, userService, !summary);
+            final NestedItemDto partDto = createChild(part, userService, !summary);
             Double quantity = null;
             if (summary) {
                 quantity = getFirstNumber(part.getQuantity());
@@ -248,7 +259,7 @@ public class ItemViewFactory {
                 dtos.add(partDto);
             }
             if (summary) {
-                addParts(part.getItem().getChildItems(), dtos, userService, true, quantity);
+                addParts(part.getItem().getParts(), dtos, userService, true, quantity);
             }
         }
     }
@@ -260,7 +271,7 @@ public class ItemViewFactory {
         vehicles.forEach(vehicle -> dtos.add(createVehicle(vehicle, userService)));
 
         view.setChildren(dtos);
-        view.setAdminMessage(AdminMessage.getMessage(itemService.getAdminMessageRepository()));
+        view.setAdminMessage(AdminMessage.getMessage(itemService.getAdminMessageRepo()));
         view.setLastVehicles(getLastNewVehicles(itemService));
         view.setLastReplacers(getLastNewReplacers(itemService));
         return view;
@@ -312,8 +323,10 @@ public class ItemViewFactory {
 
         final long businessLogicStartTime = System.nanoTime();
 
+        final UserActionRepository userActionRepo = itemService.getUserActionRepo();
+
         final long translationFromUserLang = System.nanoTime();
-        if (!userLang.equals("en") && isValid(userLang)) {
+        if (!userLang.equals("en") && isLangCodeValid(userLang)) {
             try {
                 translate(userLang, "en", view, true);
             } catch (Exception e) {
@@ -326,33 +339,46 @@ public class ItemViewFactory {
         final HeaderTable header = view.getHeader();
         final String newName = header.getValue(Parameter.DescriptionIgnored.NAME);
         final String newCategory = header.getValue(Parameter.DescriptionIgnored.CATEGORY);
+        final String newStatus = view.getStatus();
+
+        final Item item = itemService.findOne(itemId);
+
+        final Item oldItemCopy = new Item();
+        oldItemCopy.setId(item.getId());
+        oldItemCopy.setName(item.getName());
+        oldItemCopy.setCategory(item.getCategory());
+
+        final List<Item> allItems = itemService.findAllActive();
+        allItems.remove(item);
+
+        final List<UserAction> actions = new ArrayList<>();
+        createActions(header, item, newStatus, actions, currentUser);
+
         header.removeRow(Parameter.DescriptionIgnored.NAME);
         header.removeRow(Parameter.DescriptionIgnored.CATEGORY);
 
         final Map<String, String> newDescriptionMap = TableUtil.createHeaderMap(header);
         final String newDescription = toDescription(newDescriptionMap);
 
-        final Item oldItem = itemService.findOne(itemId);
-        final List<Item> allItems = itemService.findAll();
-        allItems.remove(oldItem);
-
-        boolean moveItemToAnotherCategory = updateNameAndCategory(oldItem, newCategory, newName, allItems, infoCategories, itemService);
+        boolean moveItemToAnotherCategory = updateNameAndCategory(item, newCategory, newName, allItems, infoCategories, itemService);
 
         if (moveItemToAnotherCategory) {
-            moveItemToAnotherCategory(oldItem, newCategory, newDescriptionMap, itemService);
-        } else if (!oldItem.getDescription().equals(newDescription)) {
-            oldItem.setDescription(newDescription);
+            moveItemToAnotherCategory(item, newCategory, newDescriptionMap, itemService);
+        } else if (!item.getDescription().equals(newDescription)) {
+            item.setDescription(newDescription);
             applyNewDescriptionToCategory(newCategory, header, newDescriptionMap, allItems, itemService);
         }
-        ImgUtil.updateImg(view, oldItem);
-        updateChildItems(oldItem, view, itemService, currentUser);
-        updateReplacers(oldItem, view, itemService, currentUser);
-        LinkUtil.updateItemLinks(oldItem, view, currentUser, itemService);
-        oldItem.setStatus(view.getStatus());
 
-        itemService.update(oldItem);
+        updateNestedItems(item, view, currentUser, itemService, actions);
+        updateLinks(item, view, currentUser, actions);
+        item.setStatus(newStatus);
 
-        final ItemView newItemView = createItemView(itemId, oldItem.getStatus(), currentUser.getName(), userLang);
+        itemService.update(item);
+
+        final ItemView newItemView = createItemView(itemId, item.getStatus(), currentUser.getName(), userLang);
+
+
+        LoggerUtil.warn(actions, userActionRepo, oldItemCopy, currentUser, emailSenderService);
 
         final double totalTranslationTime = view.getTranslationTime() * 1000000000 + translationFromUserLangDuration;
         setTime(newItemView, (double) (System.nanoTime() - businessLogicStartTime), totalTranslationTime);
@@ -360,16 +386,17 @@ public class ItemViewFactory {
     }
 
     private ItemView editWishList(final ItemView view, final UserEntity user) {
-        final Set<ChildItem> newWishListItems = createChildrenFromItemView(view, itemService);
-        final Set<ChildItem> toRemove = new HashSet<>();
-        for (final ChildItem oldWishListItem : user.getWishList().getItems()) {
+        final Long id = view.getItemId();
+        final Set<NestedItem> newWishListItems = convert(view.getChildren(), id, itemService, user);
+        final Set<NestedItem> toRemove = new HashSet<>();
+        for (final NestedItem oldWishListItem : user.getWishList().getItems()) {
             boolean remove = true;
-            for (final ChildItem newWishListItem : newWishListItems) {
+            for (final NestedItem newWishListItem : newWishListItems) {
                 final Long newItemId = newWishListItem.getItem().getId();
                 final Long oldItemId = oldWishListItem.getItem().getId();
                 final boolean updateOldWishListItem = oldItemId.equals(newItemId);
                 if (updateOldWishListItem) {
-                    oldWishListItem.setLocation(newWishListItem.getLocation());
+                    oldWishListItem.setComment(newWishListItem.getComment());
                     oldWishListItem.setQuantity(newWishListItem.getQuantity());
                     remove = false;
                 }
@@ -405,15 +432,24 @@ public class ItemViewFactory {
     private void removeItems(final Set<Long> idsToRemove,
                              final UserEntity currentUser,
                              final UserService userService) {
+        final List<UserAction> actions = new ArrayList<>();
         for (final Long idToRemove : idsToRemove) {
             final Item itemToRemove = itemService.findOne(idToRemove);
             removeItemFromAllWishLists(itemToRemove, userService);
-            removeItemFromAllParentItems(idToRemove, currentUser);
-            removeItem(itemToRemove, currentUser);
+            removeItemFromAllParentItems(idToRemove, currentUser, actions);
+            removeItem(itemToRemove, currentUser, actions);
         }
+        LoggerUtil.warn(
+                actions,
+                itemService.getUserActionRepo(),
+                null,
+                currentUser,
+                itemService.getEmailSenderService());
     }
 
-    private void removeItem(final Item itemToRemove, final UserEntity user) {
+    private void removeItem(final Item itemToRemove,
+                            final UserEntity user,
+                            final List<UserAction> actions) {
         final String status = itemToRemove.getStatus();
         if (status.equals(Status.DELETED)) {
             itemService.hardDelete(itemToRemove.getId());
@@ -422,7 +458,7 @@ public class ItemViewFactory {
         itemToRemove.setStatus(Status.DELETED);
         itemToRemove.setUserActionDate(DateUtil.now());
         itemService.update(itemToRemove);
-        processItemAction(ActionType.DELETE, itemToRemove, user, itemService);
+        actions.add(createAction(ActionType.DELETE, "", null, itemToRemove, user, false));
     }
 
     private void removeItemFromAllWishLists(final Item itemToRemove, final UserService userService) {
@@ -433,23 +469,22 @@ public class ItemViewFactory {
         }
     }
 
-    private void removeItemFromAllParentItems(final Long idToRemove, final UserEntity user) {
-        for (final Item item : itemService.findAll()) {
-            for (final Replacer replacer : new ArrayList<>(item.getReplacers())) {
-                final Item nestedItem = replacer.getItem();
-                if (nestedItem.getId().equals(idToRemove)) {
-//                    replacer.setStatus("deleted");
-                    item.getReplacers().remove(replacer);
-                    processReplacerAction(ActionType.DELETE, replacer, item, user, itemService);
-                }
-            }
+    private void removeItemFromAllParentItems(final Long idToRemove,
+                                              final UserEntity user,
+                                              final List<UserAction> actions) {
+        for (final Item item : itemService.findAllActive()) {
+            final List<NestedItem> nestedItems = new ArrayList<>(item.getReplacers());
+            nestedItems.addAll(new ArrayList<>(item.getParts()));
 
-            for (final ChildItem part : new ArrayList<>(item.getChildItems())) {
-                final Item nestedItem = part.getItem();
-                if (nestedItem.getId().equals(idToRemove)) {
-//                    part.setStatus("deleted");
-                    item.getChildItems().remove(part);
-                    processPartAction(ActionType.DELETE, part, item, user, itemService);
+            for (final NestedItem nestedItem : nestedItems) {
+                final Item child = nestedItem.getItem();
+                if (child.getId().equals(idToRemove)) {
+                    if (nestedItem.getType().equals(NestedItem.Type.REPLACER.toString().toLowerCase())) {
+                        item.getReplacers().remove(nestedItem);
+                    } else {
+                        item.getParts().remove(nestedItem);
+                    }
+                    actions.add(createAction(ActionType.DELETE, "", item, nestedItem, user, true));
                 }
             }
 

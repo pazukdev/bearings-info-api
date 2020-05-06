@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/replacer")
 @RequiredArgsConstructor
-@Api(tags = "Replacer Controller", value = "API methods for item replacers")
+@Api(tags = "API methods for item replacers")
 @CrossOrigin
 public class ReplacerController {
 

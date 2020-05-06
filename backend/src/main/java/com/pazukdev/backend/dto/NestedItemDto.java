@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -23,6 +25,10 @@ public class NestedItemDto extends AbstractDto {
     private String creatorName;
     private Long creatorId;
     private Integer rating = 0;
+    private String type;
+
+    private Set<NestedItemDto> likedUsers = new HashSet<>();
+    private Set<NestedItemDto> dislikedUsers = new HashSet<>();
 
     private String buttonText = "-";
 

@@ -38,24 +38,28 @@ public class FileUtil {
         public static final String TXT = "txt";
     }
 
-    public static class FileName {
-        public static final String COMMENTS = "1g8YeaINmlH26XS1rqJ0oJRh0BN8mN8MIVRBh2MG4GQE";
-        public static final String INFO_CATEGORIES = "1JM_dDZIKjCRvrkOLRvvNwGtP3Al-Rakgtu-w4dFgB-c";
-        public static final String LANGS = "1XwULMlxG5JM5VYU-3qTmXYguF_kPvKFb2zE2iIFi_o0";
+    public static class FileId {
+        public static final String COMMENT = "1g8YeaINmlH26XS1rqJ0oJRh0BN8mN8MIVRBh2MG4GQE";
+        public static final String INFO_CATEGORY = "1JM_dDZIKjCRvrkOLRvvNwGtP3Al-Rakgtu-w4dFgB-c";
+        public static final String LANG = "1XwULMlxG5JM5VYU-3qTmXYguF_kPvKFb2zE2iIFi_o0";
+        public static final String USER = "1lQvD9rQYheddn-D1k8JmnUPb7fRJr6TkJVdcwPzdTmo";
     }
 
     public static List<String> getComments() {
-        return readGoogleDocDocument(FileName.COMMENTS);
+        return readGoogleDocDocument(FileId.COMMENT);
     }
 
     public static List<String> getInfoCategories() {
-        return readGoogleDocDocument(FileName.INFO_CATEGORIES);
+        return readGoogleDocDocument(FileId.INFO_CATEGORY);
     }
 
-    public static List<String> readGoogleDocDocument(final String fileName) {
-        try (final InputStream in = openGoogleDoc(fileName, GoogleDocumentTypeUrl.DOCUMENT, FileFormat.TXT)) {
+    public static List<String> readGoogleDocDocument(final String documentId) {
+        try (final InputStream in = openGoogleDoc(documentId, GoogleDocumentTypeUrl.DOCUMENT, FileFormat.TXT)) {
             final List<String> fileLines = IOUtils.readLines(Objects.requireNonNull(in), StandardCharsets.UTF_8);
-            fileLines.add(0, SpecificStringUtil.removeUtf8BOM(fileLines.get(0)));
+            final String firstLine = SpecificStringUtil.removeUtf8BOM(fileLines.get(0));
+            fileLines.remove(0);
+            fileLines.add(0, firstLine);
+            CollectionUtil.removeAllEmpty(fileLines);
             return fileLines;
         } catch (IOException e) {
             e.printStackTrace();
@@ -63,20 +67,27 @@ public class FileUtil {
         }
     }
 
-    public static List<List<String>> readGoogleDocSpreadsheet(final String fileName) {
+    public static List<List<String>> readGoogleDocSpreadsheet(final String documentId) {
         List<String[]> lines = null;
-        try (final InputStream in = openGoogleDoc(fileName, GoogleDocumentTypeUrl.SPREADSHEET, FileFormat.CSV)) {
+        try (final InputStream in = openGoogleDoc(documentId, GoogleDocumentTypeUrl.SPREADSHEET, FileFormat.CSV)) {
             lines = new CSVReader(new InputStreamReader(Objects.requireNonNull(in))).readAll();
         } catch (IOException e) {
             LOGGER.error("Error collecting data from input stream", e);
         }
-        return AppCollectionUtil.listOfArraysToListOfLists(Objects.requireNonNull(lines));
+        return CollectionUtil.listOfArraysToListOfLists(Objects.requireNonNull(lines));
     }
 
-    private static InputStream openGoogleDoc(final String fileName,
+//    public static void main(String[] args) throws IOException {
+//        final URL url = new URL("https://www.autodoc.by/price/1307/62032RS");
+//        final InputStream in = Objects.requireNonNull(url).openStream();
+//        final List<String> fileLines = IOUtils.readLines(Objects.requireNonNull(in), StandardCharsets.UTF_8);
+//        fileLines.forEach(System.out::println);
+//    }
+
+    private static InputStream openGoogleDoc(final String documentId,
                                              final String googleDocumentTypeUrl,
                                              final String exportFormat) {        try {
-            final URL url = new URL(googleDocumentTypeUrl + fileName + "/export?format=" + exportFormat);
+            final URL url = new URL(googleDocumentTypeUrl + documentId + "/export?format=" + exportFormat);
             return Objects.requireNonNull(url).openStream();
         } catch (final IOException e) {
             e.printStackTrace();
@@ -84,12 +95,21 @@ public class FileUtil {
         return null;
     }
 
-    public static String[] getGoogleSheetsUrls() {
+    public static String[] getItemsDataGoogleSheetsIds(final boolean fromGoogleDocs) {
+        if (false) {
+            final String fileId = "147-PuU3hmvjcvb4uIJHQ3zy3UMLFRvul4oOsbdXRO5M";
+            final List<String> dataFilesIds = new ArrayList<>();
+            for (final String line : readGoogleDocDocument(fileId)) {
+                dataFilesIds.add(line.split("//")[0].trim());
+            }
+            return dataFilesIds.toArray(new String[0]);
+        }
+
         return new String[] {
                 "1N6Y6uavkv6AVzIF5-NbRlXOZTJekHFBrtF8o4VvtDxc", // manufacturer
                 "12rB_t_ImCGscKiGPazc4WodiG0b9G4zOOfTW1aIbbak", // standard
                 "1R2haf5EqWqC6YJ4GJkcwDyTBB_1ItU_wk3l5zI9CQjQ", // "material"
-                "1Kc6IIZNozbgpjwAzYbiLSnPqihOTKxzZ3lwQXO0QZa0", // "cylinder"
+//                "1Kc6IIZNozbgpjwAzYbiLSnPqihOTKxzZ3lwQXO0QZa0", // "cylinder"
                 "1SJcfsoOmpMA5auCEWprmfu5_5hyL_LQTPrT95fuKyvk", // "wire"
                 "1qtV8j8nHb8u3gyJtrByI6diDPlVHsYl7X0j4HqgOSik", // "gasket"
                 "1LzrET_v01fg-BdtMV8No7nnhBDZxZSAtUMfLwvX2bCA", // "washer"

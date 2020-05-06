@@ -1,5 +1,6 @@
 package com.pazukdev.backend.entity;
 
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,6 +27,6 @@ public class WishList extends AbstractEntity {
             joinColumns = @JoinColumn(name = "wishlist_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id")
     )
-    private Set<ChildItem> items = new HashSet<>();
+    private Set<NestedItem> items = new HashSet<>();
 
 }

@@ -5,6 +5,6 @@ package com.pazukdev.backend.constant.security;
  */
 public enum Role {
 
-    USER, ADMIN, GUEST, SELLER
+    ADMIN, EDITOR, GUEST, SELLER, USER
 
 }

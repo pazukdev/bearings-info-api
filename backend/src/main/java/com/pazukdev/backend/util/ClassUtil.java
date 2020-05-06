@@ -4,6 +4,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Siarhei Sviarkaltsau
+ */
 public class ClassUtil {
 
     public static List<String> getFieldsValues(final Class c) {

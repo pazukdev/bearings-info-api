@@ -1,6 +1,6 @@
 package com.pazukdev.backend.entity.factory;
 
-import com.pazukdev.backend.entity.AbstractEntity;
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
 import com.pazukdev.backend.tablemodel.TableModel;
 import com.pazukdev.backend.tablemodel.TableModelFactory;
 import com.pazukdev.backend.tablemodel.TableRow;

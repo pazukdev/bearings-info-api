@@ -27,7 +27,9 @@ public class HeaderTableRow extends AbstractDto {
     private List<Long> ids = new ArrayList<>();
     private int weight = 0;
 
-    public static HeaderTableRow create(final String param, final String value, final ItemService service) {
+    public static HeaderTableRow create(final String param,
+                                        final String value,
+                                        final ItemService service) {
         final List<Long> ids= new ArrayList<>();
         for (final String subValue : value.split("; ")) {
             final Item item = service.findFirstByCategoryAndName(getCategory(param), subValue);
@@ -37,12 +39,19 @@ public class HeaderTableRow extends AbstractDto {
                 ids.add(null);
             }
         }
+        final HeaderTableRow row = create(param, value);
+        row.setIds(ids);
+        return row;
+    }
+
+    public static HeaderTableRow create(final String param, final String value) {
+        final Long stubId = 0L;
 
         final HeaderTableRow row = new HeaderTableRow();
+        row.setId(stubId);
         row.setName(param);
         row.setParameter(param);
         row.setValue(value);
-        row.setIds(ids);
         row.setWeight(CategoryUtil.getWeight(param));
         return row;
     }

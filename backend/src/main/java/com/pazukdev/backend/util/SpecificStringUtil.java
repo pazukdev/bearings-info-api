@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -95,7 +96,7 @@ public class SpecificStringUtil {
     );
 
     public static boolean isCountry(final String s) {
-        return AppCollectionUtil.contains(countries, s);
+        return CollectionUtil.contains(countries, s);
     }
 
     public static List<String> getList(String source) {
@@ -470,6 +471,10 @@ public class SpecificStringUtil {
         return s != null && !s.isEmpty() && s.trim().matches(".*\\d.*");
     }
 
+    public static byte[] getSomeBytes1() {
+        return "admin-test".getBytes();
+    }
+
     public static boolean stringEndsWithSubstring(String s, String substring) {
         if (s == null || substring == null || s.isEmpty()) {
             return false;
@@ -554,6 +559,25 @@ public class SpecificStringUtil {
             return s.substring(1);
         }
         return s;
+    }
+
+    public static <T> String setToString(final Set<T> list) {
+        String s = "";
+        for (final T t : list) {
+            s += t + "; ";
+        }
+        return removeLastChar(s.trim());
+    }
+
+    public static List<Long> stringToLongList(final String idsSource) {
+        final List<Long> list = new ArrayList<>();
+        if (isEmpty(idsSource)) {
+            return list;
+        }
+        for (final String s : idsSource.split(";")) {
+            list.add(Long.valueOf(s.trim()));
+        }
+        return list;
     }
 
 }

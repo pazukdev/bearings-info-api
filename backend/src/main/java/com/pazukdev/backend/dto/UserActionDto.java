@@ -23,6 +23,7 @@ public class UserActionDto extends AbstractDto {
     private String itemType;
     private String itemCategory;
     private String date;
+    private String note;
 
     public void translate(final String langTo, final List<String> dictionary) {
         boolean name = false;

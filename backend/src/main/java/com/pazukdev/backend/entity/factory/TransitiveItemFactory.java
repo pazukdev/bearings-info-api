@@ -1,8 +1,8 @@
 package com.pazukdev.backend.entity.factory;
 
-import com.pazukdev.backend.entity.AbstractEntity;
+import com.pazukdev.backend.dto.LinkDto;
 import com.pazukdev.backend.entity.TransitiveItem;
-import com.pazukdev.backend.service.TransitiveItemService;
+import com.pazukdev.backend.entity.abstraction.AbstractEntity;
 import com.pazukdev.backend.tablemodel.TableRow;
 import com.pazukdev.backend.util.FileUtil;
 import lombok.Data;
@@ -12,9 +12,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.pazukdev.backend.util.CategoryUtil.Category;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.DescriptionIgnored.*;
 import static com.pazukdev.backend.util.CategoryUtil.isDescriptionIgnored;
+import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
+import static com.pazukdev.backend.validator.CodeValidator.isCountryCodeValid;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -25,11 +26,9 @@ import static com.pazukdev.backend.util.CategoryUtil.isDescriptionIgnored;
 @Component
 public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem> {
 
-    private final TransitiveItemService service;
-
     @Override
     protected String[] getCSVFilesPaths() {
-        return FileUtil.getGoogleSheetsUrls();
+        return FileUtil.getItemsDataGoogleSheetsIds(true);
     }
 
     @Override
@@ -42,13 +41,13 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         super.applyCharacteristics(item, tableRow);
 
         applyCategory(item, tableRow);
-        final boolean vehicle = item.getCategory().equals(Category.VEHICLE);
+//        final boolean vehicle = item.getCategory().equals(Category.VEHICLE);
 
         applyStatus(item, tableRow);
         applyImage(item, tableRow);
         applyDescription(item, tableRow);
         applyReplacers(item, tableRow);
-        applyLinks(item, tableRow, vehicle);
+        applyLinks(item, tableRow);
     }
 
     private void applyCategory(final TransitiveItem item, final TableRow tableRow) {
@@ -82,14 +81,24 @@ public class TransitiveItemFactory extends AbstractEntityFactory<TransitiveItem>
         item.setReplacer(replacer != null ? replacer : "-");
     }
 
-    private void applyLinks(final TransitiveItem item, final TableRow tableRow, final boolean vehicle) {
+    private void applyLinks(final TransitiveItem item, final TableRow tableRow) {
+        item.setManual(tableRow.getData().get(MANUAL));
+        item.setParts(tableRow.getData().get(PARTS_CATALOG));
+        item.setDrawings(tableRow.getData().get(DRAWINGS));
         item.setWiki(tableRow.getData().get(WIKI));
         item.setWebsite(tableRow.getData().get(WEBSITE));
-        item.setWebsiteLang(tableRow.getData().get(WEBSITE_LANG));
-        if (vehicle) {
-            item.setManual(tableRow.getData().get(MANUAL));
-            item.setParts(tableRow.getData().get(PARTS_CATALOG));
-            item.setDrawings(tableRow.getData().get(DRAWINGS));
+
+        for (final Map.Entry<String, String> entry : tableRow.getData().entrySet()) {
+            final String key = entry.getKey();
+            if (key == null || isEmpty(entry.getValue())) {
+                continue;
+            }
+            if (key.length() == 2 && isCountryCodeValid(key)) {
+                final LinkDto link = new LinkDto();
+                link.setCountryCode(key);
+                link.setUrl(entry.getValue());
+                item.getBuyLinksDto().add(link);
+            }
         }
     }
 

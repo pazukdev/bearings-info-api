@@ -1,13 +1,13 @@
 package com.pazukdev.backend.dto.factory;
 
 import com.pazukdev.backend.dto.NestedItemDto;
-import com.pazukdev.backend.dto.user.UserDto;
-import com.pazukdev.backend.entity.ChildItem;
+import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.entity.Item;
-import com.pazukdev.backend.entity.Replacer;
+import com.pazukdev.backend.entity.NestedItem;
 import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.service.UserService;
 import com.pazukdev.backend.util.ChildItemUtil;
+import com.pazukdev.backend.util.NestedItemUtil;
 import com.pazukdev.backend.util.UserUtil;
 
 import java.util.List;
@@ -53,41 +53,31 @@ public class NestedItemDtoFactory {
         return vehicleDto;
     }
 
-    public static NestedItemDto createChildItem(final ChildItem childItem,
-                                                final UserService userService,
-                                                final boolean addLocation) {
-        final Item item = childItem.getItem();
+    public static NestedItemDto createChild(final NestedItem nestedItem,
+                                            final UserService userService,
+                                            final boolean addLocation) {
+        final Item item = nestedItem.getItem();
 
         final NestedItemDto childItemDto = createBasicNestedItemDto(item, userService);
-        childItemDto.setId(childItem.getId());
-        childItemDto.setName(childItem.getName());
+        childItemDto.setId(nestedItem.getId());
+        childItemDto.setName(nestedItem.getName());
         if (addLocation) {
-            childItemDto.setComment(childItem.getLocation());
+            childItemDto.setComment(nestedItem.getComment());
         }
-        childItemDto.setSecondComment(childItem.getQuantity());
-        childItemDto.setStatus(childItem.getStatus());
+        childItemDto.setSecondComment(nestedItem.getQuantity());
+        childItemDto.setStatus(nestedItem.getStatus());
+        childItemDto.setType(nestedItem.getType());
         return childItemDto;
     }
 
-    public static NestedItemDto createReplacer(final Replacer replacer, final UserService userService) {
-        final Item item = replacer.getItem();
-
-        final NestedItemDto replacerDto = createBasicNestedItemDto(item, userService);
-        replacerDto.setId(replacer.getId());
-        replacerDto.setName(replacer.getName());
-        replacerDto.setComment(replacer.getComment());
-        replacerDto.setSecondComment("-");
-        return replacerDto;
-    }
-
-    public static NestedItemDto createWishListItem(final ChildItem childItem, final UserService userService) {
-        final Item item = childItem.getItem();
+    public static NestedItemDto createWishListItem(final NestedItem nestedItem, final UserService userService) {
+        final Item item = nestedItem.getItem();
 
         final NestedItemDto dto = createBasicNestedItemDto(item, userService);
-        dto.setId(childItem.getId());
+        dto.setId(nestedItem.getId());
         dto.setName(ChildItemUtil.createNameForWishListItem(item.getName()));
-        dto.setComment(childItem.getLocation());
-        dto.setSecondComment(childItem.getQuantity());
+        dto.setComment(nestedItem.getComment());
+        dto.setSecondComment(nestedItem.getQuantity());
         return dto;
     }
 
@@ -100,10 +90,12 @@ public class NestedItemDtoFactory {
         return basicSpecialNestedItemDto;
     }
 
-    public static NestedItemDto createBasicNestedItemDto(final Item item, final UserService userService) {
+    public static NestedItemDto createBasicNestedItemDto(final Item item,
+                                                         final UserService userService) {
         final Map<String, String> descriptionMap = toMap(item.getDescription());
         final String manufacturer = descriptionMap.get(Category.MANUFACTURER);
-        final UserDto creator = UserUtil.getCreatorData(item, userService);
+        final String partNumber = descriptionMap.get("Part number");
+        final UserDto creator = UserUtil.getCreator(item, userService);
         final String creatorName = creator != null ? creator.getName() : "deleted user";
 
         final NestedItemDto dto = new NestedItemDto();
@@ -111,8 +103,9 @@ public class NestedItemDtoFactory {
         dto.setItemId(item.getId());
         dto.setItemName(item.getName());
         dto.setItemCategory(item.getCategory());
-        dto.setRating(item.getRating());
-        dto.setButtonText(createButtonText(item, manufacturer));
+        dto.setLikedUsers(NestedItemUtil.getLikedUserDtos(item.getLikedUsers()));
+        dto.setDislikedUsers(NestedItemUtil.getLikedUserDtos(item.getDislikedUsers()));
+        dto.setButtonText(createButtonText(item, manufacturer, partNumber));
         if (item.getCategory().equals(Category.SEAL)) {
             dto.setSize(descriptionMap.get(Parameter.SIZE));
         }

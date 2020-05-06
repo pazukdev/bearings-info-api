@@ -1,11 +1,12 @@
 package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.dto.NestedItemDto;
+import com.pazukdev.backend.dto.factory.NestedItemDtoFactory;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.dto.table.ReplacersTable;
 import com.pazukdev.backend.entity.Item;
-import com.pazukdev.backend.entity.Replacer;
+import com.pazukdev.backend.entity.NestedItem;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
 
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.createReplacer;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter;
 import static com.pazukdev.backend.util.SpecificStringUtil.fixParam;
 import static com.pazukdev.backend.util.SpecificStringUtil.fixValue;
@@ -24,9 +24,9 @@ public class TableUtil {
     public static ReplacersTable createReplacersTable(final Item item, final UserService userService) {
         final ReplacersTable replacersTable = new ReplacersTable();
         replacersTable.setName("Replacers");
-        final List<Replacer> replacers = new ArrayList<>(item.getReplacers());
-        for (final Replacer replacer : replacers) {
-            final NestedItemDto replacerDto = createReplacer(replacer, userService);
+        final List<NestedItem> replacers = new ArrayList<>(item.getReplacers());
+        for (final NestedItem replacer : replacers) {
+            final NestedItemDto replacerDto = NestedItemDtoFactory.createChild(replacer, userService, true);
             replacersTable.getReplacers().add(replacerDto);
         }
         return replacersTable;

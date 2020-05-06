@@ -2,31 +2,28 @@ package com.pazukdev.backend.service;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.converter.ItemConverter;
-import com.pazukdev.backend.converter.ReplacerConverter;
 import com.pazukdev.backend.dto.RateReplacer;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.TransitiveItemDto;
 import com.pazukdev.backend.dto.factory.ItemViewFactory;
 import com.pazukdev.backend.dto.view.ItemView;
-import com.pazukdev.backend.entity.*;
+import com.pazukdev.backend.entity.Item;
+import com.pazukdev.backend.entity.NestedItem;
+import com.pazukdev.backend.entity.TransitiveItem;
+import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.repository.*;
-import com.pazukdev.backend.util.DateUtil;
-import com.pazukdev.backend.util.FileUtil;
-import com.pazukdev.backend.util.LinkUtil;
-import com.pazukdev.backend.util.RateUtil;
+import com.pazukdev.backend.util.*;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.pazukdev.backend.entity.NestedItem.Type;
 import static com.pazukdev.backend.util.CategoryUtil.Category.MATERIAL;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter.INSULATION;
 import static com.pazukdev.backend.util.CategoryUtil.isInfo;
-import static com.pazukdev.backend.util.ChildItemUtil.createParts;
 import static com.pazukdev.backend.util.ItemUtil.*;
-import static com.pazukdev.backend.util.ReplacerUtil.createReplacers;
-import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -35,38 +32,30 @@ import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 @Service
 public class ItemService extends AbstractService<Item, TransitiveItemDto> {
 
-    private final TransitiveItemService transitiveItemService;
     private final UserService userService;
-    private final ChildItemRepository childItemRepository;
-    private final UserActionRepository userActionRepository;
-    private final ReplacerRepository replacerRepository;
-    private final ReplacerConverter replacerConverter;
+    private final NestedItemRepository nestedItemRepo;
+    private final UserActionRepository userActionRepo;
     private final ItemRepository itemRepository;
-    private final AdminMessageRepository adminMessageRepository;
-
-    private int bearingReplacerCounter = 0;
-    private int sealReplacerCounter = 0;
-    private int oilFilterReplacerCounter = 0;
-    private int sparkPlugReplacerCounter = 0;
+    private final AdminMessageRepository adminMessageRepo;
+    private final LinkRepository linkRepository;
+    private final EmailSenderService emailSenderService;
 
     public ItemService(final ItemRepository itemRepository,
                        final ItemConverter converter,
-                       final TransitiveItemService transitiveItemService,
-                       final ChildItemRepository childItemRepository,
+                       final NestedItemRepository nestedItemRepo,
                        final UserService userService,
-                       final UserActionRepository userActionRepository,
-                       final ReplacerRepository replacerRepository,
-                       final ReplacerConverter replacerConverter,
-                       final AdminMessageRepository adminMessageRepository) {
+                       final UserActionRepository userActionRepo,
+                       final AdminMessageRepository adminMessageRepo,
+                       final LinkRepository linkRepository,
+                       final EmailSenderService emailSenderService) {
         super(itemRepository, converter);
-        this.transitiveItemService = transitiveItemService;
-        this.childItemRepository = childItemRepository;
+        this.nestedItemRepo = nestedItemRepo;
         this.userService = userService;
-        this.userActionRepository = userActionRepository;
-        this.replacerRepository = replacerRepository;
-        this.replacerConverter = replacerConverter;
+        this.userActionRepo = userActionRepo;
         this.itemRepository = itemRepository;
-        this.adminMessageRepository = adminMessageRepository;
+        this.adminMessageRepo = adminMessageRepo;
+        this.linkRepository = linkRepository;
+        this.emailSenderService = emailSenderService;
     }
 
     @Transactional
@@ -81,11 +70,8 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    @Override
-    public List<Item> findAll() {
-        final List<Item> items = itemRepository.findAll();
-        items.removeIf(entity -> !entity.getStatus().equals(Status.ACTIVE));
-        return items;
+    public List<Item> findAllActive() {
+        return findAll(Status.ACTIVE);
     }
 
     @Transactional
@@ -99,7 +85,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     public List<Item> find(final String... categories) {
         final List<Item> items = new ArrayList<>();
         for (final String category : categories) {
-            items.addAll(find(category, findAll()));
+            items.addAll(find(category, findAllActive()));
         }
         return items;
     }
@@ -116,58 +102,45 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public Item create(final TransitiveItem transitiveItem,
-                       final List<String> infoCategories,
-                       final List<UserEntity> users,
-                       final UserEntity admin) {
+    public Item convertTransitiveItemToItem(final TransitiveItem transitiveItem,
+                                            final List<TransitiveItem> transitiveItems,
+                                            final List<String> infoCategories,
+                                            final UserEntity admin,
+                                            final boolean initialDBPopulation,
+                                            final Map<Item, List<NestedItem>> itemsReplacers) {
         final String category = transitiveItem.getCategory();
         final String name = transitiveItem.getName();
 
-        final Item alreadyExistingItem = findFirstByCategoryAndName(category, name);
-        if (alreadyExistingItem != null) {
-            return alreadyExistingItem;
+        Item item = findFirstByCategoryAndName(category, name);
+        if (item != null && initialDBPopulation) {
+            return item;
+        }
+        if (item == null) {
+            item = new Item();
         }
 
-        final TransitiveItemDescriptionMap descriptionMap
-                = createDescriptionMap(transitiveItem, transitiveItemService, infoCategories);
-        final Map<String, String> items = new HashMap<>(descriptionMap.getItems());
-        final List<ChildItem> childItems
-                = createParts(transitiveItem, items, this, transitiveItemService, infoCategories, users, admin);
-        final List<Replacer> replacers
-                = createReplacers(transitiveItem, this, transitiveItemService, infoCategories, users, admin);
+        final TransitiveItemDescriptionMap map = createDescriptionMap(transitiveItem, transitiveItems, infoCategories);
+        final Map<String, String> items = new HashMap<>(map.getItems());
+        final List<NestedItem> parts = ChildItemUtil.create(Type.PART, transitiveItem, items, this, transitiveItems, infoCategories, admin, itemsReplacers);
+        final List<NestedItem> replacers = ChildItemUtil.create(Type.REPLACER, transitiveItem, null, this, transitiveItems, infoCategories, admin, itemsReplacers);
 
-        final String rating = descriptionMap.getParameters().get("Rating");
-        descriptionMap.getParameters().remove("Rating");
+        item.getParts().clear();
+        item.getReplacers().clear();
 
-        final String creatorName = descriptionMap.getParameters().get("Creator");
-        descriptionMap.getParameters().remove("Creator");
+        item.setName(name);
+        item.setCategory(category);
+        item.setStatus(transitiveItem.getStatus());
+        item.setDescription(createItemDescription(map));
+        item.getParts().addAll(parts);
+        item.getReplacers().addAll(replacers);
+        item.setCreatorId(admin.getId());
+        item.setUserActionDate(DateUtil.now());
+        item.setImg(transitiveItem.getImage());
+        LinkUtil.addLinksToItem(item, transitiveItem, null);
 
-        Long creatorId = admin.getId();
-
-        if (!isEmpty(creatorName)) {
-            final UserEntity customCreator = userService.findFirstByName(creatorName, users);
-            if (customCreator != null) {
-                creatorId = customCreator.getId();
-            }
-        }
-
-        final Item newItem = new Item();
-        newItem.setName(name);
-        newItem.setCategory(category);
-        newItem.setStatus(transitiveItem.getStatus());
-        newItem.setDescription(createItemDescription(descriptionMap));
-        newItem.getChildItems().addAll(childItems);
-        newItem.getReplacers().addAll(replacers);
-        newItem.setCreatorId(creatorId);
-        newItem.setUserActionDate(DateUtil.now());
-        newItem.setImg(transitiveItem.getImage());
-        if (!isEmpty(rating)) {
-            newItem.setRating(Integer.valueOf(rating));
-        }
-        LinkUtil.addLinksToItem(newItem, transitiveItem);
-
-        itemRepository.save(newItem);
-        return newItem;
+        itemRepository.save(item);
+        itemsReplacers.put(item, replacers);
+        return item;
     }
 
     private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {
@@ -234,7 +207,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     private ItemViewFactory createNewItemViewFactory() {
-        return new ItemViewFactory(this, FileUtil.getInfoCategories());
+        return new ItemViewFactory(this, FileUtil.getInfoCategories(), emailSenderService);
     }
 
     public List<Item> findParents(final Item item,
@@ -272,7 +245,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
             }
         } else {
             for (final Item parent : checkList) {
-                for (final ChildItem child : parent.getChildItems()) {
+                for (final NestedItem child : parent.getParts()) {
                     if (child.getItem().getId().equals(itemId)) {
                         parents.add(parent);
                     }
@@ -280,17 +253,6 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
             }
         }
         return parents;
-    }
-
-    public List<Item> getItems(final String idsSource) {
-        final List<Item> items = new ArrayList<>();
-        if (isEmpty(idsSource)) {
-            return items;
-        }
-        for (String s : idsSource.split(";")) {
-            repository.findById(Long.valueOf(s.trim())).ifPresent(items::add);
-        }
-        return items;
     }
 
 }

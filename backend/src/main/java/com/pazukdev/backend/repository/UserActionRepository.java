@@ -12,16 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserActionRepository extends JpaRepository<UserAction, Long> {
 
-    UserAction findByName(final String name);
-
-//    List<UserAction> findFirst2ByActionTypeAndItemCategory(final String actionType, final String itemCategory);
-
-    Page<UserAction> findFirst10ByActionTypeAndItemCategory(final String actionType,
-                                                            final String itemCategory,
-                                                            final Pageable pageable);
-
-    Page<UserAction> findFirst10ByActionTypeAndItemType(final String actionType,
-                                                        final String itemType,
-                                                        final Pageable pageable);
+    Page<UserAction> findFirst10ByActionTypeAndNote(final String actionType,
+                                                    final String note,
+                                                    final Pageable pageable);
 
 }

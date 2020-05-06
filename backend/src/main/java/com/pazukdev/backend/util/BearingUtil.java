@@ -5,6 +5,9 @@ import com.pazukdev.backend.entity.TransitiveItem;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Siarhei Sviarkaltsau
+ */
 public class BearingUtil {
 
     public static void setBearingEnclosure(final TransitiveItem bearing) {

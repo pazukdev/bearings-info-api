@@ -1,6 +1,6 @@
 package com.pazukdev.backend.validator;
 
-import com.pazukdev.backend.dto.user.UserDto;
+import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.repository.UserRepository;

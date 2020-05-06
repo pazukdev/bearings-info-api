@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/info")
 @RequiredArgsConstructor
-@Api(tags = "Info Controller", value = "Information for users")
+@Api(tags = "Information for users")
 @CrossOrigin
 public class InfoController {
 
@@ -24,7 +24,7 @@ public class InfoController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create new message from admin")
     public void setAdminMessage(@RequestBody final AdminMessage adminMessage) {
-        AdminMessage.save(adminMessage, itemService.getAdminMessageRepository());
+        AdminMessage.save(adminMessage, itemService.getAdminMessageRepo());
     }
 
 }

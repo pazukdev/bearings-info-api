@@ -33,6 +33,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/test/public").permitAll()
                 .antMatchers("/user/create").permitAll()
                 .antMatchers("/file/**").permitAll()
+                .antMatchers("/data-loader/**").permitAll()
                 .antMatchers("/item/**").permitAll()
                 .antMatchers("/view/**").permitAll()
                 .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // comment to disable admin-only zone
