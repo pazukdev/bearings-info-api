@@ -99,9 +99,14 @@ public class UserUtil {
         for (final UserEntity user : service.getUserService().findAll()) {
             String wishlistItems = "";
             for (final NestedItem nestedItem : user.getWishList().getItems()) {
-                final Long id = nestedItem.getItem().getId();
-                final String comment = isEmpty(nestedItem.getComment()) ? "" : nestedItem.getComment() + " - ";
-                wishlistItems += id + " " + "(" + comment + nestedItem.getQuantity() + ")" + "; ";
+                wishlistItems += nestedItem.getItem().getName()
+                        + " ("
+                        + nestedItem.getItem().getCategory()
+                        + "!"
+                        + nestedItem.getComment()
+                        + "!"
+                        + nestedItem.getQuantity()
+                        + "); ";
             }
             wishlistItems = removeLastChar(wishlistItems.trim());
 

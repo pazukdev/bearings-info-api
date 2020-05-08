@@ -17,7 +17,7 @@ import javax.persistence.*;
 public class NestedItem extends AbstractEntity implements Typeable {
 
     public enum Type {
-        PART, REPLACER
+        PART, REPLACER, WISHLIST_ITEM
     }
 
     @OneToOne

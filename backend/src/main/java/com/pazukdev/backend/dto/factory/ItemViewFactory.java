@@ -2,6 +2,7 @@ package com.pazukdev.backend.dto.factory;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.constant.security.Role;
+import com.pazukdev.backend.converter.NestedItemConverter;
 import com.pazukdev.backend.converter.UserConverter;
 import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.ImgViewData;
@@ -20,7 +21,6 @@ import java.util.*;
 
 import static com.pazukdev.backend.converter.NestedItemConverter.convert;
 import static com.pazukdev.backend.dto.DictionaryData.getDictionaryFromFile;
-import static com.pazukdev.backend.dto.factory.NestedItemDtoFactory.*;
 import static com.pazukdev.backend.util.CategoryUtil.Category;
 import static com.pazukdev.backend.util.CategoryUtil.Category.VEHICLE;
 import static com.pazukdev.backend.util.CategoryUtil.Parameter;
@@ -86,7 +86,7 @@ public class ItemViewFactory {
         boolean userListView = itemId.equals(USER_LIST_VIEW.getItemId());
 
         if (itemId.equals(WISH_LIST_VIEW.getItemId())) {
-            view = createWishListView(basicView, wishList, userService);
+            view = createWishListView(basicView, currentUser, userService);
         } else if (itemId.equals(VEHICLES_VIEW.getItemId())) {
             view = createVehiclesView(basicView, userService);
         } else if (itemId.equals(ITEMS_MANAGEMENT_VIEW.getItemId())) {
@@ -237,7 +237,7 @@ public class ItemViewFactory {
                                 final Double parentQuantity) {
         for (final NestedItem part : parts) {
             boolean add = true;
-            final NestedItemDto partDto = createChild(part, userService, !summary);
+            final NestedItemDto partDto = NestedItemConverter.convert(part, userService, !summary);
             Double quantity = null;
             if (summary) {
                 quantity = getFirstNumber(part.getQuantity());
@@ -268,7 +268,7 @@ public class ItemViewFactory {
         final List<Item> vehicles = itemService.find(VEHICLE);
 
         final List<NestedItemDto> dtos = new ArrayList<>();
-        vehicles.forEach(vehicle -> dtos.add(createVehicle(vehicle, userService)));
+        vehicles.forEach(vehicle -> dtos.add(NestedItemDto.createVehicle(vehicle, userService)));
 
         view.setChildren(dtos);
         view.setAdminMessage(AdminMessage.getMessage(itemService.getAdminMessageRepo()));
@@ -282,7 +282,7 @@ public class ItemViewFactory {
         final List<String> comments = FileUtil.getComments();
 
         final List<NestedItemDto> dtos = new ArrayList<>();
-        items.forEach(item -> dtos.add(createItemForItemsManagement(item, itemService.getUserService(), comments)));
+        items.forEach(item -> dtos.add(NestedItemDto.createItemForItemsManagement(item, itemService.getUserService(), comments)));
 
         view.setChildren(dtos);
         view.setAllCategories(new ArrayList<>(itemService.collectCategories(items)));
@@ -297,21 +297,28 @@ public class ItemViewFactory {
         final ItemView view = new ItemView();
         final List<NestedItemDto> dtos = new ArrayList<>();
         itemService.findParents(item, allItems, infoCategories)
-                .forEach(parent -> dtos.add(createItemForItemsManagement(parent, userService, comments)));
+                .forEach(parent -> dtos.add(NestedItemDto.createItemForItemsManagement(parent, userService, comments)));
         view.setChildren(dtos);
         return view;
     }
 
     private ItemView createUsersListView(final ItemView view, final UserService userService) {
         final List<NestedItemDto> dtos = new ArrayList<>();
-        userService.findAll().forEach(user -> dtos.add(createUser(user)));
+        userService.findAll().forEach(user -> dtos.add(NestedItemConverter.convert(user)));
         view.setChildren(dtos);
         return view;
     }
 
-    private ItemView createWishListView(final ItemView view, final WishList wishList, final UserService userService) {
+    private ItemView createWishListView(final ItemView view,
+                                        final UserEntity user,
+                                        final UserService service) {
         final List<NestedItemDto> dtos = new ArrayList<>();
-        wishList.getItems().forEach(item -> dtos.add(createWishListItem(item, userService)));
+        for (final NestedItem item : user.getWishList().getItems()) {
+            final Item child = item.getItem();
+            final String comment = item.getComment();
+            final String quantity = item.getQuantity();
+            dtos.add(NestedItemDto.createWishListItem(child, comment, quantity, user.getId(), service));
+        }
         view.setChildren(dtos);
         return view;
     }
@@ -396,8 +403,8 @@ public class ItemViewFactory {
                 final Long oldItemId = oldWishListItem.getItem().getId();
                 final boolean updateOldWishListItem = oldItemId.equals(newItemId);
                 if (updateOldWishListItem) {
-                    oldWishListItem.setComment(newWishListItem.getComment());
-                    oldWishListItem.setQuantity(newWishListItem.getQuantity());
+                    oldWishListItem.setComment(replaceEmptyWithDash(newWishListItem.getComment()));
+                    oldWishListItem.setQuantity(replaceEmptyWithDash(newWishListItem.getQuantity()));
                     remove = false;
                 }
             }

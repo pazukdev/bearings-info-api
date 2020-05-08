@@ -2,11 +2,9 @@ package com.pazukdev.backend.service;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.constant.security.Role;
+import com.pazukdev.backend.converter.NestedItemConverter;
 import com.pazukdev.backend.converter.UserConverter;
-import com.pazukdev.backend.dto.DictionaryData;
-import com.pazukdev.backend.dto.UserDto;
-import com.pazukdev.backend.dto.UserItemItemReport;
-import com.pazukdev.backend.dto.UserItemReport;
+import com.pazukdev.backend.dto.*;
 import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.repository.NestedItemRepository;
@@ -23,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.pazukdev.backend.dto.NestedItemDto.createWishListItem;
 import static com.pazukdev.backend.util.CSVUtil.getValue;
 import static com.pazukdev.backend.util.ChildItemUtil.collectIds;
 import static com.pazukdev.backend.util.ChildItemUtil.createNameForWishListItem;
@@ -240,9 +239,9 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
         final Map<Long, UserItemReport<Item>> reports = new HashMap<>();
 
         for (final List<String> userData : rows) {
-            final Long id = Long.valueOf(userData.get(header.indexOf(UserParam.ID)));
-            wishlistItems.put(id, getWishlistItems(getValue(UserParam.WISHLIST_ITEMS, header, userData), itemService));
-            reports.put(id, UserItemItemReport.create(header, userData, itemService));
+            final Long userId = Long.valueOf(userData.get(header.indexOf(UserParam.ID)));
+            wishlistItems.put(userId, getWishlistItems(getValue(UserParam.WISHLIST_ITEMS, header, userData), userId, itemService));
+            reports.put(userId, UserItemItemReport.create(header, userData, itemService));
         }
 
         final List<NestedItem> nestedItems = itemService.getNestedItemRepo().findAll();
@@ -280,7 +279,9 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
         }
     }
 
-    private List<NestedItem> getWishlistItems(final String source, final ItemService itemService) {
+    private List<NestedItem> getWishlistItems(final String source,
+                                              final Long userId,
+                                              final ItemService service) {
         final List<NestedItem> items = new ArrayList<>();
         if (isEmpty(source)) {
             return items;
@@ -290,22 +291,16 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
             final String name = getStringBeforeParentheses(s);
             final String additionalData = getStringBetweenParentheses(s);
             final String category = additionalData.split("!")[0].trim();
-            final String comment = additionalData.split("!")[1].trim();
-            final String quantity = additionalData.split("!")[2].trim();
+            final String comment = replaceEmptyWithDash(additionalData.split("!")[1].trim());
+            final String quantity = replaceEmptyWithDash(additionalData.split("!")[2].trim());
 
-            final Item item = itemService.findFirstByCategoryAndName(category, name);
-            if (item == null) {
+            final Item child = service.findFirstByCategoryAndName(category, name);
+            if (child == null) {
                 continue;
             }
 
-            final NestedItem wishlistItem = new NestedItem();
-            wishlistItem.setName("Wishlist - " + item.getName());
-            wishlistItem.setItem(item);
-            wishlistItem.setComment(comment);
-            wishlistItem.setQuantity(quantity);
-
-            items.add(wishlistItem);
-
+            final NestedItemDto dto = createWishListItem(child, comment, quantity, userId, service.getUserService());
+            items.add(NestedItemConverter.convert(dto, child));
         }
         return items;
     }

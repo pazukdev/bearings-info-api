@@ -17,6 +17,11 @@ import static com.pazukdev.backend.util.TransitiveItemUtil.findFirstByCategoryAn
  */
 public class ChildItemUtil {
 
+    public static class SpecialName {
+        public static final String WISHLIST = "Wishlist";
+        public static final String ITEMS_MANAGEMENT = "Items management";
+    }
+
     public static List<NestedItem> create(final Type type,
                                           final TransitiveItem parent,
                                           final Map<String, String> childItemsDescription,
@@ -137,8 +142,7 @@ public class ChildItemUtil {
     }
 
     public static String createNameForWishListItem(final String itemName) {
-        final String parentName = "Wishlist";
-        return getName(parentName, itemName);
+        return getName(SpecialName.WISHLIST, itemName);
     }
 
     public static String getParentName(final Long parentId, final ItemService itemService) {

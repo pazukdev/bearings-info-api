@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static com.pazukdev.backend.util.UserActionUtil.ActionType;
+
 /**
  * @author Siarhei Sviarkaltsau
  */
@@ -54,7 +56,7 @@ public class LoggerUtil {
         final String subject;
         if (entity != null && user != null) {
             final String whatHappened;
-            if (actions.size() == 1) {
+            if (actions.size() == 1 && !actions.get(0).getActionType().equals(ActionType.ADD)) {
                 whatHappened = actions.get(0).getActionType() + "d";
             } else {
                 whatHappened = "changed";

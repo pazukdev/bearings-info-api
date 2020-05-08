@@ -1,7 +1,7 @@
 package com.pazukdev.backend.util;
 
+import com.pazukdev.backend.converter.NestedItemConverter;
 import com.pazukdev.backend.dto.NestedItemDto;
-import com.pazukdev.backend.dto.factory.NestedItemDtoFactory;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.HeaderTableRow;
 import com.pazukdev.backend.dto.table.ReplacersTable;
@@ -26,7 +26,7 @@ public class TableUtil {
         replacersTable.setName("Replacers");
         final List<NestedItem> replacers = new ArrayList<>(item.getReplacers());
         for (final NestedItem replacer : replacers) {
-            final NestedItemDto replacerDto = NestedItemDtoFactory.createChild(replacer, userService, true);
+            final NestedItemDto replacerDto = NestedItemConverter.convert(replacer, userService, true);
             replacersTable.getReplacers().add(replacerDto);
         }
         return replacersTable;

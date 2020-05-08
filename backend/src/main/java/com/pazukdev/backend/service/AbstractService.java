@@ -44,6 +44,15 @@ public abstract class AbstractService<Entity extends AbstractEntity, Dto extends
     }
 
     @Transactional
+    public Entity findFirstActive(final Long id) throws EntityExistsException {
+        final Entity entity = repository.findById(id).orElse(null);
+        if (entity == null || !entity.getStatus().equals(Status.ACTIVE)) {
+            return null;
+        }
+        return entity;
+    }
+
+    @Transactional
     public Entity create(final Dto dto) {
         dto.setName(replaceEmptyWithDash(dto.getName()));
         return repository.save(converter.convertToEntity(dto));

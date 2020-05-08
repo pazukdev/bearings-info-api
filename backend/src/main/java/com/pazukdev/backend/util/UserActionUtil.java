@@ -1,6 +1,5 @@
 package com.pazukdev.backend.util;
 
-import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.dto.UserActionDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.table.HeaderTableRow;
@@ -20,6 +19,9 @@ import java.util.*;
 import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
 import static com.pazukdev.backend.util.UserActionUtil.ValueIncrease.*;
 
+/**
+ * @author Siarhei Sviarkaltsau
+ */
 public class UserActionUtil {
 
     public static class ActionType {
@@ -102,11 +104,17 @@ public class UserActionUtil {
 
         final Long userId = action.getUserId();
         final Long itemId = action.getItemId();
+        final Long parentId = action.getParentId();
 
         final UserEntity user = service.getUserService().findOne(userId);
-        final Item item = service.findOne(itemId);
-        if (user == null || item == null || !item.getStatus().equals(Status.ACTIVE)) {
+        final Item item = service.findFirstActive(itemId);
+        if (user == null || item == null) {
             return null;
+        }
+        if (parentId != null && parentId > 0) {
+            if (service.findFirstActive(parentId) == null) {
+                return null;
+            }
         }
 
         final UserActionDto dto = new UserActionDto();
