@@ -68,7 +68,8 @@ public class UserActionUtil {
         final UserActionRepository repository = service.getUserActionRepo();
         final String create = ActionType.CREATE;
         final Pageable p = RepositoryUtil.getPageRequest(RepositoryUtil.LAST_TEN);
-        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(create, "Vehicle", p);
+        final String note = CategoryUtil.Category.VEHICLE.toLowerCase();
+        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(create, note, p);
         return getLastUserActionsReport(actions.getContent(), service);
     }
 
@@ -76,12 +77,14 @@ public class UserActionUtil {
         final UserActionRepository repository = service.getUserActionRepo();
         final String add = ActionType.ADD;
         final Pageable p = RepositoryUtil.getPageRequest(RepositoryUtil.LAST_TEN);
-        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(add, "replacer", p);
+        final String note = "replacer";
+        final Page<UserAction> actions = repository.findFirst10ByActionTypeAndNote(add, note, p);
         return getLastUserActionsReport(actions.getContent(), service);
     }
 
     public static List<UserActionDto> getLastUserActionsReport(final List<UserAction> actions,
                                                                final ItemService service) {
+        LoggerUtil.info("Got last " + actions.size() + " user actions");
         final List<UserActionDto> lastUsersActions = new ArrayList<>();
         for (final UserAction action : actions) {
             final UserActionDto actionDto = toDto(action, service);
