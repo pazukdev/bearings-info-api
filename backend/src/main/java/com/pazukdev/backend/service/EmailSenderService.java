@@ -1,6 +1,7 @@
 package com.pazukdev.backend.service;
 
 import com.pazukdev.backend.constant.Constant;
+import com.pazukdev.backend.util.LoggerUtil;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
@@ -77,9 +78,9 @@ public class EmailSenderService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
+            LoggerUtil.info("status code: " + response.getStatusCode());
+            LoggerUtil.info("response body: " + response.getBody());
+            LoggerUtil.info("response headers: " + response.getHeaders());
         } catch (final IOException e) {
             e.printStackTrace();
         }
