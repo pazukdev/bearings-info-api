@@ -9,9 +9,6 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,16 +20,16 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class EmailSenderService {
 
-    private final JavaMailSender javaMailSender;
-
-    @Async
-    public void send(final SimpleMailMessage email) {
-        try {
-            javaMailSender.send(email);
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private final JavaMailSender javaMailSender;
+//
+//    @Async
+//    public void send(final SimpleMailMessage email) {
+//        try {
+//            javaMailSender.send(email);
+//        } catch (final Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 //    @Async
 //    public void send(final MimeMessagePreparator message) {
