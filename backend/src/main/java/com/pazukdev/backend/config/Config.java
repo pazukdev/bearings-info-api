@@ -76,6 +76,7 @@ public class Config {
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
+//        mailSender.setHost("smtp.sendgrid.net");
         mailSender.setPort(587);
         mailSender.setUsername(getMailSenderData()[0]);
         mailSender.setPassword(getMailSenderData()[1]);
@@ -84,6 +85,8 @@ public class Config {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.channel", "plain");
 
         return mailSender;
     }
