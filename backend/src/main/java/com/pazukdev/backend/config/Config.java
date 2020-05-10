@@ -1,5 +1,6 @@
 package com.pazukdev.backend.config;
 
+import com.sendgrid.SendGrid;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,8 @@ import org.springframework.web.servlet.config.annotation.*;
  */
 @Configuration
 public class Config {
+
+     private static final String SENDGRID_API_KEY = "SENDGRID_API_KEY";
 
     @Bean
     public ModelMapper getModelMapper() {
@@ -66,23 +69,9 @@ public class Config {
 
     }
 
-//    @Bean
-//    public JavaMailSender getJavaMailSender() {
-//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-//        mailSender.setHost("smtp.gmail.com");
-//        mailSender.setHost("smtp.sendgrid.net");
-//        mailSender.setPort(587);
-//        mailSender.setUsername(getMailSenderData()[0]);
-//        mailSender.setPassword(getMailSenderData()[1]);
-//
-//        Properties props = mailSender.getJavaMailProperties();
-//        props.put("mail.transport.protocol", "smtp");
-//        props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.starttls.enable", "true");
-//        props.put("mail.debug", "true");
-//        props.put("mail.smtp.channel", "plain");
-//
-//        return mailSender;
-//    }
+    @Bean
+    public SendGrid getSendGrid() {
+        return new SendGrid(System.getenv(SENDGRID_API_KEY));
+    }
 
 }
