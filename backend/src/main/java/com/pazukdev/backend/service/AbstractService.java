@@ -53,6 +53,18 @@ public abstract class AbstractService<Entity extends AbstractEntity, Dto extends
     }
 
     @Transactional
+    public List<Entity> findAllActive() {
+        return findAll(Status.ACTIVE);
+    }
+
+    @Transactional
+    public List<Entity> findAll(final String status) {
+        final List<Entity> entities = repository.findAll();
+        entities.removeIf(entity -> !entity.getStatus().equals(status));
+        return entities;
+    }
+
+    @Transactional
     public Entity create(final Dto dto) {
         dto.setName(replaceEmptyWithDash(dto.getName()));
         return repository.save(converter.convertToEntity(dto));

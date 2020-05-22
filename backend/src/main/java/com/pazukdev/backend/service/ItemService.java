@@ -2,6 +2,7 @@ package com.pazukdev.backend.service;
 
 import com.pazukdev.backend.constant.Status;
 import com.pazukdev.backend.converter.ItemConverter;
+import com.pazukdev.backend.dto.PossibleNestedItemsDto;
 import com.pazukdev.backend.dto.RateReplacer;
 import com.pazukdev.backend.dto.TransitiveItemDescriptionMap;
 import com.pazukdev.backend.dto.TransitiveItemDto;
@@ -67,18 +68,6 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     @Transactional
     public Item findFirstByCategoryAndName(final String category, final String name) {
         return itemRepository.findFirstByCategoryAndNameAndStatus(category, name, Status.ACTIVE);
-    }
-
-    @Transactional
-    public List<Item> findAllActive() {
-        return findAll(Status.ACTIVE);
-    }
-
-    @Transactional
-    public List<Item> findAll(final String status) {
-        final List<Item> items = itemRepository.findAll();
-        items.removeIf(entity -> !entity.getStatus().equals(status));
-        return items;
     }
 
     @Transactional
@@ -187,6 +176,13 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
                                    final String language,
                                    final ItemView itemView) {
         return createNewItemViewFactory().updateItemView(itemId, userName, language, itemView);
+    }
+
+    @Transactional
+    public PossibleNestedItemsDto getEditData(final Long itemId) {
+        final List<Item> allItems = findAllActive();
+        final Item parent = findFirst(itemId);
+        return PossibleNestedItemsDto.create(allItems, parent, FileUtil.getInfoCategories(), this);
     }
 
     @Transactional

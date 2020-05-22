@@ -24,7 +24,6 @@ import java.util.*;
 import static com.pazukdev.backend.dto.NestedItemDto.createWishListItem;
 import static com.pazukdev.backend.util.CSVUtil.getValue;
 import static com.pazukdev.backend.util.ChildItemUtil.collectIds;
-import static com.pazukdev.backend.util.ChildItemUtil.createNameForWishListItem;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.UserActionUtil.ActionType;
 import static com.pazukdev.backend.util.UserActionUtil.createAction;
@@ -168,22 +167,15 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
     }
 
     @Transactional
-    public Set<String> getRoles() {
-        return new HashSet<>(Arrays.asList(Role.USER.name(), Role.ADMIN.name()));
-    }
-
-    @Transactional
     public boolean addItemToWishList(final Item item, final String userName) {
-        final UserEntity currentUser = findFirstByName(userName);
+        final UserEntity user = findFirstByName(userName);
 
-        final Set<Long> ids = collectIds(currentUser.getWishList().getItems());
+        final Set<Long> ids = collectIds(user.getWishList().getItems());
 
         if (!ids.contains(item.getId())) {
-            final NestedItem nestedItem = new NestedItem();
-            nestedItem.setName(createNameForWishListItem(item.getName()));
-            nestedItem.setItem(item);
-            currentUser.getWishList().getItems().add(nestedItem);
-            update(currentUser);
+            final NestedItemDto nestedItemDto = createWishListItem(item, "-", "1", user.getId(), this);
+            user.getWishList().getItems().add(NestedItemConverter.convert(nestedItemDto, item));
+            update(user);
             return true;
         }
 

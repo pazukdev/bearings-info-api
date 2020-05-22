@@ -40,6 +40,7 @@ public class TranslatorUtil {
                                  final ItemView view,
                                  final boolean addToDictionary,
                                  final List<String> dictionary) throws Exception {
+
         HeaderTable header = view.getHeader();
         final String category = view.getCategory();
         final String localizedName = view.getLocalizedName();
@@ -47,6 +48,7 @@ public class TranslatorUtil {
         final List<String> categories = view.getAllCategories();
 
         try {
+
             header = translate(langFrom, langTo, header, addToDictionary, dictionary);
             translate(langFrom, langTo, replacersTable, dictionary);
             translate(langFrom, langTo, categories, addToDictionary, dictionary);
@@ -57,8 +59,8 @@ public class TranslatorUtil {
             view.setLocalizedName(translate(langFrom, langTo, localizedName, name, false, dictionary));
             view.setChildren(translateItemDtoList(langFrom, langTo, view.getChildren(), dictionary));
             view.setAllChildren(translateItemDtoList(langFrom, langTo, view.getAllChildren(), dictionary));
-            view.setPossibleParts(translateItemDtoList(langFrom, langTo, view.getPossibleParts(), dictionary));
-            view.setPossibleReplacers(translateItemDtoList(langFrom, langTo, view.getPossibleReplacers(), dictionary));
+//            view.setPossibleParts(translateItemDtoList(langFrom, langTo, view.getPossibleParts(), dictionary));
+//            view.setPossibleReplacers(translateItemDtoList(langFrom, langTo, view.getPossibleReplacers(), dictionary));
 
             if (!langTo.equals("en")) {
                 for (final UserActionDto userAction : view.getLastVehicles()) {
@@ -79,7 +81,6 @@ public class TranslatorUtil {
         }
 
         view.setHeader(header);
-        view.setReplacersTable(replacersTable);
         view.setAllCategories(categories);
     }
 
@@ -138,8 +139,10 @@ public class TranslatorUtil {
                                                            final List<NestedItemDto> dtos,
                                                            final List<String> dictionary) {
         if (langFrom.equals("en")) {
-            for (final NestedItemDto dto : dtos) {
-                dto.translateToLang(langTo, dictionary);
+            if (dtos.size() > Constant.COLLECTION_SIZE_TO_PARALLELIZE) {
+                dtos.parallelStream().forEach(dto -> dto.translateToLang(langTo, dictionary));
+            } else {
+                dtos.forEach(dto -> dto.translateToLang(langTo, dictionary));
             }
         }
         return dtos;

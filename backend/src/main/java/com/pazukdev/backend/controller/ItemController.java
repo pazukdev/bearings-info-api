@@ -1,6 +1,7 @@
 package com.pazukdev.backend.controller;
 
 import com.pazukdev.backend.dataloader.DataLoader;
+import com.pazukdev.backend.dto.PossibleNestedItemsDto;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.service.ItemService;
 import io.swagger.annotations.Api;
@@ -58,13 +59,18 @@ public class ItemController {
     }
 
     @PutMapping("/update/{id}/{userName}/{language}")
-    @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Update item")
     public ItemView update(@PathVariable final Long id,
-                           @PathVariable String userName,
-                           @PathVariable String language,
+                           @PathVariable final String userName,
+                           @PathVariable final String language,
                            @RequestBody final ItemView itemView) {
         return service.updateItemView(id, userName, language, itemView);
+    }
+
+    @GetMapping("/edit-data/{itemId}")
+    @ApiOperation(value = "Get edit data")
+    public PossibleNestedItemsDto getEditData(@PathVariable final Long itemId) {
+        return service.getEditData(itemId);
     }
 
 }

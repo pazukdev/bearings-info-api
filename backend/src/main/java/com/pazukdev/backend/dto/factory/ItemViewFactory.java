@@ -29,7 +29,6 @@ import static com.pazukdev.backend.util.ItemUtil.SpecialItemId.*;
 import static com.pazukdev.backend.util.ItemUtil.*;
 import static com.pazukdev.backend.util.LinkUtil.setLinksToItemView;
 import static com.pazukdev.backend.util.LinkUtil.updateLinks;
-import static com.pazukdev.backend.util.NestedItemUtil.addPossiblePartsAndReplacers;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 import static com.pazukdev.backend.util.TableUtil.createHeader;
 import static com.pazukdev.backend.util.TableUtil.createReplacersTable;
@@ -145,13 +144,13 @@ public class ItemViewFactory {
     private Item createNewItem(String name,
                                String category,
                                final UserEntity creator,
-                               final String userLang) throws Exception {
+                               final String lang) throws Exception {
 
-        if (!userLang.equals("en") && isLangCodeValid(userLang)) {
-            final DictionaryData dictionaryData = getDictionaryFromFile(userLang);
+        if (!lang.equals("en") && isLangCodeValid(lang)) {
+            final DictionaryData dictionaryData = getDictionaryFromFile(lang);
             final List<String> dictionary = dictionaryData.getDictionary();
-            name = translate(userLang, "en", name, true, false, dictionary);
-            category = translate(userLang, "en", category, false, true, dictionary);
+            name = translate(lang, "en", name, true, false, dictionary);
+            category = translate(lang, "en", category, false, true, dictionary);
         }
 
         final Item item = new Item();
@@ -215,7 +214,6 @@ public class ItemViewFactory {
         view.setChildren(createChildren(item, userService, false));
         view.setAllChildren(createChildren(item, userService, true));
         view.setReplacersTable(createReplacersTable(item, userService));
-        addPossiblePartsAndReplacers(view, allItems, item, infoCategories, itemService);
         view.setCreatorData(UserUtil.getCreator(item, itemService.getUserService()));
         setLinksToItemView(view, item);
         view.setParents(createParentItemsView(item, userService, allItems));
@@ -223,10 +221,11 @@ public class ItemViewFactory {
     }
 
     private static List<NestedItemDto> createChildren(final Item item,
-                                                      final UserService userService,
+                                                      final UserService service,
                                                       final boolean all) {
         final List<NestedItemDto> dtos = new ArrayList<>();
-        addParts(item.getParts(), dtos, userService, all, null);
+        final Set<NestedItem> parts = item.getParts();
+        addParts(parts, dtos, service, all, null);
         return dtos;
     }
 

@@ -17,6 +17,7 @@ import static com.pazukdev.backend.util.CategoryUtil.getItemsManagementComment;
 import static com.pazukdev.backend.util.ItemUtil.createButtonText;
 import static com.pazukdev.backend.util.ItemUtil.toMap;
 import static com.pazukdev.backend.util.SpecificStringUtil.isEmpty;
+import static com.pazukdev.backend.util.SpecificStringUtil.replaceEmptyWithDash;
 
 /**
  * @author Siarhei Sviarkaltsau
@@ -80,8 +81,8 @@ public class NestedItemDto extends AbstractDto {
                                                    final UserService service) {
         final NestedItemDto dto = createPart(child, service);
         dto.setName(ChildItemUtil.createNameForWishListItem(child.getName()));
-        dto.setComment(comment);
-        dto.setSecondComment(quantity);
+        dto.setComment(replaceEmptyWithDash(comment));
+        dto.setSecondComment(isEmpty(quantity) ? "1" : quantity);
         dto.setType(NestedItem.Type.WISHLIST_ITEM.name().toLowerCase());
         dto.setCreatorId(userId);
         return dto;
@@ -118,17 +119,19 @@ public class NestedItemDto extends AbstractDto {
         dto.setItemId(child.getId());
         dto.setItemName(child.getName());
         dto.setItemCategory(child.getCategory());
-        dto.setLikedUsers(NestedItemUtil.getLikedUserDtos(child.getLikedUsers()));
-        dto.setDislikedUsers(NestedItemUtil.getLikedUserDtos(child.getDislikedUsers()));
         dto.setButtonText(createButtonText(child, manufacturer, partNumber));
-        if (child.getCategory().equals(CategoryUtil.Category.SEAL)) {
-            dto.setSize(descriptionMap.get(CategoryUtil.Parameter.SIZE));
-        }
         dto.setManufacturer(manufacturer);
         dto.setStatus(child.getStatus());
         dto.setCreatorName(creatorName);
         dto.setCreatorId(child.getCreatorId());
         dto.setType(type.name().toLowerCase());
+        if (child.getCategory().equals(CategoryUtil.Category.SEAL)) {
+            dto.setSize(descriptionMap.get(CategoryUtil.Parameter.SIZE));
+        }
+        if (type == NestedItem.Type.REPLACER) {
+            dto.setLikedUsers(NestedItemUtil.getLikedUserDtos(child.getLikedUsers()));
+            dto.setDislikedUsers(NestedItemUtil.getLikedUserDtos(child.getDislikedUsers()));
+        }
 
         return dto;
     }

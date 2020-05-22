@@ -38,6 +38,7 @@ public class CategoryUtil {
         public static final String OIL_FILTER  = "Oil filter";
         public static final String PISTON_RINGS = "Piston rings";
         public static final String ROLLING_ELEMENT = "Rolling element";
+        public static final String RUBBER_PART = "Rubber part";
         public static final String SCREW = "Screw";
         public static final String SEAL = "Seal";
         public static final String SIDECAR_REDUCTION = "Sidecar reduction";
