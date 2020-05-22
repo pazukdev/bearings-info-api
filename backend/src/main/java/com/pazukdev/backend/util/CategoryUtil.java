@@ -75,6 +75,7 @@ public class CategoryUtil {
         }
 
         // other
+        public static final String ALSO_KNOWN_AS = "Also known as";
         public static final String BASE = "Base";
         public static final String CLASS = "Class";
         public static final String CORE = "Core";
@@ -96,6 +97,7 @@ public class CategoryUtil {
         put(CLASS, 101);
         put(NAME, 100);
         put(FULL_NAME, 99);
+        put(ALSO_KNOWN_AS, 98);
 
         put(TYPE, 97);
 
