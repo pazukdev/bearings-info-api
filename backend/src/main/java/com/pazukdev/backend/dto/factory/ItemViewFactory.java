@@ -218,8 +218,6 @@ public class ItemViewFactory {
             return redirectView;
         }
 
-        final List<Item> allItems = itemService.findAllActive();
-        allItems.remove(item);
         final String category = item.getCategory();
         final String name = item.getName();
         final ImgViewData imgViewData = ImgUtil.getImg(item);
@@ -245,7 +243,7 @@ public class ItemViewFactory {
             view.setChildren(createChildren(item, userService, false));
             view.setReplacersTable(createReplacersTable(item, userService));
             setLinksToItemView(view, item);
-            view.setParents(createParentItemsView(item, userService, allItems));
+            view.setParents(createParentItemsView(item, userService));
         } else {
             view.setAllChildren(createChildren(item, userService, true));
         }
@@ -321,9 +319,10 @@ public class ItemViewFactory {
     }
 
     private ItemView createParentItemsView(final Item item,
-                                           final UserService userService,
-                                           final List<Item> allItems) {
+                                           final UserService userService) {
         final List<String> comments = FileUtil.getComments();
+        final List<Item> allItems = itemService.findAllActive();
+        allItems.remove(item);
 
         final ItemView view = new ItemView();
         final List<NestedItemDto> dtos = new ArrayList<>();
