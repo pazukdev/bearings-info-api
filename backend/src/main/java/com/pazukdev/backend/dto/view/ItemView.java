@@ -29,7 +29,7 @@ public class ItemView extends AbstractView {
     private boolean hardDelete = true;
     private boolean partsEnabled = true;
     private boolean ordinaryItem;
-    private Long itemId;
+    private String itemId;
     private String category = "-";
     private String manufacturer = "-";
     private String vehicleClass;
@@ -56,6 +56,7 @@ public class ItemView extends AbstractView {
     private String manualLink;
     private String partsCatalogLink;
     private String drawingsLink;
+    private String nameToRedirect;
     private double businessLogicTime;
     private double translationTime;
     private double responseTotalTime;

@@ -6,4 +6,10 @@ public class Constant {
 
     public static final int COLLECTION_SIZE_TO_PARALLELIZE = 100;
 
+    public static class ReportType {
+
+        public static final String ALL_PARTS = "all_parts_report";
+
+    }
+
 }

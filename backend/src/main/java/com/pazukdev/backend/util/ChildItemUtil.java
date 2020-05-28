@@ -149,7 +149,7 @@ public class ChildItemUtil {
         if (parentId > 0) {
             return itemService.findOne(parentId).getName();
         }
-        if (parentId.equals(ItemUtil.SpecialItemId.WISH_LIST_VIEW.getItemId())) {
+        if (parentId.toString().equals(ItemUtil.SpecialItemId.WISH_LIST_VIEW.name())) {
             return "Wishlist";
         }
         return null;

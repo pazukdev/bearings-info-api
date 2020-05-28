@@ -28,16 +28,11 @@ public class ItemUtil {
     @Getter
     public enum SpecialItemId {
 
-        ITEMS_MANAGEMENT_VIEW(-1L),
-        VEHICLES_VIEW(-2L),
-        WISH_LIST_VIEW(-3L),
-        USER_LIST_VIEW(-4L);
+        ITEMS_MANAGEMENT_VIEW,
+        VEHICLES_VIEW,
+        WISH_LIST_VIEW,
+        USER_LIST_VIEW
 
-        private final Long itemId;
-
-        SpecialItemId(final Long itemId) {
-            this.itemId = itemId;
-        }
     }
 
     public static Set<String> findCategories(final List<TransitiveItem> items) {
