@@ -25,9 +25,9 @@ public class SwaggerConfig {
 
     private static final String TITLE = "Old Vehicles app API";
     private static final String DESCRIPTION = "API for Old Vehicles app server";
-    private static final String CONTACT_NAME = "Siarhei Sviarkaltsau";
+    private static final String CONTACT_NAME = "pazukdev";
     private static final String CONTACT_WEBSITE_URL ="https://old-vehicles.com";
-    private static final String CONTACT_EMAIL = "pazukdev@gmail.com";
+    private static final String CONTACT_EMAIL = "old.vehicles.app@gmail.com";
 
     @Bean
     public Docket api() {
