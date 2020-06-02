@@ -205,8 +205,8 @@ public class ItemViewFactory {
         Item item = null;
         if (!isEmpty(itemId)) {
             if (itemId.contains("&")) {
-                final String category = itemId.split("&")[0];
-                final String name = itemId.split("&")[1];
+                final String category = itemId.split("&")[0].replaceAll("_", " ");
+                final String name = itemId.split("&")[1].replaceAll("_", " ");
                 item = itemService.findFirstByCategoryAndName(category, name);
             } else if (isNumber(itemId)) {
                 item = itemService.findOne(Long.valueOf(itemId));
