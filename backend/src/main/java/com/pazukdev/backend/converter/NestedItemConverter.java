@@ -46,15 +46,14 @@ public class NestedItemConverter {
                                         final boolean addLocation) {
         final Item child = item.getItem();
 
-        final NestedItemDto childItemDto = NestedItemDto.createPart(child, service);
+        final NestedItem.Type type = NestedItem.Type.valueOf(item.getType().toUpperCase());
+        final NestedItemDto childItemDto = NestedItemDto.create(child, type, service);
         childItemDto.setId(item.getId());
         childItemDto.setName(item.getName());
+        childItemDto.setSecondComment(item.getQuantity());
         if (addLocation) {
             childItemDto.setComment(item.getComment());
         }
-        childItemDto.setSecondComment(item.getQuantity());
-        childItemDto.setStatus(item.getStatus());
-        childItemDto.setType(item.getType());
 
         return childItemDto;
     }

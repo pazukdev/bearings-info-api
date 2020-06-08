@@ -113,16 +113,6 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_likelist_table" author="sviarkaltsau">
-        <createTable tableName="likelist">
-            <column autoIncrement="true" name="id" type="bigserial">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="name" type="varchar(255)"/>
-            <column name="status" type="varchar(255)"/>
-        </createTable>
-    </changeSet>
-
     <changeSet id="create_user_table" author="sviarkaltsau">
         <createTable tableName="user_table">
             <column name="id" type="bigserial" autoIncrement="true">
@@ -147,28 +137,6 @@
             </column>
             <column name="item_id" type="bigserial">
                 <constraints foreignKeyName="fk_wishlist_item_item_id" references="child_item (id)"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="create_likelist_item_table" author="sviarkaltsau">
-        <createTable tableName="likelist_item">
-            <column name="likelist_id" type="bigserial">
-                <constraints foreignKeyName="fk_likelist_item_likelist_id" references="likelist (id)"/>
-            </column>
-            <column name="item_id" type="bigserial">
-                <constraints foreignKeyName="fk_likelist_item_item_id" references="item (id)"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="create_dislikelist_item_table" author="sviarkaltsau">
-        <createTable tableName="dislikelist_item">
-            <column name="likelist_id" type="bigserial">
-                <constraints foreignKeyName="fk_dislikelist_item_likelist_id" references="likelist (id)"/>
-            </column>
-            <column name="item_id" type="bigserial">
-                <constraints foreignKeyName="fk_dislikelist_item_item_id" references="item (id)"/>
             </column>
         </createTable>
     </changeSet>
