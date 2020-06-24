@@ -29,6 +29,7 @@ public class ItemView extends AbstractView {
     private boolean hardDelete = true;
     private boolean partsEnabled = true;
     private boolean ordinaryItem;
+    private String lang;
     private String itemId;
     private String category = "-";
     private String manufacturer = "-";

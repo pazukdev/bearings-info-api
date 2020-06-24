@@ -11,7 +11,10 @@ import com.pazukdev.backend.repository.NestedItemRepository;
 import com.pazukdev.backend.repository.UserActionRepository;
 import com.pazukdev.backend.repository.UserRepository;
 import com.pazukdev.backend.repository.WishListRepository;
-import com.pazukdev.backend.util.*;
+import com.pazukdev.backend.util.CollectionUtil;
+import com.pazukdev.backend.util.FileUtil;
+import com.pazukdev.backend.util.LoggerUtil;
+import com.pazukdev.backend.util.TranslatorUtil;
 import com.pazukdev.backend.validator.UserDataValidator;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -157,7 +160,7 @@ public class UserService extends AbstractService<UserEntity, UserDto> {
             }
             user.setRole(Role.valueOf(view.getRole().toUpperCase()));
             user.setCountry(view.getCountry());
-            ImgUtil.updateImg(view, user);
+            user.setImg(replaceEmptyWithDash(view.getImg()));
             user.setStatus(view.getStatus());
 
             repository.save(user);

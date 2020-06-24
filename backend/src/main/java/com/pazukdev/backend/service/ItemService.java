@@ -202,7 +202,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         return categories;
     }
 
-    private ItemViewFactory createNewItemViewFactory() {
+    public ItemViewFactory createNewItemViewFactory() {
         return new ItemViewFactory(this, FileUtil.getInfoCategories(), emailSenderService);
     }
 

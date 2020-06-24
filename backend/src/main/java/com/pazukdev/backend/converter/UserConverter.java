@@ -2,12 +2,10 @@ package com.pazukdev.backend.converter;
 
 import com.pazukdev.backend.constant.security.Role;
 import com.pazukdev.backend.converter.abstraction.EntityDtoConverter;
-import com.pazukdev.backend.dto.ImgViewData;
 import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.dto.view.UserView;
 import com.pazukdev.backend.entity.UserEntity;
 import com.pazukdev.backend.repository.WishListRepository;
-import com.pazukdev.backend.util.ImgUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -70,16 +68,13 @@ public class UserConverter implements EntityDtoConverter<UserEntity, UserDto> {
     }
 
     public static UserView convertToUserView(final UserEntity user) {
-        final ImgViewData imgViewData = ImgUtil.getImg(user);
-
         final UserView userView = new UserView();
         userView.setId(user.getId());
         userView.setName(user.getName());
         userView.setRole(user.getRole().toString().toLowerCase());
         userView.setRating(user.getRating().toString());
         userView.setEmail(user.getEmail());
-        userView.setImg(imgViewData.getImg());
-        userView.setDefaultImg(imgViewData.getDefaultImg());
+        userView.setImg(user.getImg());
         userView.setCountry(user.getCountry());
         userView.setStatus(user.getStatus());
         return userView;

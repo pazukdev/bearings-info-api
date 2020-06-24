@@ -31,14 +31,13 @@ import java.util.List;
 public class UserController {
 
     private final ItemService itemService;
-    private final UserConverter userConverter;
     private final EmailSenderService emailSenderService;
 
     @GetMapping("/view/user/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get public user data")
     public UserView getUserView(@PathVariable("id") final Long id) {
-        return userConverter.convertToUserView(itemService.getUserService().findOne(id));
+        return UserConverter.convertToUserView(itemService.getUserService().findOne(id));
     }
 
     @GetMapping("/view/user/list/{userName}/{language}")

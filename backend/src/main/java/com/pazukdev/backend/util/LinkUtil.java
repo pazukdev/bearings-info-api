@@ -3,7 +3,6 @@ package com.pazukdev.backend.util;
 import com.pazukdev.backend.converter.LinkConverter;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
-import org.apache.commons.validator.routines.UrlValidator;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -186,10 +185,6 @@ public class LinkUtil {
             }
         }
         return null;
-    }
-
-    public static boolean isUrl(final String s) {
-        return UrlValidator.getInstance().isValid(s);
     }
 
 }

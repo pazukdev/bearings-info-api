@@ -34,15 +34,16 @@ public class TableUtil {
 
     public static HeaderTable createHeader(final Item item,
                                            final Map<String, String> description,
+                                           final List<String> infoCategories,
                                            final ItemService service) {
         final String itemName = item.getName();
         final String itemCategory = item.getCategory();
         final String tableName = getHeaderTableName(itemCategory, itemName);
 
         final List<HeaderTableRow> headerTableRows = new ArrayList<>();
-        headerTableRows.add(HeaderTableRow.create(Parameter.DescriptionIgnored.NAME, itemName, service));
-        headerTableRows.add(HeaderTableRow.create(Parameter.DescriptionIgnored.CATEGORY, itemCategory, service));
-        return createTable(tableName, description, headerTableRows, service);
+        headerTableRows.add(HeaderTableRow.create(Parameter.DescriptionIgnored.NAME, itemName, infoCategories, service));
+        headerTableRows.add(HeaderTableRow.create(Parameter.DescriptionIgnored.CATEGORY, itemCategory, infoCategories, service));
+        return createTable(tableName, description, headerTableRows, infoCategories, service);
     }
 
     public static String getHeaderTableName(final String itemCategory, final String itemName) {
@@ -52,9 +53,10 @@ public class TableUtil {
     private static HeaderTable createTable(final String tableName,
                                            final Map<String, String> descriptionMap,
                                            final List<HeaderTableRow> rows,
+                                           final List<String> infoCategories,
                                            final ItemService service) {
         for (final Map.Entry<String, String> entry : descriptionMap.entrySet()) {
-            rows.add(HeaderTableRow.create(entry.getKey(), entry.getValue(), service));
+            rows.add(HeaderTableRow.create(entry.getKey(), entry.getValue(), infoCategories, service));
         }
         return HeaderTable.create(tableName, rows);
     }

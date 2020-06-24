@@ -29,10 +29,15 @@ public class HeaderTableRow extends AbstractDto {
 
     public static HeaderTableRow create(final String param,
                                         final String value,
+                                        final List<String> infoCategories,
                                         final ItemService service) {
         final List<Long> ids= new ArrayList<>();
         for (final String subValue : value.split("; ")) {
-            final Item item = service.findFirstByCategoryAndName(getCategory(param), subValue);
+            final String category = getCategory(param);
+            Item item = null;
+            if (CategoryUtil.isInfo(category, infoCategories)) {
+                item = service.findFirstByCategoryAndName(category, subValue);
+            }
             if (item != null) {
                 ids.add(item.getId());
             } else {

@@ -115,6 +115,11 @@ public class Item extends AbstractEntity implements Typeable {
         links.add(imgLink);
     }
 
+    public String getImg() {
+        final Link imgLink = LinkUtil.getLink(LinkType.IMG, this.getLinks());
+        return imgLink == null ? "-" : imgLink.getUrl();
+    }
+
     private Link getImgLink() {
         return LinkUtil.getLink(LinkType.IMG, this.getLinks());
     }
