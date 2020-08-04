@@ -37,7 +37,7 @@ public class PossibleNestedItemsDto {
                 continue;
             }
 
-            boolean addPart = isPart(category, infoCategories) && !category.equals(parent.getCategory());
+            boolean addPart = isPart(category, infoCategories);
             boolean addReplacer = category.equals(parent.getCategory())
                     || (parent.getCategory().equals(Category.RUBBER_PART) && category.equals(Category.BEARING));
 

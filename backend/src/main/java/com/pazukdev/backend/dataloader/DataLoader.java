@@ -104,7 +104,7 @@ public class DataLoader implements ApplicationRunner {
                 Item parent = null;
                 for (final Map.Entry<Item, List<NestedItem>> entry : itemsReplacers.entrySet()) {
                     for (final NestedItem r : entry.getValue()) {
-                        if (r.getId().equals(replacer.getId())) {
+                        if (r.getId() != null && r.getId().equals(replacer.getId())) {
                             parent = entry.getKey();
                             break;
                         }
@@ -142,7 +142,8 @@ public class DataLoader implements ApplicationRunner {
         final String itemInfo = "item category=" + category + " name=" + name;
         final List<String> infoCategories = FileUtil.readGoogleDocDocument(FileUtil.FileId.INFO_CATEGORY);
         final List<UserEntity> users = itemService.getUserService().findAll();
-        final List<TransitiveItem> transitiveItems = createStubReplacers(transitiveItemFactory.createEntitiesFromCSVFile());
+//        final List<TransitiveItem> transitiveItems = createStubReplacers(transitiveItemFactory.createEntitiesFromCSVFile());
+        final List<TransitiveItem> transitiveItems = transitiveItemFactory.createEntitiesFromCSVFile();
         final UserEntity admin = itemService.getUserService().findAdmin(users);
         for (final TransitiveItem transitiveItem : transitiveItems) {
             if (transitiveItem.getCategory().equalsIgnoreCase(category)
