@@ -7,7 +7,6 @@ import com.pazukdev.backend.converter.NestedItemConverter;
 import com.pazukdev.backend.converter.UserConverter;
 import com.pazukdev.backend.dto.DictionaryData;
 import com.pazukdev.backend.dto.NestedItemDto;
-import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.dto.table.HeaderTable;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.*;
@@ -47,54 +46,53 @@ public class ItemViewFactory {
     private final List<String> infoCategories;
     private final EmailSenderService emailSenderService;
 
-    public ItemView createHomeView(final String userName, final String lang) {
-        return createItemView(VEHICLES_VIEW.name(), Status.ACTIVE, userName, lang);
+    public ItemView createHomeView(final String userName, final UserEntity user, final String lang) {
+        return createItemView(VEHICLES_VIEW.name(), Status.ACTIVE, userName, user, lang);
     }
 
-    public ItemView createItemsListView(final String itemsStatus, final String userName, final String lang) {
-        return createItemView(ITEMS_MANAGEMENT_VIEW.name(), itemsStatus, userName, lang);
+    public ItemView createItemsListView(final String itemsStatus,
+                                        final String userName,
+                                        final UserEntity user,
+                                        final String lang) {
+        return createItemView(ITEMS_MANAGEMENT_VIEW.name(), itemsStatus, userName, user, lang);
     }
 
-    public ItemView createWishlistView(final String userName, final String lang) {
-        return createItemView(WISH_LIST_VIEW.name(), Status.ACTIVE, userName, lang);
+    public ItemView createWishlistView(final String userName, final UserEntity user, final String lang) {
+        return createItemView(WISH_LIST_VIEW.name(), Status.ACTIVE, userName, user, lang);
     }
 
-    public ItemView createUserListView(final String userName, final String lang) {
-        return createItemView(USER_LIST_VIEW.name(), Status.ACTIVE, userName, lang);
+    public ItemView createUserListView(final String userName, final UserEntity user, final String lang) {
+        return createItemView(USER_LIST_VIEW.name(), Status.ACTIVE, userName, user, lang);
     }
 
     public ItemView createItemView(final String itemId,
                                    final String status,
                                    final String userName,
+                                   final UserEntity user,
                                    final String lang) {
-        return createItemView(itemId, status, userName, lang, null);
+        return createItemView(itemId, status, userName, user, lang, null);
     }
 
     public ItemView createItemView(final String itemId,
                                    final String status,
                                    String userName,
+                                   UserEntity user,
                                    final String lang,
                                    final String option) {
         final long businessLogicStartTime = System.nanoTime();
-
         final UserService userService = itemService.getUserService();
-        if (isEmpty(userName) || userName.equals("undefined")) {
-            userName = Role.GUEST.name().toLowerCase();
+        if (user == null) {
+            user = UserUtil.getUser(userName, itemService.getUserService());
         }
-        final UserEntity currentUser = userService.findFirstByName(userName);
-        final WishList wishList = currentUser.getWishList();
-
         final ItemView basicView = new ItemView();
         basicView.setItemId(itemId);
-        basicView.setWishListIds(collectIds(wishList.getItems()));
-        basicView.setUserData(UserConverter.convert(currentUser));
-
+        basicView.setLang("en");
+        UserUtil.setUserDataTo(basicView, user);
         ItemView view;
-
         boolean userListView = itemId.equals(USER_LIST_VIEW.name());
 
         if (itemId.equals(WISH_LIST_VIEW.name())) {
-            view = createWishListView(basicView, currentUser, userService);
+            view = createWishListView(basicView, user, userService);
         } else if (itemId.equals(VEHICLES_VIEW.name())) {
             view = createVehiclesView(basicView, userService);
         } else if (itemId.equals(ITEMS_MANAGEMENT_VIEW.name())) {
@@ -118,26 +116,24 @@ public class ItemViewFactory {
         }
         double translationDuration = System.nanoTime() - businessLogicEndTime;
 
-        setTime(view, businessLogicDuration, translationDuration);
+        itemService.setTime(view, businessLogicDuration, translationDuration);
         return view;
     }
 
     public ItemView createItemViewForCache(final Item item,
                                            final List<Item> allItems,
                                            final List<String> comments,
-                                           final UserDto userDto,
-                                           final Set<Long> wishListIds,
-                                           final String lang,
                                            final UserService userService) {
 
         final String category = item.getCategory();
         final String name = item.getName();
         final Map<String, String> description = toMap(item.getDescription());
+        final UserEntity guest = userService.findFirstByName(Role.GUEST.name().toLowerCase());
 
         final ItemView view = new ItemView();
-        view.setLang(lang);
-        view.setWishListIds(wishListIds);
-        view.setUserData(userDto);
+        view.setLang("en");
+        view.setWishListIds(new HashSet<>());
+        view.setUserData(UserConverter.convert(guest));
         view.setItemId(item.getId().toString());
         view.setSearchEnabled(true);
         view.setOrdinaryItem(true);
@@ -157,14 +153,6 @@ public class ItemViewFactory {
         view.setReplacersTable(createReplacersTable(item, userService));
         setLinksToItemView(view, item);
         view.setParents(createParentItemsView(item, userService, comments, allItems));
-        if (!lang.equals("en") && isLangCodeValid(lang)) {
-            try {
-                translate("en", lang, view, false);
-            } catch (Exception e) {
-                view.setErrorMessage(e.getMessage());
-                return view;
-            }
-        }
         return view;
     }
 
@@ -189,10 +177,10 @@ public class ItemViewFactory {
                 creator,
                 itemService.getEmailSenderService());
 
-        final ItemView view = createItemView(item.getId().toString(), Status.ACTIVE, userName, userLanguage);
+        final ItemView view = createItemView(item.getId().toString(), Status.ACTIVE, userName, null, userLanguage);
         view.setNewItem(true);
 
-        setTime (view, (double) (System.nanoTime() - businessLogicStartTime), null);
+        itemService.setTime (view, (double) (System.nanoTime() - businessLogicStartTime), null);
         return view;
     }
 
@@ -462,13 +450,13 @@ public class ItemViewFactory {
 
         itemService.update(item);
 
-        final ItemView newItemView = createItemView(itemId.toString(), item.getStatus(), currentUser.getName(), userLang);
+        final ItemView newItemView = createItemView(itemId.toString(), item.getStatus(), "", currentUser, userLang);
 
 
         LoggerUtil.warn(actions, userActionRepo, oldItemCopy, currentUser, emailSenderService);
 
         final double totalTranslationTime = view.getTranslationTime() * 1000000000 + translationFromUserLangDuration;
-        setTime(newItemView, (double) (System.nanoTime() - businessLogicStartTime), totalTranslationTime);
+        itemService.setTime(newItemView, (double) (System.nanoTime() - businessLogicStartTime), totalTranslationTime);
         return newItemView;
     }
 
@@ -577,19 +565,6 @@ public class ItemViewFactory {
             itemService.update(item);
         }
 
-    }
-
-    private void setTime(final ItemView view,
-                         final Double businessLogicDuration,
-                         final Double translationDuration) {
-        final double secondsInNano = 0.000000001;
-        if (businessLogicDuration != null) {
-            view.setBusinessLogicTime(businessLogicDuration * secondsInNano);
-        }
-        if (translationDuration != null) {
-            view.setTranslationTime(translationDuration * secondsInNano);
-        }
-        view.setResponseTotalTime(view.getBusinessLogicTime() + view.getTranslationTime());
     }
 
 }

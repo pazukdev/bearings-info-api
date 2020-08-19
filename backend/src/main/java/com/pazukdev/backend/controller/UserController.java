@@ -45,14 +45,14 @@ public class UserController {
     @ApiOperation(value = "Get users list view")
     public ItemView getUserListView(@PathVariable final String userName, @PathVariable final String language) {
         final ItemViewFactory factory = new ItemViewFactory(itemService, FileUtil.getInfoCategories(), emailSenderService);
-        return factory.createUserListView(userName, language);
+        return factory.createUserListView(userName, null, language);
     }
 
     @GetMapping("/view/wishlist/{userName}/{language}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get user wishlist view")
     public ItemView getWishlistView(@PathVariable final String userName, @PathVariable final String language) {
-        return itemService.createWishlistView(userName, language);
+        return itemService.createWishlistView(userName, null, language);
     }
 
     @PostMapping("/user/create/{lang}")

@@ -34,14 +34,33 @@ public class DataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         final boolean initialDBPopulation = true;
-        populate(initialDBPopulation);
+        List<Item> items = itemService.getRepository().findAll();
+        if (items.isEmpty()) {
+            items = populate(initialDBPopulation);
+        }
+        final long start = System.nanoTime();
+        itemService.putCachedView(itemService.createItemsListView("active", "guest", null, "en"), "en");
+        itemService.putCachedView(itemService.createHomeView("guest", null, "en"), "en");
+//        itemService.putCachedView(itemService.createItemsListView("active", userName, "ru"), "ru");
+//        itemService.putCachedView(itemService.createHomeView(userName, "ru"), "ru");
+        items.parallelStream().forEach(item -> {
+            final String category = item.getCategory().toLowerCase();
+            if (
+                    category.equals("vehicle")
+                    || category.equals("engine")
+                    || category.equals("gearbox")
+                    || category.equals("final drive")
+            ) {
+                itemService.putCachedView(itemService.createItemView(item.getId().toString(), "guest", null, "en", null), "en");
+            }
+        });
+        final long stop = System.nanoTime();
+        final double time = (stop - start) * 0.000000001;
+        LoggerUtil.info("Cache created in " + (int) time + " seconds");
     }
 
     @Transactional
-    public void populate(final boolean initialDBPopulation) {
-        if (initialDBPopulation && !itemService.getRepository().findAll().isEmpty()) {
-            return;
-        }
+    public List<Item> populate(final boolean initialDBPopulation) {
         final long start = System.nanoTime();
 
         final List<String> infoCategories = FileUtil.readGoogleDocDocument(FileUtil.FileId.INFO_CATEGORY);
@@ -54,14 +73,15 @@ public class DataLoader implements ApplicationRunner {
         final UserEntity admin = itemService.getUserService().findAdmin(users);
 
         final Map<Item, List<NestedItem>> itemsReplacers = new HashMap<>();
+        final List<Item> items = new ArrayList<>();
         for (final TransitiveItem transitiveItem : transitiveItems) {
-            itemService.convertTransitiveItemToItem(
+            items.add(itemService.convertTransitiveItemToItem(
                     transitiveItem,
                     transitiveItems,
                     infoCategories,
                     admin,
                     initialDBPopulation,
-                    itemsReplacers);
+                    itemsReplacers));
         }
         itemService.getUserService().recoverUserActions(users, itemService);
         itemService.getUserService().save(users);
@@ -125,6 +145,7 @@ public class DataLoader implements ApplicationRunner {
         final long stop = System.nanoTime();
         final double time = (stop - start) * 0.000000001;
         LoggerUtil.info("DB created in " + (int) time + " seconds");
+        return items;
     }
 
     public Item findParentForReplacer(final NestedItem replacer, final List<Item> checkList) {

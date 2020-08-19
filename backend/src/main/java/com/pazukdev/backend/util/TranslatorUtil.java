@@ -33,6 +33,7 @@ public class TranslatorUtil {
         final String lang = !langFrom.equals("en") ? langFrom : langTo;
         final DictionaryData dictionaryData = getDictionaryFromFile(lang);
         translate(langFrom, langTo, view, addToDictionary, dictionaryData.getDictionary());
+        view.setLang(langTo);
     }
 
     public static void translate(final String langFrom,

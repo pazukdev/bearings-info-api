@@ -41,6 +41,8 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     private final LinkRepository linkRepository;
     private final EmailSenderService emailSenderService;
 
+    private final Map<String, ItemView> cachedViews = new HashMap<>();
+
     public ItemService(final ItemRepository itemRepository,
                        final ItemConverter converter,
                        final NestedItemRepository nestedItemRepo,
@@ -128,8 +130,29 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         LinkUtil.addLinksToItem(item, transitiveItem, null);
 
         itemRepository.save(item);
+//        int i = 0;
+//        while (i++ < 1) {
+//            cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "admin", "en", ""));
+//        }
+        if (item.getCategory().toLowerCase().equals("vehicle")) {
+//            cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "guest", "en", null));
+        }
+//        cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "guest", "en", null));
         itemsReplacers.put(item, replacers);
         return item;
+    }
+
+    public ItemView getCachedView(final String id, final String lang) {
+        ItemView view = cachedViews.get(id + lang);
+        if (view == null) {
+            view = cachedViews.get(id + "en");
+        }
+        return view;
+    }
+
+    public void putCachedView(final ItemView view, String lang) {
+        lang = "en"; // cache views only in English
+        cachedViews.put(view.getItemId() + lang, view);
     }
 
     private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {
@@ -138,23 +161,34 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     @Transactional
-    public ItemView createHomeView(final String userName, final String language) {
-        return createNewItemViewFactory().createHomeView(userName, language);
+    public ItemView createHomeView(final String userName,
+                                   final UserEntity user,
+                                   final String language) {
+        return createNewItemViewFactory().createHomeView(userName, user, language);
     }
 
     @Transactional
-    public ItemView createItemsListView(final String itemsStatus, final String userName, final String language) {
-        return createNewItemViewFactory().createItemsListView(itemsStatus, userName, language);
+    public ItemView createItemsListView(final String itemsStatus,
+                                        final String userName,
+                                        final UserEntity user,
+                                        final String language) {
+        return createNewItemViewFactory().createItemsListView(itemsStatus, userName, user, language);
     }
 
     @Transactional
-    public ItemView createWishlistView(final String userName, final String language) {
-        return createNewItemViewFactory().createWishlistView(userName, language);
+    public ItemView createWishlistView(final String userName,
+                                       final UserEntity user,
+                                       final String language) {
+        return createNewItemViewFactory().createWishlistView(userName, user, language);
     }
 
     @Transactional
-    public ItemView createItemView(final String itemId, final String userName, final String lang, final String option) {
-        return createNewItemViewFactory().createItemView(itemId, Status.ACTIVE, userName, lang, option);
+    public ItemView createItemView(final String itemId,
+                                   final String userName,
+                                   final UserEntity user,
+                                   final String lang,
+                                   final String option) {
+        return createNewItemViewFactory().createItemView(itemId, Status.ACTIVE, userName, user, lang, option);
     }
 
     @Transactional
@@ -249,6 +283,35 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
             }
         }
         return parents;
+    }
+
+//    @Transactional
+//    public List<ItemView> createViews(final List<Item> items)  {
+//        final ItemViewFactory factory = createNewItemViewFactory();
+//        final List<ItemView> views = new ArrayList<>();
+//        items.forEach(item -> {
+//            final List<Item> copy = new ArrayList<>(items);
+//            copy.remove(item);
+//            views.add(factory.createItemViewForCache(
+//                    item,
+//                    copy,
+//                    FileUtil.getComments(),
+//                    userService));
+//        });
+//        return views;
+//    }
+
+    public void setTime(final ItemView view,
+                        final Double businessLogicDuration,
+                        final Double translationDuration) {
+        final double secondsInNano = 0.000000001;
+        if (businessLogicDuration != null) {
+            view.setBusinessLogicTime(businessLogicDuration * secondsInNano);
+        }
+        if (translationDuration != null) {
+            view.setTranslationTime(translationDuration * secondsInNano);
+        }
+        view.setResponseTotalTime(view.getBusinessLogicTime() + view.getTranslationTime());
     }
 
 }

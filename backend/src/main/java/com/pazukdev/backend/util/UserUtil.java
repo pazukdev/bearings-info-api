@@ -1,12 +1,15 @@
 package com.pazukdev.backend.util;
 
 import com.pazukdev.backend.constant.security.Role;
+import com.pazukdev.backend.converter.UserConverter;
 import com.pazukdev.backend.dto.UserDto;
 import com.pazukdev.backend.dto.UserItemReport;
 import com.pazukdev.backend.dto.UserItemStringReport;
+import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.Item;
 import com.pazukdev.backend.entity.NestedItem;
 import com.pazukdev.backend.entity.UserEntity;
+import com.pazukdev.backend.entity.WishList;
 import com.pazukdev.backend.service.ItemService;
 import com.pazukdev.backend.service.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +22,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pazukdev.backend.util.ChildItemUtil.collectIds;
 import static com.pazukdev.backend.util.SpecificStringUtil.*;
 
 /**
@@ -136,6 +140,19 @@ public class UserUtil {
             }
         }
 
+    }
+
+    public static UserEntity getUser(String userName, final UserService service) {
+        if (isEmpty(userName) || userName.equals("undefined")) {
+            userName = Role.GUEST.name().toLowerCase();
+        }
+        return service.findFirstByName(userName);
+    }
+
+    public static void setUserDataTo(final ItemView view, final UserEntity user) {
+        final WishList wishList = user.getWishList();
+        view.setWishListIds(collectIds(wishList.getItems()));
+        view.setUserData(UserConverter.convert(user));
     }
 
 }
