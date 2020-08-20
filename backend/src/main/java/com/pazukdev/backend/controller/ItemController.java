@@ -1,6 +1,7 @@
 package com.pazukdev.backend.controller;
 
 import com.pazukdev.backend.constant.Status;
+import com.pazukdev.backend.dataloader.DataLoader;
 import com.pazukdev.backend.dto.PossibleNestedItemsDto;
 import com.pazukdev.backend.dto.view.ItemView;
 import com.pazukdev.backend.entity.UserEntity;
@@ -91,6 +92,21 @@ public class ItemController {
         return service.getEditData(itemId);
     }
 
+    @PutMapping("/reset-cache")
+    @ApiOperation(value = "Reset cache")
+    public int resetCache() {
+        service.getCachedViews().clear();
+        return service.getCachedViews().size();
+    }
+
+    @PutMapping("/create-default-cache")
+    @ApiOperation(value = "Reset cache")
+    public int createDefaultCache() {
+        resetCache();
+        DataLoader.createDefaultCache(service.findAllActive(), service);
+        return service.getCachedViews().size();
+    }
+
     private ItemView getView(final String id,
                              final String userName,
                              final String lang,
@@ -102,27 +118,31 @@ public class ItemController {
         if (view == null) {
             cached = false;
             if (id.equals(VEHICLES_VIEW.name())) {
-                view = service.createHomeView(userName, null, "en");
+                view = service.createHomeView(userName, null, "en", null);
             } else if (id.equals(ITEMS_MANAGEMENT_VIEW.name())) {
-                view = service.createItemsListView(status, userName, null, "en");
+                view = service.createItemsListView(status, userName, null, "en", null);
             } else {
-                view = service.createItemView(id, userName, null, lang, option);
+                view = service.createItemView(id, userName, null, lang, option, null);
             }
         }
         boolean userListView = id.equals(USER_LIST_VIEW.name());
 
+        final ItemView translatedView = SerializationUtils.clone(view);
+        if (!cached && translatedView.getLang().equals("en")) {
+            final UserEntity guest = UserUtil.getUser("guest", service.getUserService());
+            UserUtil.setUserDataTo(view, guest);
+            service.putCachedView(view, "en");
+        }
         final double businessLogicEndTime = System.nanoTime();
         final double businessLogicDuration = businessLogicEndTime - businessLogicStartTime;
-
-        final ItemView translatedView = SerializationUtils.clone(view);
-        final UserEntity guest = UserUtil.getUser("guest", service.getUserService());
-        UserUtil.setUserDataTo(view, guest);
-        service.putCachedView(view, lang);
 
         if (!cached || translatedView.getLang().equals("en")) {
             if (!lang.equals("en") && !userListView && isLangCodeValid(lang)) {
                 try {
                     translate("en", lang, translatedView, false);
+                    if (!translatedView.getLang().equals("en")) {
+                        service.putCachedView(translatedView, lang);
+                    }
                 } catch (Exception e) {
                     translatedView.setErrorMessage(e.getMessage());
                 }
@@ -130,11 +150,11 @@ public class ItemController {
         }
         double translationDuration = System.nanoTime() - businessLogicEndTime;
 
-        service.setTime(translatedView, businessLogicDuration, translationDuration);
-//        service.putCachedView(view, lang);
-        translatedView.setCachedViews(service.getCachedViews().size());
-        setUserData(translatedView, userName);
-        return translatedView;
+        final ItemView viewToReturn = SerializationUtils.clone(translatedView);
+        service.setTime(viewToReturn, businessLogicDuration, translationDuration);
+        viewToReturn.setCachedViews(service.getCachedViews().size());
+        setUserData(viewToReturn, userName);
+        return viewToReturn;
     }
 
     public void setUserData(final ItemView view, final String userName) {

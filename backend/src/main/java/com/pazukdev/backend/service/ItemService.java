@@ -33,6 +33,9 @@ import static com.pazukdev.backend.util.ItemUtil.*;
 @Service
 public class ItemService extends AbstractService<Item, TransitiveItemDto> {
 
+    private final List<String> categoriesToCache = Arrays.asList(
+            "Vehicle", "Engine", "Gearbox", "Final drive", "Reduction drive", "Generator", "Chassis");
+
     private final UserService userService;
     private final NestedItemRepository nestedItemRepo;
     private final UserActionRepository userActionRepo;
@@ -40,7 +43,6 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     private final AdminMessageRepository adminMessageRepo;
     private final LinkRepository linkRepository;
     private final EmailSenderService emailSenderService;
-
     private final Map<String, ItemView> cachedViews = new HashMap<>();
 
     public ItemService(final ItemRepository itemRepository,
@@ -130,14 +132,6 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
         LinkUtil.addLinksToItem(item, transitiveItem, null);
 
         itemRepository.save(item);
-//        int i = 0;
-//        while (i++ < 1) {
-//            cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "admin", "en", ""));
-//        }
-        if (item.getCategory().toLowerCase().equals("vehicle")) {
-//            cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "guest", "en", null));
-        }
-//        cachedViews.put(item.getId().toString(), createItemView(item.getId().toString(), "guest", "en", null));
         itemsReplacers.put(item, replacers);
         return item;
     }
@@ -151,7 +145,7 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     public void putCachedView(final ItemView view, String lang) {
-        lang = "en"; // cache views only in English
+//        lang = "en"; // cache views only in English
         cachedViews.put(view.getItemId() + lang, view);
     }
 
@@ -163,16 +157,24 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     @Transactional
     public ItemView createHomeView(final String userName,
                                    final UserEntity user,
-                                   final String language) {
-        return createNewItemViewFactory().createHomeView(userName, user, language);
+                                   final String language,
+                                   ItemViewFactory factory) {
+        if (factory == null) {
+            factory = createNewItemViewFactory();
+        }
+        return factory.createHomeView(userName, user, language);
     }
 
     @Transactional
     public ItemView createItemsListView(final String itemsStatus,
                                         final String userName,
                                         final UserEntity user,
-                                        final String language) {
-        return createNewItemViewFactory().createItemsListView(itemsStatus, userName, user, language);
+                                        final String language,
+                                        ItemViewFactory factory) {
+        if (factory == null) {
+            factory = createNewItemViewFactory();
+        }
+        return factory.createItemsListView(itemsStatus, userName, user, language);
     }
 
     @Transactional
@@ -187,8 +189,12 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
                                    final String userName,
                                    final UserEntity user,
                                    final String lang,
-                                   final String option) {
-        return createNewItemViewFactory().createItemView(itemId, Status.ACTIVE, userName, user, lang, option);
+                                   final String option,
+                                   ItemViewFactory factory) {
+        if (factory == null) {
+            factory = createNewItemViewFactory();
+        }
+        return factory.createItemView(itemId, Status.ACTIVE, userName, user, lang, option);
     }
 
     @Transactional

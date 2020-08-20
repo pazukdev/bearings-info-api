@@ -1,6 +1,7 @@
 package com.pazukdev.backend.dataloader;
 
 import com.pazukdev.backend.dto.ReplacerData;
+import com.pazukdev.backend.dto.factory.ItemViewFactory;
 import com.pazukdev.backend.entity.*;
 import com.pazukdev.backend.entity.factory.TransitiveItemFactory;
 import com.pazukdev.backend.service.ItemService;
@@ -39,24 +40,25 @@ public class DataLoader implements ApplicationRunner {
             items = populate(initialDBPopulation);
         }
         final long start = System.nanoTime();
-        itemService.putCachedView(itemService.createItemsListView("active", "guest", null, "en"), "en");
-        itemService.putCachedView(itemService.createHomeView("guest", null, "en"), "en");
-//        itemService.putCachedView(itemService.createItemsListView("active", userName, "ru"), "ru");
-//        itemService.putCachedView(itemService.createHomeView(userName, "ru"), "ru");
-        items.parallelStream().forEach(item -> {
-            final String category = item.getCategory().toLowerCase();
-            if (
-                    category.equals("vehicle")
-                    || category.equals("engine")
-                    || category.equals("gearbox")
-                    || category.equals("final drive")
-            ) {
-                itemService.putCachedView(itemService.createItemView(item.getId().toString(), "guest", null, "en", null), "en");
-            }
-        });
+        createDefaultCache(items, itemService);
         final long stop = System.nanoTime();
         final double time = (stop - start) * 0.000000001;
         LoggerUtil.info("Cache created in " + (int) time + " seconds");
+    }
+
+    public static void createDefaultCache(final List<Item> items, final ItemService service) {
+        final List<String> langs = Arrays.asList("en", "ru", "pl", "uk", "be", "lt");
+//        final List<String> langs = Arrays.asList("en", "ru");
+        final ItemViewFactory factory = service.createNewItemViewFactory();
+        langs.parallelStream().forEach(lang -> {
+            service.putCachedView(service.createItemsListView("active", "guest", null, lang, factory), lang);
+            service.putCachedView(service.createHomeView("guest", null, lang, factory), lang);
+        });
+        items.parallelStream().forEach(item -> {
+            if (service.getCategoriesToCache().contains(item.getCategory())) {
+                service.putCachedView(service.createItemView(item.getId().toString(), "guest", null, "en", null, factory), "en");
+            }
+        });
     }
 
     @Transactional
