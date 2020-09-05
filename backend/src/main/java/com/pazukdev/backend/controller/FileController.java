@@ -40,6 +40,11 @@ public class FileController {
         return FileUtil.getComments();
     }
 
+    @GetMapping(value = "/google-doc/get/text/{id}")
+    public List<String> getText(@PathVariable final String id) {
+        return FileUtil.readGoogleDocDocument(id);
+    }
+
     @GetMapping(value = "/download/info-categories")
     public List<String> getInfoCategories() {
         return FileUtil.getInfoCategories();
