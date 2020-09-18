@@ -23,8 +23,12 @@ public class ReplacerController {
     @PutMapping("/rate/{userName}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Rate replacer")
-    public RateReplacer rateReplacer(@PathVariable final String userName, @RequestBody final RateReplacer rate) {
-        return itemService.rateReplacer(userName, rate);
+    public RateReplacer rateReplacer(@PathVariable final String userName,
+                                     @RequestBody final RateReplacer rqRate) {
+        final RateReplacer rsRate = itemService.rateReplacer(userName, rqRate);
+        itemService.getCachedViews().clear();
+        rsRate.setCachedViews(itemService.getCachedViews().size());
+        return rsRate;
     }
 
 }

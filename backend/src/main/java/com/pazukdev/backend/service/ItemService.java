@@ -137,16 +137,34 @@ public class ItemService extends AbstractService<Item, TransitiveItemDto> {
     }
 
     public ItemView getCachedView(final String id, final String lang) {
-        ItemView view = cachedViews.get(id + lang);
+        ItemView view = cachedViews.get(createKey(id, lang));
         if (view == null) {
-            view = cachedViews.get(id + "en");
+            view = cachedViews.get(createKey(id, "en"));
         }
         return view;
     }
 
     public void putCachedView(final ItemView view, String lang) {
 //        lang = "en"; // cache views only in English
-        cachedViews.put(view.getItemId() + lang, view);
+        cachedViews.put(createKey(view.getItemId(), lang), view);
+    }
+
+    public void removeCachedView(final String id, final String lang) {
+//        final Map<String, ItemView> cachedViews = new HashMap<>(this.cachedViews);
+//        if (lang.equals("all")) {
+//            for (final Map.Entry<String, ItemView> entry : cachedViews.entrySet()) {
+//                if (entry.getKey().contains(id)) {
+//                    this.cachedViews.remove(entry.getKey());
+//                }
+//            }
+//        }
+        cachedViews.clear();
+//        cachedViews.entrySet().removeIf(e -> e.getKey().contains(id));
+//        cachedViews.remove(createKey(id, lang));
+    }
+
+    private String createKey(final String id, final String lang) {
+        return id + lang;
     }
 
     private String createItemDescription(final TransitiveItemDescriptionMap descriptionMap) {

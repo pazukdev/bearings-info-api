@@ -64,7 +64,6 @@ public class ItemController {
                            @PathVariable final String lang) {
         final ItemView view = service.createNewItemView(category, name, userName, lang);
         service.getCachedViews().clear();
-//        service.putCachedView(view, lang);
         return view;
     }
 
@@ -74,10 +73,8 @@ public class ItemController {
                            @PathVariable final String userName,
                            @PathVariable final String lang,
                            @RequestBody final ItemView itemView) {
-        final ItemView view = service.updateItemView(id, userName, lang, itemView);
         service.getCachedViews().clear();
-//        service.putCachedView(view, lang);
-        return view;
+        return service.updateItemView(id, userName, lang, itemView);
     }
 
     @GetMapping("/edit-data/{itemId}")
@@ -107,7 +104,12 @@ public class ItemController {
                              final String option,
                              final String status) {
         final long businessLogicStartTime = System.nanoTime();
-        ItemView view = service.getCachedView(id, lang);
+        ItemView view;
+        if (id.equals(ITEMS_MANAGEMENT_VIEW.name()) && status != null && status.equals("deleted")) {
+            view = service.createItemsListView(status, userName, null, "en", null);
+        } else {
+            view = service.getCachedView(id, lang);
+        }
         boolean cached = true;
         if (view == null) {
             cached = false;

@@ -114,7 +114,7 @@ public class ChildItemUtil {
         } else {
             name = value;
             comment = "-";
-            quantity = category.equals(CategoryUtil.Category.SPARK_PLUG) ? "2" : "1";
+            quantity = "1";
         }
 
         final TransitiveItem source = TransitiveItemUtil.findFirstByCategoryAndName(category, name, transitiveItems);
